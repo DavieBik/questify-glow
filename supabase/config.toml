@@ -1,1 +1,13 @@
 project_id = "jjhwqwxmwygqoqsqrxnf"
+
+[functions.certificate-issuance]
+verify_jwt = false
+
+[functions.refresher-scheduling]
+verify_jwt = false
+
+[functions.expiry-reminders]
+verify_jwt = false
+
+[functions.generate-certificate-pdf]
+verify_jwt = false
