@@ -16,7 +16,9 @@ import ModuleDetail from "./pages/ModuleDetail";
 import Quiz from "./pages/Quiz";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
+import AdminCourses from "./pages/AdminCourses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -79,10 +81,24 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               } />
+              <Route path="/admin/dashboard" element={
+                <ProtectedRoute requireRole={['admin']}>
+                  <Layout>
+                    <AdminDashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } />
               <Route path="/admin/users" element={
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminUsers />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/courses" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminCourses />
                   </Layout>
                 </ProtectedRoute>
               } />
