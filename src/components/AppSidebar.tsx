@@ -27,7 +27,7 @@ const navigationItems = [
 ];
 
 const adminItems = [
-  { title: 'Admin', url: '/admin', icon: Settings },
+  { title: 'Admin Users', url: '/admin/users', icon: Settings },
 ];
 
 export function AppSidebar() {

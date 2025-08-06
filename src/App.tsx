@@ -16,6 +16,7 @@ import ModuleDetail from "./pages/ModuleDetail";
 import Quiz from "./pages/Quiz";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,20 +65,27 @@ const App = () => (
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/certificates" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Certificates />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/certificates/:id" element={
-              <ProtectedRoute>
-                <Layout>
-                  <CertificateDetail />
-                </Layout>
-              </ProtectedRoute>
-            } />
+              <Route path="/certificates" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Certificates />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/certificates/:id" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CertificateDetail />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/users" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminUsers />
+                  </Layout>
+                </ProtectedRoute>
+              } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
