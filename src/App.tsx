@@ -19,6 +19,10 @@ import CertificateDetail from "./pages/CertificateDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCourses from "./pages/AdminCourses";
+import AdminCourseCreate from "./pages/AdminCourseCreate";
+import AdminCourseEdit from "./pages/AdminCourseEdit";
+import AdminModuleCreate from "./pages/AdminModuleCreate";
+import AdminModuleEdit from "./pages/AdminModuleEdit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +103,34 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminCourses />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/courses/new" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminCourseCreate />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/courses/:id/edit" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminCourseEdit />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/courses/:courseId/modules/new" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminModuleCreate />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/modules/:id/edit" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminModuleEdit />
                   </Layout>
                 </ProtectedRoute>
               } />
