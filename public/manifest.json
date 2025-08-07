@@ -1,0 +1,29 @@
+{
+  "name": "SkillBridge LMS",
+  "short_name": "SkillBridge",
+  "description": "Learning Management System with Interactive Learning Paths and Social Features",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/placeholder.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/placeholder.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "en",
+  "orientation": "portrait-primary"
+}

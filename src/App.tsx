@@ -12,10 +12,16 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+import CourseForums from "./pages/CourseForums";
+import ForumDetail from "./pages/ForumDetail";
+import CourseGroups from "./pages/CourseGroups";
+import CourseSessions from "./pages/CourseSessions";
+import SessionDetail from "./pages/SessionDetail";
 import ModuleDetail from "./pages/ModuleDetail";
 import Quiz from "./pages/Quiz";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
+import Badges from "./pages/Badges";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCourses from "./pages/AdminCourses";
@@ -54,6 +60,48 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <CourseDetail />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/courses/:courseId/forums" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CourseForums />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/forums/:forumId" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ForumDetail />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/courses/:courseId/groups" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CourseGroups />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/courses/:courseId/sessions" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CourseSessions />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/sessions/:sessionId" element={
+              <ProtectedRoute>
+                <Layout>
+                  <SessionDetail />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/badges" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Badges />
                 </Layout>
               </ProtectedRoute>
             } />

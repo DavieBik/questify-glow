@@ -24,6 +24,7 @@ const navigationItems = [
   { title: 'Dashboard', url: '/', icon: Home },
   { title: 'Courses', url: '/courses', icon: BookOpen },
   { title: 'Certificates', url: '/certificates', icon: Award },
+  { title: 'Badges', url: '/badges', icon: Award },
 ];
 
 const adminItems = [
