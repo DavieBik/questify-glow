@@ -31,6 +31,7 @@ const adminItems = [
   { title: 'Admin Dashboard', url: '/admin/dashboard', icon: Settings },
   { title: 'Admin Users', url: '/admin/users', icon: Settings },
   { title: 'Course Management', url: '/admin/courses', icon: BookOpen },
+  { title: 'Analytics', url: '/admin/analytics', icon: FileText },
 ];
 
 export function AppSidebar() {
