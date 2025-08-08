@@ -65,13 +65,13 @@ export function AnalyticsSkillsGap() {
   const fetchSkillsGapData = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('rpc_skills_gap', {
+      const { data, error } = await (supabase as any).rpc('rpc_skills_gap', {
         manager_scope: isManager && !isAdmin
       });
 
       if (error) throw error;
 
-      const processedData = data?.map((item: any) => ({
+      const processedData = (data || []).map((item: any) => ({
         user_id: item.user_id,
         user_name: item.user_name || 'Unknown User',
         user_email: item.user_email || '',
@@ -80,7 +80,7 @@ export function AnalyticsSkillsGap() {
         mandatory: item.mandatory,
         due_date: item.due_date ? new Date(item.due_date) : null,
         status: item.status
-      })) || [];
+      }));
 
       setSkillsGap(processedData);
     } catch (error) {

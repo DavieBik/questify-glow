@@ -53,56 +53,56 @@ export function AnalyticsOverview() {
     setLoading(true);
     try {
       // Fetch KPI metrics
-      const { data: progressData } = await supabase.rpc('rpc_admin_team_user_progress', {
+      const { data: progressData } = await (supabase as any).rpc('rpc_admin_team_user_progress', {
         date_from: format(dateRange.from, 'yyyy-MM-dd'),
         date_to: format(dateRange.to, 'yyyy-MM-dd'),
         manager_scope: isManager && !isAdmin
       });
 
-      const { data: courseData } = await supabase.rpc('rpc_course_metrics', {
+      const { data: courseData } = await (supabase as any).rpc('rpc_course_metrics', {
         date_from: format(dateRange.from, 'yyyy-MM-dd'),
         date_to: format(dateRange.to, 'yyyy-MM-dd')
       });
 
-      const { data: patternsData } = await supabase.rpc('rpc_learning_patterns', {
+      const { data: patternsData } = await (supabase as any).rpc('rpc_learning_patterns', {
         date_from: format(dateRange.from, 'yyyy-MM-dd'),
         date_to: format(dateRange.to, 'yyyy-MM-dd')
       });
 
       // Calculate metrics
-      const totalLearners = new Set(progressData?.map(p => p.user_id) || []).size;
-      const activeLast7d = progressData?.filter(p => 
+      const totalLearners = new Set((progressData || []).map(p => p.user_id)).size;
+      const activeLast7d = (progressData || []).filter(p => 
         new Date(p.last_activity_at) >= subDays(new Date(), 7)
-      ).length || 0;
+      ).length;
       
-      const avgScore = progressData?.reduce((acc, p) => acc + (p.avg_score || 0), 0) / (progressData?.length || 1);
-      const avgTime = progressData?.reduce((acc, p) => acc + (p.time_spent_minutes || 0), 0) / (progressData?.length || 1);
+      const avgScore = (progressData || []).reduce((acc, p) => acc + (p.avg_score || 0), 0) / ((progressData || []).length || 1);
+      const avgTime = (progressData || []).reduce((acc, p) => acc + (p.time_spent_minutes || 0), 0) / ((progressData || []).length || 1);
 
       setMetrics({
         totalLearners,
         activeLast7d,
-        totalCourses: courseData?.length || 0,
-        completions7d: progressData?.filter(p => 
+        totalCourses: (courseData || []).length,
+        completions7d: (progressData || []).filter(p => 
           p.first_completed_at && new Date(p.first_completed_at) >= subDays(new Date(), 7)
-        ).length || 0,
-        completions30d: progressData?.filter(p => 
+        ).length,
+        completions30d: (progressData || []).filter(p => 
           p.first_completed_at && new Date(p.first_completed_at) >= subDays(new Date(), 30)
-        ).length || 0,
+        ).length,
         avgScore: Math.round(avgScore * 10) / 10,
         avgTimePerCompletion: Math.round(avgTime),
       });
 
       // Process chart data
-      setCoursePerformance(courseData?.slice(0, 10).map(course => ({
+      setCoursePerformance((courseData || []).slice(0, 10).map(course => ({
         name: course.course_title || `Course ${course.course_id}`,
         avgTime: course.avg_time_minutes || 0,
         passRate: course.completion_rate || 0
-      })) || []);
+      })));
 
-      setLearningPatterns(patternsData?.filter(p => p.bucket_type === 'hour').map(p => ({
+      setLearningPatterns((patternsData || []).filter(p => p.bucket_type === 'hour').map(p => ({
         hour: `${p.bucket}:00`,
         completions: p.completions || 0
-      })) || []);
+      })));
 
     } catch (error) {
       console.error("Error fetching overview data:", error);

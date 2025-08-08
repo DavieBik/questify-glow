@@ -45,7 +45,7 @@ export function AnalyticsTeam() {
       const dateFrom = format(subDays(new Date(), parseInt(dateRange)), 'yyyy-MM-dd');
       const dateTo = format(new Date(), 'yyyy-MM-dd');
 
-      const { data, error } = await supabase.rpc('rpc_admin_team_user_progress', {
+      const { data, error } = await (supabase as any).rpc('rpc_admin_team_user_progress', {
         date_from: dateFrom,
         date_to: dateTo,
         manager_scope: isManager && !isAdmin
@@ -54,7 +54,7 @@ export function AnalyticsTeam() {
       if (error) throw error;
 
       // Process data to match our interface
-      const processedData = data?.map((item: any) => ({
+      const processedData = (data || []).map((item: any) => ({
         user_id: item.user_id,
         user_name: item.user_name || 'Unknown User',
         manager_name: item.manager_name || 'No Manager',
@@ -64,7 +64,7 @@ export function AnalyticsTeam() {
         attempts: item.attempts || 0,
         pass_rate: Math.round((item.best_score || 0) * 100) / 100,
         last_activity_at: item.last_activity_at || new Date().toISOString()
-      })) || [];
+      }));
 
       setTeamData(processedData);
     } catch (error) {

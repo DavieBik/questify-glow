@@ -46,7 +46,7 @@ export function AnalyticsCourses() {
       const dateFrom = format(subDays(new Date(), 90), 'yyyy-MM-dd');
       const dateTo = format(new Date(), 'yyyy-MM-dd');
 
-      const { data, error } = await supabase.rpc('rpc_course_metrics', {
+      const { data, error } = await (supabase as any).rpc('rpc_course_metrics', {
         date_from: dateFrom,
         date_to: dateTo
       });
@@ -64,23 +64,23 @@ export function AnalyticsCourses() {
   const fetchCourseDetail = async (course: CourseMetrics) => {
     try {
       // Fetch module metrics for this course
-      const { data: moduleData } = await supabase.rpc('rpc_module_metrics', {
+      const { data: moduleData } = await (supabase as any).rpc('rpc_module_metrics', {
         course_id: course.course_id,
         date_from: format(subDays(new Date(), 90), 'yyyy-MM-dd'),
         date_to: format(new Date(), 'yyyy-MM-dd')
       });
 
       // Fetch struggling learners (users with low scores or high time)
-      const { data: progressData } = await supabase.rpc('rpc_admin_team_user_progress', {
+      const { data: progressData } = await (supabase as any).rpc('rpc_admin_team_user_progress', {
         date_from: format(subDays(new Date(), 90), 'yyyy-MM-dd'),
         date_to: format(new Date(), 'yyyy-MM-dd'),
         manager_scope: false
       });
 
-      const strugglingLearners = progressData?.filter((p: any) => 
+      const strugglingLearners = (progressData || []).filter((p: any) => 
         p.course_id === course.course_id && 
         (p.avg_score < 70 || p.time_spent_minutes > course.avg_time_minutes * 2)
-      ).slice(0, 10) || [];
+      ).slice(0, 10);
 
       setSelectedCourse({
         course,

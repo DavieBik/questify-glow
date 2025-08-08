@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { AnalyticsOverview } from '@/components/analytics/AnalyticsOverview';
+import { AnalyticsTeam } from '@/components/analytics/AnalyticsTeam';
+import { AnalyticsCourses } from '@/components/analytics/AnalyticsCourses';
+import { AnalyticsModules } from '@/components/analytics/AnalyticsModules';
+import { AnalyticsSkillsGap } from '@/components/analytics/AnalyticsSkillsGap';
+import { AnalyticsRetention } from '@/components/analytics/AnalyticsRetention';
+import { AnalyticsCustomReports } from '@/components/analytics/AnalyticsCustomReports';
 
 export default function AdminAnalytics() {
   const { isAdmin, isManager } = useAuth();
@@ -28,7 +35,7 @@ export default function AdminAnalytics() {
 
     setRefreshing(true);
     try {
-      const { error } = await supabase.rpc('refresh_analytics');
+      const { error } = await (supabase as any).rpc('refresh_analytics');
       if (error) throw error;
       
       toast({
@@ -81,31 +88,31 @@ export default function AdminAnalytics() {
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="text-center py-8">Analytics Overview - Coming Soon</div>
+          <AnalyticsOverview />
         </TabsContent>
 
         <TabsContent value="team">
-          <div className="text-center py-8">Team Analytics - Coming Soon</div>
+          <AnalyticsTeam />
         </TabsContent>
 
         <TabsContent value="courses">
-          <div className="text-center py-8">Course Analytics - Coming Soon</div>
+          <AnalyticsCourses />
         </TabsContent>
 
         <TabsContent value="modules">
-          <div className="text-center py-8">Module Analytics - Coming Soon</div>
+          <AnalyticsModules />
         </TabsContent>
 
         <TabsContent value="skills-gap">
-          <div className="text-center py-8">Skills Gap Analysis - Coming Soon</div>
+          <AnalyticsSkillsGap />
         </TabsContent>
 
         <TabsContent value="retention">
-          <div className="text-center py-8">Retention Analytics - Coming Soon</div>
+          <AnalyticsRetention />
         </TabsContent>
 
         <TabsContent value="custom-reports">
-          <div className="text-center py-8">Custom Reports - Coming Soon</div>
+          <AnalyticsCustomReports />
         </TabsContent>
       </Tabs>
     </div>

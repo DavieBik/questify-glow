@@ -64,7 +64,7 @@ export function AnalyticsModules() {
       const dateFrom = format(subDays(new Date(), 90), 'yyyy-MM-dd');
       const dateTo = format(new Date(), 'yyyy-MM-dd');
 
-      const { data, error } = await supabase.rpc('rpc_module_metrics', {
+      const { data, error } = await (supabase as any).rpc('rpc_module_metrics', {
         course_id: selectedCourse === "all" ? null : selectedCourse,
         date_from: dateFrom,
         date_to: dateTo
@@ -75,7 +75,7 @@ export function AnalyticsModules() {
       setModules(data || []);
       
       // Generate trend data (mock data for demonstration)
-      const trendData = data?.slice(0, 5).map((module: any, index: number) => {
+      const trendData = (data || []).slice(0, 5).map((module: any, index: number) => {
         const weeks = [];
         for (let i = 7; i >= 0; i--) {
           weeks.push({

@@ -39,11 +39,11 @@ export function AnalyticsRetention() {
   const fetchRetentionMetrics = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('rpc_retention_metrics');
+      const { data, error } = await (supabase as any).rpc('rpc_retention_metrics');
 
       if (error) throw error;
 
-      const processedData = data?.map((item: any) => ({
+      const processedData = (data || []).map((item: any) => ({
         cohort_week: format(new Date(item.cohort_week), 'MMM dd'),
         users_started: item.users_started || 0,
         retained_30d: item.retained_30d || 0,
@@ -52,7 +52,7 @@ export function AnalyticsRetention() {
         retention_30d_rate: item.users_started ? Math.round((item.retained_30d / item.users_started) * 100) : 0,
         retention_60d_rate: item.users_started ? Math.round((item.retained_60d / item.users_started) * 100) : 0,
         retention_90d_rate: item.users_started ? Math.round((item.retained_90d / item.users_started) * 100) : 0
-      })) || [];
+      }));
 
       setRetentionData(processedData);
 
