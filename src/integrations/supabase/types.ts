@@ -53,6 +53,103 @@ export type Database = {
         }
         Relationships: []
       }
+      announcement_reads: {
+        Row: {
+          announcement_id: string
+          id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          id?: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_reads_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          content: string
+          course_id: string | null
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_pinned: boolean
+          priority: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          course_id?: string | null
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          priority?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          course_id?: string | null
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          priority?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "announcements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_performance_analytics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "announcements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "v_skills_gap"
+            referencedColumns: ["course_id"]
+          },
+        ]
+      }
       badges: {
         Row: {
           created_at: string
@@ -1513,6 +1610,14 @@ export type Database = {
       }
     }
     Functions: {
+      get_announcement_stats: {
+        Args: { announcement_id_param: string }
+        Returns: {
+          total_readers: number
+          total_eligible: number
+          read_percentage: number
+        }[]
+      }
       get_or_create_direct_conversation: {
         Args: { other_user_id: string }
         Returns: string

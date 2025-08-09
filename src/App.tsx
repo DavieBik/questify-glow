@@ -21,6 +21,7 @@ import SessionDetail from "./pages/SessionDetail";
 import ModuleDetail from "./pages/ModuleDetail";
 import Quiz from "./pages/Quiz";
 import Messages from "./pages/Messages";
+import Announcements from "./pages/Announcements";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
 import Badges from "./pages/Badges";
@@ -132,6 +133,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Messages />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/announcements" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Announcements />
                 </Layout>
               </ProtectedRoute>
             } />

@@ -18,6 +18,7 @@ import {
   Award, 
   Home,
   MessageCircle,
+  Megaphone,
   Settings
 } from 'lucide-react';
 
@@ -25,6 +26,7 @@ const navigationItems = [
   { title: 'Dashboard', url: '/', icon: Home },
   { title: 'Courses', url: '/courses', icon: BookOpen },
   { title: 'Messages', url: '/messages', icon: MessageCircle },
+  { title: 'Announcements', url: '/announcements', icon: Megaphone },
   { title: 'Certificates', url: '/certificates', icon: Award },
   { title: 'Badges', url: '/badges', icon: Award },
 ];
