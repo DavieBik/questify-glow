@@ -20,7 +20,8 @@ import {
   MessageCircle,
   Megaphone,
   Users,
-  Settings
+  Settings,
+  User
 } from 'lucide-react';
 
 const navigationItems = [
@@ -31,6 +32,7 @@ const navigationItems = [
   { title: 'Group Projects', url: '/projects', icon: Users },
   { title: 'Certificates', url: '/certificates', icon: Award },
   { title: 'Badges', url: '/badges', icon: Award },
+  { title: 'Profile', url: '/profile', icon: User },
 ];
 
 const adminItems = [
