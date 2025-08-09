@@ -943,6 +943,234 @@ export type Database = {
           },
         ]
       }
+      peer_reviews: {
+        Row: {
+          feedback: string | null
+          id: string
+          rating: number | null
+          review_criteria: Json | null
+          reviewer_team_id: string
+          reviewer_user_id: string
+          submission_id: string
+          submitted_at: string
+        }
+        Insert: {
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          review_criteria?: Json | null
+          reviewer_team_id: string
+          reviewer_user_id: string
+          submission_id: string
+          submitted_at?: string
+        }
+        Update: {
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          review_criteria?: Json | null
+          reviewer_team_id?: string
+          reviewer_user_id?: string
+          submission_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peer_reviews_reviewer_team_id_fkey"
+            columns: ["reviewer_team_id"]
+            isOneToOne: false
+            referencedRelation: "project_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_reviews_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "project_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_submissions: {
+        Row: {
+          content: string | null
+          feedback: string | null
+          file_url: string | null
+          grade: number | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          is_final: boolean
+          link_url: string | null
+          submission_type: string
+          submitted_at: string
+          submitted_by: string
+          team_id: string
+        }
+        Insert: {
+          content?: string | null
+          feedback?: string | null
+          file_url?: string | null
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_final?: boolean
+          link_url?: string | null
+          submission_type: string
+          submitted_at?: string
+          submitted_by: string
+          team_id: string
+        }
+        Update: {
+          content?: string | null
+          feedback?: string | null
+          file_url?: string | null
+          grade?: number | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          is_final?: boolean
+          link_url?: string | null
+          submission_type?: string
+          submitted_at?: string
+          submitted_by?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_submissions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "project_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_teams: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_full: boolean
+          name: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_full?: boolean
+          name: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_full?: boolean
+          name?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_teams_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          allow_self_enrollment: boolean
+          course_id: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          grading_rubric: Json | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          max_team_size: number
+          min_team_size: number
+          submission_format: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_self_enrollment?: boolean
+          course_id: string
+          created_at?: string
+          created_by: string
+          description: string
+          due_date?: string | null
+          grading_rubric?: Json | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          max_team_size?: number
+          min_team_size?: number
+          submission_format?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_self_enrollment?: boolean
+          course_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          grading_rubric?: Json | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          max_team_size?: number
+          min_team_size?: number
+          submission_format?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "projects_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_performance_analytics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "projects_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "v_skills_gap"
+            referencedColumns: ["course_id"]
+          },
+        ]
+      }
       quiz_answer_options: {
         Row: {
           created_at: string
@@ -1130,6 +1358,38 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "project_teams"
+            referencedColumns: ["id"]
           },
         ]
       }

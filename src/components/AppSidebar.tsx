@@ -19,6 +19,7 @@ import {
   Home,
   MessageCircle,
   Megaphone,
+  Users,
   Settings
 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ const navigationItems = [
   { title: 'Courses', url: '/courses', icon: BookOpen },
   { title: 'Messages', url: '/messages', icon: MessageCircle },
   { title: 'Announcements', url: '/announcements', icon: Megaphone },
+  { title: 'Group Projects', url: '/projects', icon: Users },
   { title: 'Certificates', url: '/certificates', icon: Award },
   { title: 'Badges', url: '/badges', icon: Award },
 ];

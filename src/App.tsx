@@ -22,6 +22,7 @@ import ModuleDetail from "./pages/ModuleDetail";
 import Quiz from "./pages/Quiz";
 import Messages from "./pages/Messages";
 import Announcements from "./pages/Announcements";
+import GroupProjects from "./pages/GroupProjects";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
 import Badges from "./pages/Badges";
@@ -140,6 +141,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Announcements />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <Layout>
+                  <GroupProjects />
                 </Layout>
               </ProtectedRoute>
             } />
