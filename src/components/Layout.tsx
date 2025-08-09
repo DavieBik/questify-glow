@@ -6,6 +6,7 @@ import {
   SidebarTrigger 
 } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { LogOut } from 'lucide-react';
 
 interface LayoutProps {
@@ -28,6 +29,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span className="text-sm text-muted-foreground">
                 Welcome, {user?.email}
               </span>
+              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="sm"
