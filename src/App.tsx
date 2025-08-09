@@ -20,6 +20,7 @@ import CourseSessions from "./pages/CourseSessions";
 import SessionDetail from "./pages/SessionDetail";
 import ModuleDetail from "./pages/ModuleDetail";
 import Quiz from "./pages/Quiz";
+import Messages from "./pages/Messages";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
 import Badges from "./pages/Badges";
@@ -30,6 +31,7 @@ import AdminCourseCreate from "./pages/AdminCourseCreate";
 import AdminCourseEdit from "./pages/AdminCourseEdit";
 import AdminModuleCreate from "./pages/AdminModuleCreate";
 import AdminModuleEdit from "./pages/AdminModuleEdit";
+import AdminAnalytics from "./pages/AdminAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -126,6 +128,13 @@ const App = () => (
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/messages" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Messages />
+                </Layout>
+              </ProtectedRoute>
+            } />
               <Route path="/certificates" element={
                 <ProtectedRoute>
                   <Layout>
@@ -186,6 +195,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminModuleEdit />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/analytics" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminAnalytics />
                   </Layout>
                 </ProtectedRoute>
               } />
