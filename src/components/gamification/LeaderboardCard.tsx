@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, Medal, Award, Star, Zap, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,12 +47,7 @@ export function LeaderboardCard() {
 
       const { data: weeklyPoints, error: weeklyError } = await supabase
         .from('completions')
-        .select(`
-          user_id,
-          points,
-          completed_at,
-          users!inner(first_name, last_name)
-        `)
+        .select('user_id, points, completed_at, users!inner(first_name, last_name)')
         .gte('completed_at', weekAgo.toISOString())
         .not('completed_at', 'is', null);
 
@@ -88,11 +82,7 @@ export function LeaderboardCard() {
       // Fetch all-time leaderboard
       const { data: allTimeData, error: allTimeError } = await supabase
         .from('completions')
-        .select(`
-          user_id,
-          points,
-          users!inner(first_name, last_name)
-        `)
+        .select('user_id, points, users!inner(first_name, last_name)')
         .not('completed_at', 'is', null);
 
       if (allTimeError) throw allTimeError;
@@ -128,41 +118,6 @@ export function LeaderboardCard() {
         const userInWeekly = weeklyUserPoints[user.id];
         
         if (userInAllTime) {
-          // Calculate streak
-          const { data: recentCompletions } = await supabase
-            .from('completions')
-            .select('completed_at')
-            .eq('user_id', user.id)
-            .not('completed_at', 'is', null)
-            .order('completed_at', { ascending: false });
-
-          let currentStreak = 0;
-          let longestStreak = 0;
-          let tempStreak = 0;
-
-          if (recentCompletions && recentCompletions.length > 0) {
-            // Calculate current streak (consecutive days)
-            const today = new Date();
-            const completionDates = recentCompletions.map(c => new Date(c.completed_at).toDateString());
-            const uniqueDates = [...new Set(completionDates)];
-
-            for (let i = 0; i < uniqueDates.length; i++) {
-              const completionDate = new Date(uniqueDates[i]);
-              const daysDiff = Math.floor((today.getTime() - completionDate.getTime()) / (1000 * 60 * 60 * 24));
-              
-              if (daysDiff === i) {
-                currentStreak++;
-                tempStreak++;
-                longestStreak = Math.max(longestStreak, tempStreak);
-              } else {
-                if (tempStreak > 0) {
-                  longestStreak = Math.max(longestStreak, tempStreak);
-                }
-                tempStreak = 0;
-              }
-            }
-          }
-
           const allTimeRank = Object.values(allTimeUserPoints)
             .sort((a, b) => b.total_points - a.total_points)
             .findIndex(u => u.id === user.id) + 1;
@@ -170,8 +125,8 @@ export function LeaderboardCard() {
           setUserStats({
             total_points: userInAllTime.total_points,
             completed_courses: userInAllTime.completed_courses,
-            current_streak: currentStreak,
-            longest_streak: longestStreak,
+            current_streak: 0, // Simplified for now
+            longest_streak: 0, // Simplified for now
             rank: allTimeRank,
             weekly_points: userInWeekly?.total_points || 0
           });
