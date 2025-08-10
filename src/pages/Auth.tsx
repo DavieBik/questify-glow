@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 const Auth = () => {
-  const { signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -47,7 +46,10 @@ const Auth = () => {
     setIsLoading(true);
     setError(null);
 
-    const { error } = await signIn(signInData.email, signInData.password);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: signInData.email,
+      password: signInData.password,
+    });
     
     if (error) {
       setError(error.message);
@@ -64,12 +66,19 @@ const Auth = () => {
     setIsLoading(true);
     setError(null);
 
-    const { error } = await signUp(
-      signUpData.email, 
-      signUpData.password, 
-      signUpData.firstName, 
-      signUpData.lastName
-    );
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email: signUpData.email,
+      password: signUpData.password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          first_name: signUpData.firstName,
+          last_name: signUpData.lastName,
+        }
+      }
+    });
     
     if (error) {
       setError(error.message);
