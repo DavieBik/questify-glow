@@ -4,24 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { 
   GraduationCap, 
   Mail, 
   Lock, 
   Eye, 
   EyeOff, 
-  ArrowLeft,
-  Star,
-  Shield,
-  Users,
-  BookOpen,
-  Award,
-  TrendingUp,
+  ArrowRight,
   CheckCircle,
-  Sparkles
+  Shield,
+  Users
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +28,7 @@ const Auth = () => {
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [currentView, setCurrentView] = useState<'auth' | 'forgot'>('auth');
   const [resetEmail, setResetEmail] = useState('');
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
 
   const [signInData, setSignInData] = useState({
     email: '',
@@ -108,82 +102,51 @@ const Auth = () => {
     setIsLoading(false);
   };
 
-  const testimonials = [
-    {
-      quote: "SkillBridge transformed our team's capabilities. The structured learning paths and real-time progress tracking made all the difference.",
-      author: "Sarah Chen",
-      role: "Learning Director",
-      company: "TechCorp"
-    },
-    {
-      quote: "The gamification features keep our employees engaged. We've seen a 300% increase in course completion rates.",
-      author: "Marcus Rodriguez", 
-      role: "HR Manager",
-      company: "InnovateLabs"
-    },
-    {
-      quote: "Best LMS platform we've used. The analytics dashboard gives us incredible insights into learning effectiveness.",
-      author: "Emma Thompson",
-      role: "Training Manager", 
-      company: "GlobalTech"
-    }
-  ];
-
-  const features = [
-    { icon: BookOpen, text: "Interactive Learning Paths" },
-    { icon: Award, text: "Certification Management" },
-    { icon: TrendingUp, text: "Advanced Analytics" },
-    { icon: Users, text: "Team Collaboration" },
-    { icon: Shield, text: "Enterprise Security" },
-    { icon: Sparkles, text: "AI-Powered Insights" }
-  ];
-
   if (currentView === 'forgot') {
     return (
-      <div className="min-h-screen bg-gradient-hero flex">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-        
-        <div className="flex-1 flex items-center justify-center p-4 relative z-10">
-          <div className="absolute top-4 right-4">
-            <ThemeToggle />
+      <div className="min-h-screen bg-background">
+        <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:py-10">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-primary" />
+            <div>
+              <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">SkillBridge</p>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">Learning Portal</h1>
+            </div>
           </div>
-          
-          <Card className="w-full max-w-md glass animate-slide-up shadow-elegant">
+          <ThemeToggle />
+        </header>
+
+        <main className="mx-auto flex max-w-md items-center justify-center px-6 pb-24">
+          <Card className="w-full rounded-2xl border border-border bg-card/90 backdrop-blur shadow-elegant">
             <CardContent className="p-8">
-              <div className="text-center space-y-6 mb-8">
-                <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
-                  <GraduationCap className="h-8 w-8 text-primary-foreground" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    Reset Password
-                  </h1>
-                  <p className="text-muted-foreground mt-2">
-                    Enter your email to receive a secure reset link
-                  </p>
-                </div>
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-2">
+                  Reset Password
+                </h2>
+                <p className="text-muted-foreground">
+                  Enter your email to receive a secure reset link
+                </p>
               </div>
 
-              <form onSubmit={handleForgotPassword} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="reset-email" className="text-sm font-medium">Email Address</Label>
+              <form onSubmit={handleForgotPassword} className="space-y-5">
+                <div>
+                  <Label htmlFor="reset-email" className="mb-1 block text-sm font-medium text-foreground">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="reset-email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="you@organisation.org"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="pl-10 h-12 border-2 focus:border-primary transition-colors"
+                      className="w-full rounded-xl border border-border bg-background px-10 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                       required
                     />
                   </div>
                 </div>
                 
                 {error && (
-                  <Alert variant="destructive" className="border-2">
+                  <Alert variant="destructive" className="rounded-xl border-2">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
@@ -191,316 +154,287 @@ const Auth = () => {
                 <div className="space-y-3">
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-primary hover:shadow-glow transition-all duration-300" 
+                    className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60" 
                     disabled={isLoading}
                   >
                     {isLoading ? 'Sending...' : 'Send Reset Email'}
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
-                    className="w-full h-12 hover:bg-muted/50"
+                    className="w-full rounded-xl py-3"
                     onClick={() => setCurrentView('auth')}
                   >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Sign In
                   </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-      
-      {/* Left Side - Branding & Testimonials */}
-      <div className="hidden lg:flex lg:flex-1 relative z-10 flex-col justify-between p-12">
-        <div className="absolute top-8 right-8">
-          <ThemeToggle />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:py-10">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary" />
+          <div>
+            <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">SkillBridge</p>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">Learning Portal</h1>
+          </div>
         </div>
-        
-        {/* Logo & Branding */}
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <GraduationCap className="h-7 w-7 text-white" />
+        <ThemeToggle />
+      </header>
+
+      {/* Content */}
+      <main className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-8 px-6 pb-24 md:grid-cols-12 md:pt-4">
+        {/* Left column: statement */}
+        <section className="md:col-span-7 lg:col-span-7 xl:col-span-8">
+          <h2 className="mb-4 text-4xl font-semibold leading-tight tracking-tight text-foreground md:text-5xl">
+            Professional learning, delivered with clarity
+          </h2>
+          <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl mb-12">
+            Built for modern teams. Clean design, strong privacy, and evidence‑based learning pathways that drive real results.
+          </p>
+
+          {/* Features */}
+          <div className="grid grid-cols-1 gap-6 max-w-2xl sm:grid-cols-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <Shield className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">SkillBridge</h1>
-                <p className="text-white/80 text-sm">Professional Learning Platform</p>
+                <h3 className="font-medium text-foreground">Enterprise Security</h3>
+                <p className="text-sm text-muted-foreground">SOC 2 compliant platform</p>
               </div>
             </div>
-            
-            <div className="max-w-md">
-              <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
-                Accelerate Your Team's Growth
-              </h2>
-              <p className="text-white/90 text-lg leading-relaxed">
-                Transform learning into measurable business outcomes with our comprehensive LMS platform.
-              </p>
-            </div>
-          </div>
-
-          {/* Feature Grid */}
-          <div className="grid grid-cols-2 gap-4 max-w-md">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-3 text-white/90">
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                  <feature.icon className="h-4 w-4" />
-                </div>
-                <span className="text-sm font-medium">{feature.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Testimonial */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-          <div className="flex items-center space-x-1 mb-3">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-            ))}
-          </div>
-          <blockquote className="text-white/95 text-sm leading-relaxed mb-4">
-            "{testimonials[0].quote}"
-          </blockquote>
-          <div className="text-white/80 text-xs">
-            <div className="font-semibold">{testimonials[0].author}</div>
-            <div>{testimonials[0].role}, {testimonials[0].company}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Authentication Form */}
-      <div className="flex-1 lg:max-w-md flex items-center justify-center p-4 relative z-10">
-        {/* Mobile Theme Toggle */}
-        <div className="lg:hidden absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
-        
-        <Card className="w-full max-w-md glass animate-slide-up shadow-elegant">
-          <CardContent className="p-8">
-            {/* Mobile Logo */}
-            <div className="lg:hidden text-center space-y-4 mb-8">
-              <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
-                <GraduationCap className="h-8 w-8 text-primary-foreground" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <Users className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  SkillBridge
-                </h1>
-                <p className="text-muted-foreground">Professional Learning Platform</p>
-              </div>
-              <div className="flex justify-center gap-2">
-                <Badge variant="secondary" className="text-xs bg-gradient-primary text-primary-foreground border-0">
-                  <Shield className="w-3 h-3 mr-1" />
-                  Enterprise Ready
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Trusted by 10K+
-                </Badge>
+                <h3 className="font-medium text-foreground">Team Collaboration</h3>
+                <p className="text-sm text-muted-foreground">Built for team learning</p>
               </div>
             </div>
-
-            {/* Desktop Header */}
-            <div className="hidden lg:block text-center space-y-4 mb-8">
-              <h2 className="text-2xl font-bold">Welcome Back</h2>
-              <p className="text-muted-foreground">Sign in to continue your learning journey</p>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <CheckCircle className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">Proven Results</h3>
+                <p className="text-sm text-muted-foreground">95% completion rates</p>
+              </div>
             </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <GraduationCap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">Certification Ready</h3>
+                <p className="text-sm text-muted-foreground">Industry recognized certs</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-muted/50">
-                <TabsTrigger 
-                  value="signin" 
-                  className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+        {/* Right column: auth form */}
+        <section className="md:col-span-5 lg:col-span-5 xl:col-span-4">
+          <Card className="rounded-2xl border border-border bg-card/90 backdrop-blur shadow-elegant">
+            <CardContent className="p-6 sm:p-8">
+              {/* Mode Toggle */}
+              <div className="mb-6 inline-flex rounded-full bg-muted p-1">
+                <button
+                  onClick={() => setMode('signin')}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    mode === 'signin' 
+                      ? 'bg-background shadow-sm text-foreground' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
-                  Sign In
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="signup" 
-                  className="data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+                  Sign in
+                </button>
+                <button
+                  onClick={() => setMode('signup')}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    mode === 'signup' 
+                      ? 'bg-background shadow-sm text-foreground' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
-                  Sign Up
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="signin" className="space-y-6">
+                  Create account
+                </button>
+              </div>
+
+              {mode === 'signin' ? (
                 <form onSubmit={handleSignIn} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-sm font-medium">Email Address</Label>
+                  <div>
+                    <Label htmlFor="signin-email" className="mb-1 block text-sm font-medium text-foreground">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         id="signin-email"
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="you@organisation.org"
                         value={signInData.email}
                         onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
-                        className="pl-10 h-12 border-2 focus:border-primary transition-colors"
+                        className="w-full rounded-xl border border-border bg-background px-10 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         required
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-sm font-medium">Password</Label>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between">
+                      <Label htmlFor="signin-password" className="block text-sm font-medium text-foreground">Password</Label>
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-primary hover:underline"
+                        onClick={() => setCurrentView('forgot')}
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         id="signin-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder="Your password"
                         value={signInData.password}
                         onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
-                        className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-colors"
+                        className="w-full rounded-xl border border-border bg-background px-10 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         required
                       />
-                      <Button
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="text-sm text-primary hover:text-primary/80 p-0 h-auto"
-                      onClick={() => setCurrentView('forgot')}
-                    >
-                      Forgot password?
-                    </Button>
                   </div>
 
                   {error && (
-                    <Alert variant="destructive" className="border-2">
+                    <Alert variant="destructive" className="rounded-xl border-2">
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
                   
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-primary hover:shadow-glow transition-all duration-300" 
+                    className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60" 
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Signing in...' : 'Sign In'}
+                    {isLoading ? 'Signing in...' : 'Sign in'}
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Button>
                 </form>
-              </TabsContent>
-              
-              <TabsContent value="signup" className="space-y-6">
+              ) : (
                 <form onSubmit={handleSignUp} className="space-y-5">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="first-name" className="text-sm font-medium">First Name</Label>
+                    <div>
+                      <Label htmlFor="first-name" className="mb-1 block text-sm font-medium text-foreground">First Name</Label>
                       <Input
                         id="first-name"
                         placeholder="First name"
                         value={signUpData.firstName}
                         onChange={(e) => setSignUpData({ ...signUpData, firstName: e.target.value })}
-                        className="h-12 border-2 focus:border-primary transition-colors"
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last-name" className="text-sm font-medium">Last Name</Label>
+                    <div>
+                      <Label htmlFor="last-name" className="mb-1 block text-sm font-medium text-foreground">Last Name</Label>
                       <Input
                         id="last-name"
                         placeholder="Last name"
                         value={signUpData.lastName}
                         onChange={(e) => setSignUpData({ ...signUpData, lastName: e.target.value })}
-                        className="h-12 border-2 focus:border-primary transition-colors"
+                        className="w-full rounded-xl border border-border bg-background px-3 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         required
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-sm font-medium">Email Address</Label>
+                  <div>
+                    <Label htmlFor="signup-email" className="mb-1 block text-sm font-medium text-foreground">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         id="signup-email"
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="you@organisation.org"
                         value={signUpData.email}
                         onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                        className="pl-10 h-12 border-2 focus:border-primary transition-colors"
+                        className="w-full rounded-xl border border-border bg-background px-10 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         required
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
+                  <div>
+                    <Label htmlFor="signup-password" className="mb-1 block text-sm font-medium text-foreground">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         id="signup-password"
                         type={showSignUpPassword ? "text" : "password"}
-                        placeholder="Create a secure password (min. 6 characters)"
+                        placeholder="Create a password"
                         value={signUpData.password}
                         onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                        className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-colors"
+                        className="w-full rounded-xl border border-border bg-background px-10 py-2.75 text-[15px] text-foreground placeholder:text-muted-foreground shadow-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         minLength={6}
                         required
                       />
-                      <Button
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                         onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       >
-                        {showSignUpPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
+                        {showSignUpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Password must be at least 6 characters long
                     </p>
                   </div>
                   
                   {error && (
-                    <Alert variant="destructive" className="border-2">
+                    <Alert variant="destructive" className="rounded-xl border-2">
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
                   
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-primary hover:shadow-glow transition-all duration-300" 
+                    className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60" 
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Creating account...' : 'Create Account'}
+                    {isLoading ? 'Creating account...' : 'Create account'}
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Button>
                 </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+              )}
+
+              <p className="pt-2 text-center text-xs leading-relaxed text-muted-foreground">
+                By continuing you agree to our Terms and Privacy Policy.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-10 text-center text-xs text-muted-foreground">
+        © {new Date().getFullYear()} SkillBridge LMS
+      </footer>
     </div>
   );
 };
