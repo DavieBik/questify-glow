@@ -91,6 +91,7 @@ export type Database = {
           expires_at: string | null
           id: string
           is_pinned: boolean
+          organization_id: string | null
           priority: string
           title: string
           updated_at: string
@@ -103,6 +104,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_pinned?: boolean
+          organization_id?: string | null
           priority?: string
           title: string
           updated_at?: string
@@ -115,6 +117,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_pinned?: boolean
+          organization_id?: string | null
           priority?: string
           title?: string
           updated_at?: string
@@ -147,6 +150,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "announcements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -573,12 +583,15 @@ export type Database = {
           is_active: boolean
           is_mandatory: boolean
           ndis_compliant: boolean
+          organization_id: string | null
+          owner_type: string | null
           scorm_package_url: string | null
           short_description: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
           video_url: string | null
+          visibility: string | null
         }
         Insert: {
           category?: string | null
@@ -591,12 +604,15 @@ export type Database = {
           is_active?: boolean
           is_mandatory?: boolean
           ndis_compliant?: boolean
+          organization_id?: string | null
+          owner_type?: string | null
           scorm_package_url?: string | null
           short_description?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
+          visibility?: string | null
         }
         Update: {
           category?: string | null
@@ -609,12 +625,15 @@ export type Database = {
           is_active?: boolean
           is_mandatory?: boolean
           ndis_compliant?: boolean
+          organization_id?: string | null
+          owner_type?: string | null
           scorm_package_url?: string | null
           short_description?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
+          visibility?: string | null
         }
         Relationships: [
           {
@@ -637,6 +656,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -682,6 +708,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          organization_id: string | null
           title: string
           updated_at: string
         }
@@ -691,6 +718,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          organization_id?: string | null
           title: string
           updated_at?: string
         }
@@ -700,6 +728,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          organization_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -731,6 +760,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "forums_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -771,6 +807,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          organization_id: string | null
           updated_at: string
         }
         Insert: {
@@ -780,6 +817,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          organization_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -789,6 +827,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          organization_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -819,6 +858,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "groups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -877,6 +923,7 @@ export type Database = {
           is_required: boolean
           max_attempts: number
           order_index: number
+          organization_id: string | null
           pass_threshold_percentage: number
           time_limit_minutes: number | null
           title: string
@@ -892,6 +939,7 @@ export type Database = {
           is_required?: boolean
           max_attempts?: number
           order_index: number
+          organization_id?: string | null
           pass_threshold_percentage?: number
           time_limit_minutes?: number | null
           title: string
@@ -907,6 +955,7 @@ export type Database = {
           is_required?: boolean
           max_attempts?: number
           order_index?: number
+          organization_id?: string | null
           pass_threshold_percentage?: number
           time_limit_minutes?: number | null
           title?: string
@@ -941,7 +990,91 @@ export type Database = {
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
           },
+          {
+            foreignKeyName: "modules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      org_members: {
+        Row: {
+          id: string
+          invited_by: string | null
+          joined_at: string | null
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          contact_email: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          max_users: number | null
+          name: string
+          primary_color: string | null
+          slug: string
+          subscription_plan: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_users?: number | null
+          name: string
+          primary_color?: string | null
+          slug: string
+          subscription_plan?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_users?: number | null
+          name?: string
+          primary_color?: string | null
+          slug?: string
+          subscription_plan?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       peer_reviews: {
         Row: {
@@ -1102,6 +1235,7 @@ export type Database = {
           is_active: boolean
           max_team_size: number
           min_team_size: number
+          organization_id: string | null
           submission_format: string | null
           title: string
           updated_at: string
@@ -1119,6 +1253,7 @@ export type Database = {
           is_active?: boolean
           max_team_size?: number
           min_team_size?: number
+          organization_id?: string | null
           submission_format?: string | null
           title: string
           updated_at?: string
@@ -1136,6 +1271,7 @@ export type Database = {
           is_active?: boolean
           max_team_size?: number
           min_team_size?: number
+          organization_id?: string | null
           submission_format?: string | null
           title?: string
           updated_at?: string
@@ -1168,6 +1304,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "projects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1302,6 +1445,7 @@ export type Database = {
           end_time: string
           id: string
           join_url: string | null
+          organization_id: string | null
           start_time: string
           title: string
           updated_at: string
@@ -1314,6 +1458,7 @@ export type Database = {
           end_time: string
           id?: string
           join_url?: string | null
+          organization_id?: string | null
           start_time: string
           title: string
           updated_at?: string
@@ -1326,6 +1471,7 @@ export type Database = {
           end_time?: string
           id?: string
           join_url?: string | null
+          organization_id?: string | null
           start_time?: string
           title?: string
           updated_at?: string
@@ -1358,6 +1504,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1540,6 +1693,7 @@ export type Database = {
           last_login: string | null
           last_name: string
           manager_id: string | null
+          organization_id: string | null
           password_hash: string
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
@@ -1558,6 +1712,7 @@ export type Database = {
           last_login?: string | null
           last_name: string
           manager_id?: string | null
+          organization_id?: string | null
           password_hash: string
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
@@ -1576,6 +1731,7 @@ export type Database = {
           last_login?: string | null
           last_name?: string
           manager_id?: string | null
+          organization_id?: string | null
           password_hash?: string
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
@@ -1602,6 +1758,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "users_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1882,12 +2045,24 @@ export type Database = {
         Args: { other_user_id: string }
         Returns: string
       }
+      get_user_org_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      has_org_role: {
+        Args: { required_role: string }
+        Returns: boolean
+      }
       is_admin: {
         Args: { uid: string }
         Returns: boolean
       }
       is_manager_of: {
         Args: { manager_uid: string; employee_uid: string }
+        Returns: boolean
+      }
+      is_org_admin_or_manager: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       refresh_all_analytics: {
