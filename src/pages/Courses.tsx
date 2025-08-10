@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Clock, Edit, Trash2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { CourseCard } from '@/components/course/CourseCard';
 
 interface Course {
   id: string;
@@ -158,55 +159,22 @@ const Courses = () => {
       {/* Courses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => (
-          <Card key={course.id} className="flex flex-col">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-2 flex-1">
-                  <CardTitle className="line-clamp-2">{course.title}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getDifficultyColor(course.difficulty)}>
-                      {course.difficulty}
-                    </Badge>
-                    {course.estimated_duration_minutes && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {Math.round(course.estimated_duration_minutes / 60)}h
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {canEdit && (
-                  <div className="flex gap-1 ml-2">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/courses/${course.id}/edit`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <CardDescription className="flex-1 mb-4">
-                {course.short_description}
-              </CardDescription>
-              <div className="flex gap-2">
-                <Button asChild className="flex-1">
-                  <Link to={`/courses/${course.id}`}>
-                    View Details
-                  </Link>
-                </Button>
-                {!course.is_enrolled && (
-                  <Button 
-                    variant="outline"
-                    onClick={() => enrollInCourse(course.id)}
-                  >
-                    Enroll
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <CourseCard
+            key={course.id}
+            course={{
+              id: course.id,
+              title: course.title,
+              description: course.short_description,
+              difficulty: course.difficulty,
+              category: course.category,
+              estimated_duration_minutes: course.estimated_duration_minutes,
+              thumbnail_url: course.thumbnail_url
+            }}
+            enrollment={course.is_enrolled ? {
+              progress_percentage: 0,
+              status: 'enrolled'
+            } : undefined}
+          />
         ))}
       </div>
 
