@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { 
   SidebarProvider, 
@@ -7,6 +6,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useAuth } from '@/contexts/AuthContext';
 import { LogOut } from 'lucide-react';
 
 interface LayoutProps {

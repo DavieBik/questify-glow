@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Award, Clock, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LeaderboardCard } from '@/components/gamification/LeaderboardCard';
+import { LearningStreakCard } from '@/components/gamification/LearningStreakCard';
+import { PointsSystemCard } from '@/components/gamification/PointsSystemCard';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -167,6 +170,13 @@ const Dashboard = () => {
             <div className="text-2xl font-bold">{stats.totalHours}</div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Gamification Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <LeaderboardCard />
+        <LearningStreakCard />
+        <PointsSystemCard />
       </div>
 
       {/* Recent Courses */}
