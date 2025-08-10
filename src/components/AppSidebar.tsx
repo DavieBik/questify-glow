@@ -21,7 +21,8 @@ import {
   Megaphone,
   Users,
   Settings,
-  User
+  User,
+  Building2
 } from 'lucide-react';
 
 const navigationItems = [
@@ -42,9 +43,13 @@ const adminItems = [
   { title: 'Analytics', url: '/admin/analytics', icon: FileText },
 ];
 
+const organizationItems = [
+  { title: 'Organization Settings', url: '/organization/settings', icon: Building2 },
+];
+
 export function AppSidebar() {
   const { open } = useSidebar();
-  const { canEdit } = useAuth();
+  const { canEdit, isOrgAdmin } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -87,6 +92,29 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isOrgAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Organization</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {organizationItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={item.url} 
+                        className={getNavClasses(item.url)}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {canEdit && (
           <SidebarGroup>

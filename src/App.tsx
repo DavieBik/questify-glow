@@ -36,6 +36,8 @@ import AdminCourseEdit from "./pages/AdminCourseEdit";
 import AdminModuleCreate from "./pages/AdminModuleCreate";
 import AdminModuleEdit from "./pages/AdminModuleEdit";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import OrganizationSetup from "./pages/OrganizationSetup";
+import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +58,18 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/reset-password" element={<PasswordReset />} />
+            <Route path="/organization/setup" element={
+              <ProtectedRoute>
+                <OrganizationSetup />
+              </ProtectedRoute>
+            } />
+            <Route path="/organization/settings" element={
+              <ProtectedRoute>
+                <Layout>
+                  <OrganizationSettings />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Layout>
