@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { LeaderboardCard } from '@/components/gamification/LeaderboardCard';
 import { LearningStreakCard } from '@/components/gamification/LearningStreakCard';
 import { PointsSystemCard } from '@/components/gamification/PointsSystemCard';
+import { OrgSwitcher } from '@/components/demo/OrgSwitcher';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -128,6 +129,9 @@ const Dashboard = () => {
           Track your progress and continue your learning journey
         </p>
       </div>
+
+      {/* Demo Organization Switcher */}
+      <OrgSwitcher />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

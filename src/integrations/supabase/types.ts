@@ -434,6 +434,81 @@ export type Database = {
           },
         ]
       }
+      content_imports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          file_url: string | null
+          id: string
+          import_type: string
+          metadata: Json | null
+          organization_id: string | null
+          source_course_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          file_url?: string | null
+          id?: string
+          import_type: string
+          metadata?: Json | null
+          organization_id?: string | null
+          source_course_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          file_url?: string | null
+          id?: string
+          import_type?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          source_course_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_imports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_imports_source_course_id_fkey"
+            columns: ["source_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_imports_source_course_id_fkey"
+            columns: ["source_course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "content_imports_source_course_id_fkey"
+            columns: ["source_course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_performance_analytics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "content_imports_source_course_id_fkey"
+            columns: ["source_course_id"]
+            isOneToOne: false
+            referencedRelation: "v_skills_gap"
+            referencedColumns: ["course_id"]
+          },
+        ]
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -575,7 +650,7 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string | null
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           estimated_duration_minutes: number | null
@@ -592,11 +667,12 @@ export type Database = {
           updated_at: string
           video_url: string | null
           visibility: string | null
+          visibility_type: string | null
         }
         Insert: {
           category?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           estimated_duration_minutes?: number | null
@@ -613,11 +689,12 @@ export type Database = {
           updated_at?: string
           video_url?: string | null
           visibility?: string | null
+          visibility_type?: string | null
         }
         Update: {
           category?: string | null
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           estimated_duration_minutes?: number | null
@@ -634,6 +711,7 @@ export type Database = {
           updated_at?: string
           video_url?: string | null
           visibility?: string | null
+          visibility_type?: string | null
         }
         Relationships: [
           {
@@ -1029,6 +1107,65 @@ export type Database = {
             foreignKeyName: "org_members_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_subscriptions: {
+        Row: {
+          billing_cycle: string | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          max_users: number
+          organization_id: string | null
+          plan_name: string
+          price_aud_cents: number | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_end: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          billing_cycle?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          max_users?: number
+          organization_id?: string | null
+          plan_name?: string
+          price_aud_cents?: number | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          billing_cycle?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          max_users?: number
+          organization_id?: string | null
+          plan_name?: string
+          price_aud_cents?: number | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },

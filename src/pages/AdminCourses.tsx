@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
-import { Plus, Edit, Eye, Users } from 'lucide-react';
+import { Plus, Edit, Eye, Users, Upload } from 'lucide-react';
+import { ContentImportDialog } from '@/components/content/ContentImportDialog';
 
 interface Course {
   id: string;
@@ -116,12 +117,23 @@ const AdminCourses: React.FC = () => {
             Manage and organize learning courses for your platform.
           </p>
         </div>
-        <Button asChild>
-          <Link to="/admin/courses/create">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Course
-          </Link>
-        </Button>
+          <div className="flex gap-2">
+            <ContentImportDialog
+              trigger={
+                <Button variant="outline">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import Content
+                </Button>
+              }
+              onImportComplete={fetchCourses}
+            />
+            <Button asChild>
+              <Link to="/admin/courses/create">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Course
+              </Link>
+            </Button>
+          </div>
       </div>
 
       {/* Course Stats */}

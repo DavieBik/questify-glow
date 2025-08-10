@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { BillingSection } from '@/components/billing/BillingSection';
 
 export function OrganizationSettings() {
   const { organization, isOrgAdmin, refreshOrganization } = useAuth();
@@ -230,38 +231,7 @@ export function OrganizationSettings() {
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Billing & Subscription
-              </CardTitle>
-              <CardDescription>
-                Manage your subscription and billing information
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium capitalize">{organization.subscription_plan} Plan</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Up to {organization.max_users} users
-                    </p>
-                  </div>
-                  <Badge variant="secondary">Current Plan</Badge>
-                </div>
-
-                <div className="text-center py-8">
-                  <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">Billing integration coming soon</p>
-                  <p className="text-sm text-muted-foreground">
-                    Subscription management and payment processing will be available here
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <BillingSection />
         </TabsContent>
       </Tabs>
     </div>
