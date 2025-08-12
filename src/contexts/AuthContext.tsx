@@ -77,25 +77,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           )
         `)
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!userError && userData) {
         setUserRole(userData.role);
         if (userData.organizations) {
           setOrganization(userData.organizations as Organization);
-        }
+          
+          // Fetch org role if user has organization_id
+          if (userData.organization_id) {
+            const { data: orgMemberData } = await supabase
+              .from('org_members')
+              .select('role')
+              .eq('user_id', user.id)
+              .eq('organization_id', userData.organization_id)
+              .maybeSingle();
 
-        // Fetch org role
-        if (userData.organization_id) {
+            if (orgMemberData) {
+              setOrgRole(orgMemberData.role);
+            }
+          }
+        } else {
+          // User has no organization_id set, check if they're a member of any organization
           const { data: orgMemberData } = await supabase
             .from('org_members')
-            .select('role')
+            .select(`
+              role,
+              organization_id,
+              organizations (
+                id,
+                name,
+                slug,
+                subscription_plan,
+                max_users,
+                is_active,
+                logo_url,
+                primary_color,
+                contact_email
+              )
+            `)
             .eq('user_id', user.id)
-            .eq('organization_id', userData.organization_id)
-            .single();
+            .maybeSingle();
 
-          if (orgMemberData) {
+          if (orgMemberData?.organizations) {
+            setOrganization(orgMemberData.organizations as Organization);
             setOrgRole(orgMemberData.role);
+            
+            // Update user's organization_id for future queries
+            await supabase
+              .from('users')
+              .update({ organization_id: orgMemberData.organization_id })
+              .eq('id', user.id);
           }
         }
       }
