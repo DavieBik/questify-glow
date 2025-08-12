@@ -1175,6 +1175,7 @@ export type Database = {
         Row: {
           contact_email: string | null
           created_at: string | null
+          created_by: string | null
           id: string
           is_active: boolean | null
           logo_url: string | null
@@ -1188,6 +1189,7 @@ export type Database = {
         Insert: {
           contact_email?: string | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -1201,6 +1203,7 @@ export type Database = {
         Update: {
           contact_email?: string | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -1540,6 +1543,39 @@ export type Database = {
             referencedColumns: ["module_id"]
           },
         ]
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       session_rsvps: {
         Row: {
@@ -2170,6 +2206,27 @@ export type Database = {
       }
     }
     Functions: {
+      change_user_organization: {
+        Args: { target_user_id: string; new_org_id: string }
+        Returns: boolean
+      }
+      create_org: {
+        Args: { p_name: string; p_slug: string; p_contact_email: string }
+        Returns: {
+          contact_email: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          max_users: number | null
+          name: string
+          primary_color: string | null
+          slug: string
+          subscription_plan: string | null
+          updated_at: string | null
+        }
+      }
       get_announcement_stats: {
         Args: { announcement_id_param: string }
         Returns: {
@@ -2187,7 +2244,9 @@ export type Database = {
         Returns: string
       }
       has_org_role: {
-        Args: { required_role: string }
+        Args:
+          | { p_org: string; p_roles: string[]; p_user?: string }
+          | { required_role: string }
         Returns: boolean
       }
       is_admin: {
@@ -2196,6 +2255,10 @@ export type Database = {
       }
       is_manager_of: {
         Args: { manager_uid: string; employee_uid: string }
+        Returns: boolean
+      }
+      is_member_of: {
+        Args: { p_org: string; p_user?: string }
         Returns: boolean
       }
       is_org_admin_or_manager: {
