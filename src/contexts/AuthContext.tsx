@@ -54,13 +54,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log('AuthProvider rendered, user:', user, 'organization:', organization, 'loading:', loading);
-
   const fetchUserAndOrganization = async () => {
     if (!user) return;
 
     try {
-      console.log('Fetching user and organization for user:', user.id);
       // Fetch user data with organization
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -81,8 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         `)
         .eq('id', user.id)
         .maybeSingle();
-
-      console.log('User data response:', { userData, userError });
 
       if (!userError && userData) {
         setUserRole(userData.role);
