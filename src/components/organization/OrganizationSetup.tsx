@@ -73,13 +73,15 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
 
       if (orgError) throw orgError;
 
-      // Add user as admin in org_members
+      // Add user as admin in org_members (use upsert to handle duplicates)
       const { error: memberError } = await supabase
         .from('org_members')
-        .insert({
+        .upsert({
           organization_id: orgData.id,
           user_id: user.id,
           role: 'admin',
+        }, {
+          onConflict: 'organization_id,user_id'
         });
 
       if (memberError) throw memberError;
