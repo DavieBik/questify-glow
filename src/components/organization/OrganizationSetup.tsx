@@ -57,6 +57,19 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
 
     setLoading(true);
     try {
+      // Check if slug already exists
+      const { data: existingOrg } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('slug', formData.slug)
+        .single();
+
+      if (existingOrg) {
+        toast.error('This subdomain is already taken. Please choose a different one.');
+        setLoading(false);
+        return;
+      }
+
       // Create organization - this will be secured by RLS policies
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
@@ -71,7 +84,13 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
         .select()
         .single();
 
-      if (orgError) throw orgError;
+      if (orgError) {
+        if (orgError.code === '23505' && orgError.message.includes('organizations_slug_key')) {
+          toast.error('This subdomain is already taken. Please choose a different one.');
+          return;
+        }
+        throw orgError;
+      }
 
       // Add user as admin in org_members (use upsert to handle duplicates)
       const { error: memberError } = await supabase
@@ -92,7 +111,11 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
 
     } catch (error: any) {
       console.error('Error creating organization:', error);
-      toast.error(error.message || 'Failed to create organization');
+      if (error.code === '23505' && error.message.includes('organizations_slug_key')) {
+        toast.error('This subdomain is already taken. Please choose a different one.');
+      } else {
+        toast.error(error.message || 'Failed to create organization');
+      }
     } finally {
       setLoading(false);
     }
