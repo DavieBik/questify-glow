@@ -62,7 +62,7 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
         .from('organizations')
         .select('id')
         .eq('slug', formData.slug)
-        .single();
+        .maybeSingle();
 
       if (existingOrg) {
         toast.error('This subdomain is already taken. Please choose a different one.');
