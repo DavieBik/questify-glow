@@ -58,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
 
     try {
+      console.log('Fetching user and organization for user:', user.id);
       // Fetch user data with organization
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -78,6 +79,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         `)
         .eq('id', user.id)
         .maybeSingle();
+
+      console.log('User data response:', { userData, userError });
 
       if (!userError && userData) {
         setUserRole(userData.role);
