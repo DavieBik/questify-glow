@@ -57,7 +57,7 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
 
     setLoading(true);
     try {
-      // Create organization
+      // Create organization - this will be secured by RLS policies
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .insert({
@@ -72,14 +72,6 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
         .single();
 
       if (orgError) throw orgError;
-
-      // Update user to belong to this organization
-      const { error: userError } = await supabase
-        .from('users')
-        .update({ organization_id: orgData.id })
-        .eq('id', user.id);
-
-      if (userError) throw userError;
 
       // Add user as admin in org_members
       const { error: memberError } = await supabase
