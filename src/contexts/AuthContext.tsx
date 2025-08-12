@@ -54,6 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log('AuthProvider rendered, user:', user, 'organization:', organization, 'loading:', loading);
+
   const fetchUserAndOrganization = async () => {
     if (!user) return;
 
