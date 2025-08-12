@@ -23,11 +23,13 @@ const planOptions = [
 export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'create' | 'join'>('join'); // Default to join
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     plan: 'trial',
     contactEmail: '',
+    inviteCode: '',
   });
   const { user, refreshOrganization } = useAuth();
 
@@ -45,11 +47,77 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
   };
 
   const validateStep1 = () => {
+    if (mode === 'join') {
+      return formData.inviteCode.trim() || formData.slug.trim();
+    }
     return formData.name.trim() && formData.slug.trim();
   };
 
   const validateStep2 = () => {
+    if (mode === 'join') return true; // No step 2 for join mode
     return formData.plan && formData.contactEmail.includes('@');
+  };
+
+  const handleJoinOrganization = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // Try to find organization by slug or invite code
+      const searchValue = formData.inviteCode || formData.slug;
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('*')
+        .or(`slug.eq.${searchValue},contact_email.eq.${searchValue}`)
+        .maybeSingle();
+
+      if (orgError || !orgData) {
+        toast.error('Organization not found. Please check your organization code or slug.');
+        setLoading(false);
+        return;
+      }
+
+      // Add user to the organization
+      const { error: memberError } = await supabase
+        .from('org_members')
+        .upsert({
+          organization_id: orgData.id,
+          user_id: user.id,
+          role: 'worker', // Default role for joining users
+        }, {
+          onConflict: 'organization_id,user_id'
+        });
+
+      if (memberError) throw memberError;
+
+      // Update user's organization_id
+      const { error: userUpdateError } = await supabase
+        .from('users')
+        .upsert({
+          id: user.id,
+          organization_id: orgData.id,
+          email: user.email || '',
+          first_name: user.user_metadata?.first_name || '',
+          last_name: user.user_metadata?.last_name || '',
+          role: 'worker',
+          is_active: true,
+          password_hash: 'placeholder_hash'
+        }, {
+          onConflict: 'id'
+        });
+
+      if (userUpdateError) throw userUpdateError;
+
+      await refreshOrganization();
+      toast.success(`Successfully joined ${orgData.name}!`);
+      onComplete?.();
+
+    } catch (error: any) {
+      console.error('Error joining organization:', error);
+      toast.error(error.message || 'Failed to join organization');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateOrganization = async () => {
@@ -122,7 +190,11 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
   };
 
   const nextStep = () => {
-    if (step === 1 && validateStep1()) {
+    if (mode === 'join') {
+      if (validateStep1()) {
+        handleJoinOrganization();
+      }
+    } else if (step === 1 && validateStep1()) {
       setStep(2);
     } else if (step === 2 && validateStep2()) {
       handleCreateOrganization();
@@ -144,22 +216,72 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
           </CardHeader>
 
           <CardContent className="space-y-6 pt-6">
-            {/* Progress indicator */}
-            <div className="flex items-center justify-center mb-8">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
-              }`}>
-                1
-              </div>
-              <div className={`w-12 h-1 mx-2 ${step >= 2 ? 'bg-emerald-600' : 'bg-slate-200'}`} />
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
-              }`}>
-                2
+            {/* Mode Toggle */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-1 flex">
+                <button
+                  type="button"
+                  onClick={() => setMode('join')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    mode === 'join' 
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Join Organization
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('create')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    mode === 'create' 
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Create New
+                </button>
               </div>
             </div>
 
-            {step === 1 && (
+            {/* Progress indicator - only show for create mode */}
+            {mode === 'create' && (
+              <div className="flex items-center justify-center mb-8">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step >= 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  1
+                </div>
+                <div className={`w-12 h-1 mx-2 ${step >= 2 ? 'bg-emerald-600' : 'bg-slate-200'}`} />
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step >= 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  2
+                </div>
+              </div>
+            )}
+
+            {mode === 'join' && (
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="inviteCode" className="text-base font-medium">
+                    Organization Code or Slug
+                  </Label>
+                  <Input
+                    id="inviteCode"
+                    placeholder="roots-2025 or organization email"
+                    value={formData.inviteCode}
+                    onChange={(e) => handleInputChange('inviteCode', e.target.value)}
+                    className="mt-2 text-base"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter the organization slug or contact email provided by your administrator
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {mode === 'create' && step === 1 && (
               <div className="space-y-6">
                 <div>
                   <Label htmlFor="name" className="text-base font-medium">
@@ -197,7 +319,7 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
               </div>
             )}
 
-            {step === 2 && (
+            {mode === 'create' && step === 2 && (
               <div className="space-y-6">
                 <div>
                   <Label htmlFor="plan" className="text-base font-medium">
@@ -245,7 +367,7 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
             )}
 
             <div className="flex justify-between pt-6">
-              {step > 1 && (
+              {mode === 'create' && step > 1 && (
                 <Button
                   variant="outline"
                   onClick={() => setStep(step - 1)}
@@ -260,17 +382,22 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
                 onClick={nextStep}
                 disabled={
                   loading || 
-                  (step === 1 && !validateStep1()) || 
-                  (step === 2 && !validateStep2())
+                  (mode === 'join' && !validateStep1()) ||
+                  (mode === 'create' && step === 1 && !validateStep1()) || 
+                  (mode === 'create' && step === 2 && !validateStep2())
                 }
-                className={`ml-auto ${step === 1 ? 'w-full' : ''}`}
+                className={`ml-auto ${(mode === 'join' || step === 1) ? 'w-full' : ''}`}
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                ) : step === 2 ? null : (
+                ) : (mode === 'join' || step === 2) ? null : (
                   <ChevronRight className="w-4 h-4 mr-2" />
                 )}
-                {loading ? 'Creating...' : step === 2 ? 'Create Organization' : 'Continue'}
+                {loading ? 
+                  (mode === 'join' ? 'Joining...' : 'Creating...') : 
+                  mode === 'join' ? 'Join Organization' :
+                  step === 2 ? 'Create Organization' : 'Continue'
+                }
               </Button>
             </div>
           </CardContent>
