@@ -1946,15 +1946,12 @@ export type Database = {
       mv_course_metrics: {
         Row: {
           avg_score: number | null
-          avg_time_minutes: number | null
           completed: number | null
-          completed_last_30d: number | null
           completion_rate: number | null
           course_id: string | null
           in_progress: number | null
           learners: number | null
           median_score: number | null
-          started_last_30d: number | null
         }
         Relationships: []
       }
@@ -2027,11 +2024,10 @@ export type Database = {
       }
       mv_retention_metrics: {
         Row: {
-          cohort_week: string | null
-          retained_30d: number | null
-          retained_60d: number | null
-          retained_90d: number | null
-          users_started: number | null
+          completions: number | null
+          new_enrollments: number | null
+          retention_rate: number | null
+          week_start: string | null
         }
         Relationships: []
       }
