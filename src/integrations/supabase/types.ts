@@ -160,6 +160,27 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          created_at: string
+          default_org_id: string
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_org_id: string
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_org_id?: string
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           created_at: string

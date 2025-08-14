@@ -274,6 +274,52 @@ ORG_NAME="Dev Org" npm run dev
 
 ---
 
+## 📋 How to Clone for a New Client (5 Steps)
+
+1. **Copy repository and update environment**:
+   ```bash
+   # Clone to new directory
+   git clone <your-repo-url> client-name-skillbridge
+   cd client-name-skillbridge
+   
+   # Update .env with new client details
+   cp .env.example .env
+   # Set ORG_ID to a new UUID
+   # Update ORG_NAME, ORG_CONTACT_EMAIL, etc.
+   ```
+
+2. **Generate new organization UUID**:
+   ```bash
+   # Generate a new UUID for the client
+   node -e "console.log(require('crypto').randomUUID())"
+   # Update ORG_ID in .env with this new UUID
+   ```
+
+3. **Update app_settings in database**:
+   ```sql
+   -- Connect to your Supabase project and run:
+   UPDATE app_settings SET default_org_id = 'NEW_UUID_HERE' WHERE id = 1;
+   ```
+
+4. **Run seed script**:
+   ```bash
+   npm run seed:single
+   ```
+
+5. **Deploy and test**:
+   ```bash
+   # Deploy to your hosting platform
+   # Test signup, course creation, and all core features
+   ```
+
+**Quick Go/No-Go Test Plan:**
+- ✅ Signup assigns correct ORG_ID automatically
+- ✅ CRUD operations (courses, departments) use default org
+- ✅ Bad insert attempts with different org ID are rejected
+- ✅ All pages load without org context errors  
+- ✅ RLS policies enforce single-tenant access
+- ✅ Fresh admin can create and access content
+
 ## Success Checklist
 
 ✅ Environment variables configured  

@@ -79,6 +79,18 @@ async function seedSingleTenant() {
       console.log('✅ Organization already exists');
     }
 
+    // 1.5. Ensure app_settings has the correct default org
+    console.log('⚙️ Setting up app settings...');
+    const { error: appSettingsError } = await supabase
+      .from('app_settings')
+      .upsert({
+        id: 1,
+        default_org_id: ORG_CONFIG.ORG_ID
+      });
+
+    if (appSettingsError) throw appSettingsError;
+    console.log('✅ App settings configured');
+
     // 2. Create admin user
     console.log('👤 Setting up admin user...');
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
