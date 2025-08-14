@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -189,6 +189,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      bulk_jobs: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          error_message: string | null
+          id: string
+          job_type: string
+          organization_id: string
+          payload: Json
+          processed_count: number | null
+          status: string
+          total_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          error_message?: string | null
+          id?: string
+          job_type: string
+          organization_id: string
+          payload: Json
+          processed_count?: number | null
+          status?: string
+          total_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          organization_id?: string
+          payload?: Json
+          processed_count?: number | null
+          status?: string
+          total_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulk_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       certificates: {
         Row: {
@@ -740,6 +790,51 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+          parent_id: string | null
+          path: unknown | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          parent_id?: string | null
+          path?: unknown | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          parent_id?: string | null
+          path?: unknown | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
@@ -1852,6 +1947,59 @@ export type Database = {
           },
         ]
       }
+      user_departments: {
+        Row: {
+          created_at: string | null
+          department_id: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department_id: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          department_id?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_departments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_departments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_user_progress_analytics"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_departments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_departments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_skills_gap"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
@@ -2202,12 +2350,20 @@ export type Database = {
       }
     }
     Functions: {
+      _ltree_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      _ltree_gist_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
       change_user_organization: {
-        Args: { target_user_id: string; new_org_id: string }
+        Args: { new_org_id: string; target_user_id: string }
         Returns: boolean
       }
       create_org: {
-        Args: { p_name: string; p_slug: string; p_contact_email: string }
+        Args: { p_contact_email: string; p_name: string; p_slug: string }
         Returns: {
           contact_email: string | null
           created_at: string | null
@@ -2226,9 +2382,9 @@ export type Database = {
       get_announcement_stats: {
         Args: { announcement_id_param: string }
         Returns: {
-          total_readers: number
-          total_eligible: number
           read_percentage: number
+          total_eligible: number
+          total_readers: number
         }[]
       }
       get_or_create_direct_conversation: {
@@ -2245,12 +2401,16 @@ export type Database = {
           | { required_role: string }
         Returns: boolean
       }
+      hash_ltree: {
+        Args: { "": unknown }
+        Returns: number
+      }
       is_admin: {
         Args: { uid: string }
         Returns: boolean
       }
       is_manager_of: {
-        Args: { manager_uid: string; employee_uid: string }
+        Args: { employee_uid: string; manager_uid: string }
         Returns: boolean
       }
       is_member_of: {
@@ -2260,6 +2420,86 @@ export type Database = {
       is_org_admin_or_manager: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      lca: {
+        Args: { "": unknown[] }
+        Returns: unknown
+      }
+      lquery_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      lquery_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      lquery_recv: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      lquery_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      ltree_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_gist_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_gist_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      ltree_gist_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_recv: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltree_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      ltree2text: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      ltxtq_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltxtq_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltxtq_recv: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ltxtq_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      nlevel: {
+        Args: { "": unknown }
+        Returns: number
       }
       refresh_all_analytics: {
         Args: Record<PropertyKey, never>
@@ -2273,30 +2513,34 @@ export type Database = {
         Args: { date_from?: string; date_to?: string; manager_scope?: boolean }
         Returns: unknown[]
       }
+      rpc_bulk_assign: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       rpc_course_metrics: {
         Args: { date_from?: string; date_to?: string }
         Returns: {
-          course_id: string
-          course_title: string
-          category: string
-          difficulty: string
-          enrolled_users: number
-          completed_users: number
-          completion_rate: number
           avg_score: number
           avg_time_minutes: number
-          total_attempts: number
+          category: string
+          completed_users: number
+          completion_rate: number
+          course_id: string
+          course_title: string
+          difficulty: string
+          enrolled_users: number
           passed_attempts: number
+          total_attempts: number
         }[]
       }
       rpc_learning_patterns: {
         Args: { date_from?: string; date_to?: string }
         Returns: {
-          bucket_type: string
-          bucket: string
-          completions: number
           avg_score: number
           avg_time_minutes: number
+          bucket: string
+          bucket_type: string
+          completions: number
         }[]
       }
       rpc_module_metrics: {
@@ -2306,31 +2550,35 @@ export type Database = {
           date_to?: string
         }
         Returns: {
-          module_id: string
-          course_id: string
-          module_title: string
-          course_title: string
-          content_type: string
-          order_index: number
           attempted_users: number
-          completed_users: number
-          completion_rate: number
+          avg_attempts_per_user: number
           avg_score: number
           avg_time_minutes: number
+          completed_users: number
+          completion_rate: number
+          content_type: string
+          course_id: string
+          course_title: string
+          module_id: string
+          module_title: string
+          order_index: number
           total_attempts: number
-          avg_attempts_per_user: number
         }[]
       }
       rpc_skills_gap: {
         Args: { department_filter?: string; role_filter?: string }
         Returns: {
-          department: string
-          role: string
-          total_users: number
           avg_completion_rate: number
-          skills_gaps: string[]
+          department: string
           recommended_courses: string[]
+          role: string
+          skills_gaps: string[]
+          total_users: number
         }[]
+      }
+      text2ltree: {
+        Args: { "": string }
+        Returns: unknown
       }
     }
     Enums: {
