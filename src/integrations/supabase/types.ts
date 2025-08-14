@@ -2387,6 +2387,10 @@ export type Database = {
           total_readers: number
         }[]
       }
+      get_default_org_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_or_create_direct_conversation: {
         Args: { other_user_id: string }
         Returns: string

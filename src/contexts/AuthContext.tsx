@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getOrganizationConfig } from '@/config/organization';
 
 interface Organization {
   id: string;
@@ -20,7 +21,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   userRole: string | null;
-  organization: Organization | null;
+  organization: Organization;
   orgRole: string | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any }>;
@@ -49,90 +50,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [organization, setOrganization] = useState<Organization | null>(null);
   const [orgRole, setOrgRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Single-tenant: organization is now static from config
+  const organization = getOrganizationConfig();
 
   const fetchUserAndOrganization = async () => {
     if (!user) return;
 
     try {
-      // Fetch user data with organization
+      // Fetch user data (simplified for single-tenant)
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select(`
-          role,
-          organization_id,
-          organizations:organization_id(
-            id,
-            name,
-            slug,
-            subscription_plan,
-            max_users,
-            is_active,
-            logo_url,
-            primary_color,
-            contact_email
-          )
-        `)
+        .select('role')
         .eq('id', user.id)
         .maybeSingle();
 
       if (!userError && userData) {
         setUserRole(userData.role);
-        if (userData.organizations) {
-          setOrganization(userData.organizations as Organization);
-          
-          // Fetch org role if user has organization_id
-          if (userData.organization_id) {
-            const { data: orgMemberData } = await supabase
-              .from('org_members')
-              .select('role')
-              .eq('user_id', user.id)
-              .eq('organization_id', userData.organization_id)
-              .maybeSingle();
+        
+        // Fetch org role from org_members
+        const { data: orgMemberData } = await supabase
+          .from('org_members')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('organization_id', organization.id)
+          .maybeSingle();
 
-            if (orgMemberData) {
-              setOrgRole(orgMemberData.role);
-            }
-          }
-        } else {
-          // User has no organization_id set, check if they're a member of any organization
-          const { data: orgMemberData } = await supabase
-            .from('org_members')
-            .select(`
-              role,
-              organization_id,
-              organizations (
-                id,
-                name,
-                slug,
-                subscription_plan,
-                max_users,
-                is_active,
-                logo_url,
-                primary_color,
-                contact_email
-              )
-            `)
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (orgMemberData?.organizations) {
-            setOrganization(orgMemberData.organizations as Organization);
-            setOrgRole(orgMemberData.role);
-            
-            // Update user's organization_id for future queries
-            await supabase
-              .from('users')
-              .update({ organization_id: orgMemberData.organization_id })
-              .eq('id', user.id);
-          }
+        if (orgMemberData) {
+          setOrgRole(orgMemberData.role);
         }
       }
     } catch (error) {
-      console.error('Error fetching user and organization:', error);
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -154,7 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }, 0);
         } else {
           setUserRole(null);
-          setOrganization(null);
           setOrgRole(null);
         }
         
@@ -174,27 +125,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  // Redirect logic
+  // Redirect logic (simplified for single-tenant)
   useEffect(() => {
     if (!loading) {
       const isAuthPage = location.pathname === '/auth';
-      const isOrgSetupPage = location.pathname === '/organization/setup';
       
       if (!user && !isAuthPage) {
         navigate('/auth');
       } else if (user && isAuthPage) {
-        // If user has no organization, redirect to setup
-        if (!organization) {
-          navigate('/organization/setup');
-        } else {
-          navigate('/');
-        }
-      } else if (user && !organization && !isOrgSetupPage) {
-        // If user is logged in but has no organization and isn't on setup page
-        navigate('/organization/setup');
+        navigate('/');
       }
     }
-  }, [user, organization, loading, location.pathname, navigate]);
+  }, [user, loading, location.pathname, navigate]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -224,6 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     await supabase.auth.signOut();
     setUserRole(null);
+    setOrgRole(null);
     navigate('/auth');
   };
 
