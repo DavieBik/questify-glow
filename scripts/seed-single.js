@@ -79,14 +79,14 @@ async function seedSingleTenant() {
       console.log('✅ Organization already exists');
     }
 
-    // 1.5. Ensure app_settings has the correct default org
+    // 1.5. Ensure app_settings has the correct default org (idempotent)
     console.log('⚙️ Setting up app settings...');
     const { error: appSettingsError } = await supabase
       .from('app_settings')
       .upsert({
         id: 1,
         default_org_id: ORG_CONFIG.ORG_ID
-      });
+      }, { onConflict: 'id' });
 
     if (appSettingsError) throw appSettingsError;
     console.log('✅ App settings configured');

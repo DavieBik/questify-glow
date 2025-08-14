@@ -179,7 +179,15 @@ export type Database = {
           id?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_default_org_id_fkey"
+            columns: ["default_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       badges: {
         Row: {

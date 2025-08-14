@@ -299,6 +299,7 @@ ORG_NAME="Dev Org" npm run dev
    ```sql
    -- Connect to your Supabase project and run:
    UPDATE app_settings SET default_org_id = 'NEW_UUID_HERE' WHERE id = 1;
+   -- The FK constraint ensures the UUID exists in organizations table
    ```
 
 4. **Run seed script**:
