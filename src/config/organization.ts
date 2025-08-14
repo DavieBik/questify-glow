@@ -6,37 +6,37 @@
 // Organization Configuration
 export const ORG_CONFIG = {
   // Core Organization Settings
-  ORG_ID: process.env.ORG_ID || '00000000-0000-0000-0000-000000000001',
-  ORG_NAME: process.env.ORG_NAME || 'SkillBridge Learning',
-  ORG_SLUG: process.env.ORG_SLUG || 'skillbridge',
-  ORG_CONTACT_EMAIL: process.env.ORG_CONTACT_EMAIL || 'admin@skillbridge.com.au',
+  ORG_ID: import.meta.env.VITE_ORG_ID || '00000000-0000-0000-0000-000000000001',
+  ORG_NAME: import.meta.env.VITE_ORG_NAME || 'SkillBridge Learning',
+  ORG_SLUG: import.meta.env.VITE_ORG_SLUG || 'skillbridge',
+  ORG_CONTACT_EMAIL: import.meta.env.VITE_ORG_CONTACT_EMAIL || 'admin@skillbridge.com.au',
   
   // Branding
-  ORG_LOGO_URL: process.env.ORG_LOGO_URL || '',
-  ORG_PRIMARY_COLOR: process.env.ORG_PRIMARY_COLOR || '#059669',
-  ORG_FAVICON_URL: process.env.ORG_FAVICON_URL || '/favicon.ico',
+  ORG_LOGO_URL: import.meta.env.VITE_ORG_LOGO_URL || '',
+  ORG_PRIMARY_COLOR: import.meta.env.VITE_ORG_PRIMARY_COLOR || '#059669',
+  ORG_FAVICON_URL: import.meta.env.VITE_ORG_FAVICON_URL || '/favicon.ico',
   
   // Application URLs
-  APP_URL: process.env.APP_URL || 'https://skillbridge.com.au',
-  APP_DOMAIN: process.env.APP_DOMAIN || 'skillbridge.com.au',
+  APP_URL: import.meta.env.VITE_APP_URL || 'https://skillbridge.com.au',
+  APP_DOMAIN: import.meta.env.VITE_APP_DOMAIN || 'skillbridge.com.au',
   
   // Email Configuration
-  SMTP_FROM: process.env.SMTP_FROM || 'SkillBridge <noreply@skillbridge.com.au>',
-  SUPPORT_EMAIL: process.env.SUPPORT_EMAIL || 'support@skillbridge.com.au',
+  SMTP_FROM: import.meta.env.VITE_SMTP_FROM || 'SkillBridge <noreply@skillbridge.com.au>',
+  SUPPORT_EMAIL: import.meta.env.VITE_SUPPORT_EMAIL || 'support@skillbridge.com.au',
   
   // Subscription Settings
-  SUBSCRIPTION_PLAN: process.env.SUBSCRIPTION_PLAN || 'enterprise',
-  MAX_USERS: parseInt(process.env.MAX_USERS || '999'),
+  SUBSCRIPTION_PLAN: import.meta.env.VITE_SUBSCRIPTION_PLAN || 'enterprise',
+  MAX_USERS: parseInt(import.meta.env.VITE_MAX_USERS || '999'),
   
   // Feature Flags
-  SINGLE_TENANT_STRICT: process.env.SINGLE_TENANT_STRICT === 'true',
-  ENABLE_SIGNUP: process.env.ENABLE_SIGNUP !== 'false', // Allow signup by default
+  SINGLE_TENANT_STRICT: import.meta.env.VITE_SINGLE_TENANT_STRICT === 'true',
+  ENABLE_SIGNUP: import.meta.env.VITE_ENABLE_SIGNUP !== 'false', // Allow signup by default
   
   // Default Admin User (for seeding)
-  DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL || 'admin@skillbridge.com.au',
-  DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD || 'SkillBridge2024!',
-  DEFAULT_ADMIN_FIRST_NAME: process.env.DEFAULT_ADMIN_FIRST_NAME || 'System',
-  DEFAULT_ADMIN_LAST_NAME: process.env.DEFAULT_ADMIN_LAST_NAME || 'Administrator',
+  DEFAULT_ADMIN_EMAIL: import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || 'admin@skillbridge.com.au',
+  DEFAULT_ADMIN_PASSWORD: import.meta.env.VITE_DEFAULT_ADMIN_PASSWORD || 'SkillBridge2024!',
+  DEFAULT_ADMIN_FIRST_NAME: import.meta.env.VITE_DEFAULT_ADMIN_FIRST_NAME || 'System',
+  DEFAULT_ADMIN_LAST_NAME: import.meta.env.VITE_DEFAULT_ADMIN_LAST_NAME || 'Administrator',
 } as const;
 
 // Helper function to get organization data for use in components

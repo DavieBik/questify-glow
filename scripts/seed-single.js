@@ -20,16 +20,16 @@ config();
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Organization configuration
+// Organization configuration (server-side script uses process.env)
 const ORG_CONFIG = {
-  ORG_ID: process.env.ORG_ID || '00000000-0000-0000-0000-000000000001',
-  ORG_NAME: process.env.ORG_NAME || 'SkillBridge Learning',
-  ORG_SLUG: process.env.ORG_SLUG || 'skillbridge',
-  ORG_CONTACT_EMAIL: process.env.ORG_CONTACT_EMAIL || 'admin@skillbridge.com.au',
-  DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL || 'admin@skillbridge.com.au',
-  DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD || 'SkillBridge2024!',
-  DEFAULT_ADMIN_FIRST_NAME: process.env.DEFAULT_ADMIN_FIRST_NAME || 'System',
-  DEFAULT_ADMIN_LAST_NAME: process.env.DEFAULT_ADMIN_LAST_NAME || 'Administrator',
+  ORG_ID: process.env.VITE_ORG_ID || '00000000-0000-0000-0000-000000000001',
+  ORG_NAME: process.env.VITE_ORG_NAME || 'SkillBridge Learning',
+  ORG_SLUG: process.env.VITE_ORG_SLUG || 'skillbridge',
+  ORG_CONTACT_EMAIL: process.env.VITE_ORG_CONTACT_EMAIL || 'admin@skillbridge.com.au',
+  DEFAULT_ADMIN_EMAIL: process.env.VITE_DEFAULT_ADMIN_EMAIL || 'admin@skillbridge.com.au',
+  DEFAULT_ADMIN_PASSWORD: process.env.VITE_DEFAULT_ADMIN_PASSWORD || 'SkillBridge2024!',
+  DEFAULT_ADMIN_FIRST_NAME: process.env.VITE_DEFAULT_ADMIN_FIRST_NAME || 'System',
+  DEFAULT_ADMIN_LAST_NAME: process.env.VITE_DEFAULT_ADMIN_LAST_NAME || 'Administrator',
 };
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
