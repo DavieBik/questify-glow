@@ -67,7 +67,7 @@ const Announcements: React.FC = () => {
         .from('announcements')
         .select(`
           *,
-          users!announcements_created_by_fkey(first_name, last_name, role),
+          users!created_by(first_name, last_name, role),
           courses(title)
         `)
         .order('is_pinned', { ascending: false })
