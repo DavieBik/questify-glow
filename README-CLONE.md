@@ -372,8 +372,33 @@ All scripts require:
 
 ---
 
+## 📊 Analytics Architecture
+
+### Secure Data Access Model
+
+SkillBridge implements a security-first analytics architecture:
+
+- **RPC-Only Access**: All analytics data flows through role-validated RPC functions
+- **No Direct View Access**: Materialized views (`mv_*`) are not exposed via API  
+- **Admin/Manager Gates**: Every analytics endpoint checks user permissions
+- **Scheduled Refresh**: Hourly automated updates via pg_cron or edge functions
+- **Audit Logging**: All analytics operations tracked in security logs
+
+### Why This Architecture
+
+1. **Security**: Direct materialized view access would bypass RLS and role checks
+2. **Performance**: Pre-computed views serve as high-speed data cache
+3. **Flexibility**: RPC functions can aggregate and validate data before return
+4. **Compliance**: Full audit trail of who accessed what analytics data when
+
+See [docs/analytics-security.md](./docs/analytics-security.md) for complete technical details.
+
+---
+
 ## 📚 Related Documentation
 
 - [README-SINGLE-TENANT.md](./README-SINGLE-TENANT.md) - Architecture overview
+- [docs/analytics-security.md](./docs/analytics-security.md) - Analytics security model
+- [docs/e2e-testing.md](./docs/e2e-testing.md) - E2E testing with Playwright
 - [supabase/README.md](./supabase/README.md) - Database schema
 - [src/config/organization.ts](./src/config/organization.ts) - Configuration options

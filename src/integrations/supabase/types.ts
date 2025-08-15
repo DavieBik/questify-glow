@@ -2416,6 +2416,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      rpc_admin_team_user_progress: {
+        Args: { date_from?: string; date_to?: string; manager_scope?: boolean }
+        Returns: {
+          average_score: number
+          completed_courses: number
+          completion_rate: number
+          department: string
+          engagement_score: number
+          enrolled_courses: number
+          last_activity: string
+          role: Database["public"]["Enums"]["user_role"]
+          total_hours: number
+          user_id: string
+          user_name: string
+        }[]
+      }
       rpc_bulk_assign: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -2466,6 +2482,19 @@ export type Database = {
           module_title: string
           order_index: number
           total_attempts: number
+        }[]
+      }
+      rpc_retention_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cohort_week: string
+          retained_30d: number
+          retained_60d: number
+          retained_90d: number
+          retention_rate_30d: number
+          retention_rate_60d: number
+          retention_rate_90d: number
+          users_started: number
         }[]
       }
       rpc_skills_gap: {
