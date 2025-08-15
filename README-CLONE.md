@@ -169,7 +169,10 @@ http://localhost:5173
 ### Step 7: Build & Deploy
 
 ```bash
-# Production build
+# Check environment variable security first
+npm run env-check
+
+# Production build (includes security checks)
 npm run build
 
 # Test preview locally
@@ -308,6 +311,7 @@ systemctl restart skillbridge
 - [ ] CORS origins configured
 - [ ] Branding assets uploaded
 - [ ] Environment variables validated
+- [ ] Environment security checks passed (`npm run env-check`)
 
 ### Testing
 - [ ] Authentication flow working
@@ -399,6 +403,7 @@ See [docs/analytics-security.md](./docs/analytics-security.md) for complete tech
 
 - [README-SINGLE-TENANT.md](./README-SINGLE-TENANT.md) - Architecture overview
 - [docs/analytics-security.md](./docs/analytics-security.md) - Analytics security model
+- [docs/environment-security.md](./docs/environment-security.md) - Environment variable security
 - [docs/e2e-testing.md](./docs/e2e-testing.md) - E2E testing with Playwright
 - [supabase/README.md](./supabase/README.md) - Database schema
 - [src/config/organization.ts](./src/config/organization.ts) - Configuration options
