@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
+import { DeploymentHealthCard } from './DeploymentHealthCard';
 
 interface AdminStats {
   totalUsers: number;
@@ -221,6 +222,9 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Deployment Health */}
+      <DeploymentHealthCard />
 
       {/* Quick Actions & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
