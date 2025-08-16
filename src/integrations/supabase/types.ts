@@ -1379,6 +1379,42 @@ export type Database = {
         }
         Relationships: []
       }
+      org_branding: {
+        Row: {
+          banner_image_url: string | null
+          created_at: string
+          external_link_title: string | null
+          external_link_url: string | null
+          id: string
+          logo_url: string | null
+          organization_id: string
+          primary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          banner_image_url?: string | null
+          created_at?: string
+          external_link_title?: string | null
+          external_link_url?: string | null
+          id?: string
+          logo_url?: string | null
+          organization_id?: string
+          primary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          banner_image_url?: string | null
+          created_at?: string
+          external_link_title?: string | null
+          external_link_url?: string | null
+          id?: string
+          logo_url?: string | null
+          organization_id?: string
+          primary_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       org_members: {
         Row: {
           id: string

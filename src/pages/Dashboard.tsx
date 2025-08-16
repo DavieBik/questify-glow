@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBranding } from '@/contexts/BrandingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface RecentCourse {
 
 const Dashboard = () => {
   const { user, isManager, isAdmin } = useAuth();
+  const { branding } = useBranding();
   const [stats, setStats] = useState<DashboardStats>({
     enrolledCourses: 0,
     completedCourses: 0,
@@ -127,6 +129,26 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Optional Banner */}
+      {branding?.banner_image_url && (
+        <div className="relative rounded-lg overflow-hidden h-48 bg-gradient-to-r from-primary/20 to-primary/5">
+          <img 
+            src={branding.banner_image_url} 
+            alt="Organization Banner" 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+            <div className="text-center text-white">
+              <h2 className="text-2xl font-bold mb-2">Welcome to Learning</h2>
+              <p className="text-white/90">Continue your learning journey</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-3xl font-bold">Learning Dashboard</h1>
         <p className="text-muted-foreground">

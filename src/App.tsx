@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout";
 
@@ -30,6 +31,7 @@ import CertificateDetail from "./pages/CertificateDetail";
 import Badges from "./pages/Badges";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
+import BrandingSettings from "./pages/BrandingSettings";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCourses from "./pages/AdminCourses";
 import AdminCourseCreate from "./pages/AdminCourseCreate";
@@ -59,6 +61,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <BrandingProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/reset-password" element={<PasswordReset />} />
@@ -266,6 +269,13 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               } />
+              <Route path="/admin/branding" element={
+                <ProtectedRoute requireRole={['admin']}>
+                  <Layout>
+                    <BrandingSettings />
+                  </Layout>
+                </ProtectedRoute>
+              } />
               <Route path="/admin/curricula" element={
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
@@ -276,6 +286,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+            </BrandingProvider>
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>

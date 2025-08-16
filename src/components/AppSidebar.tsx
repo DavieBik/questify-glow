@@ -40,9 +40,13 @@ const navigationItems = [
   { title: 'Profile', url: '/profile', icon: User },
 ];
 
-const adminItems = [
+const managementItems = [
   { title: 'Admin Dashboard', url: '/admin/dashboard', icon: Settings },
   { title: 'Manager Dashboard', url: '/manager/dashboard', icon: Settings },
+];
+
+const adminItems = [
+  { title: 'Branding', url: '/admin/branding', icon: Settings },
   { title: 'Admin Users', url: '/admin/users', icon: Settings },
   { title: 'Course Management', url: '/admin/courses', icon: BookOpen },
   { title: 'Curricula Management', url: '/admin/curricula', icon: GraduationCap },
@@ -57,8 +61,8 @@ const organizationItems = [
 
 export function AppSidebar() {
   const { open } = useSidebar();
-  const { canEdit, isOrgAdmin } = useAuth();
   const location = useLocation();
+  const { isAdmin, isManager } = useAuth();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => {
@@ -68,11 +72,8 @@ export function AppSidebar() {
     return currentPath.startsWith(path);
   };
 
-  const getNavClasses = (path: string) => {
-    return isActive(path) 
-      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
-      : 'hover:bg-sidebar-accent/50';
-  };
+  const getNavCls = ({ isActive }: { isActive: boolean }) =>
+    isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"
 
   return (
     <Sidebar
@@ -86,11 +87,7 @@ export function AppSidebar() {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end={item.url === '/'}
-                      className={getNavClasses(item.url)}
-                    >
+                    <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -101,18 +98,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isOrgAdmin && (
+        {/* Admin Section */}
+        {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Organization</SidebarGroupLabel>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {organizationItems.map((item) => (
+                {adminItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClasses(item.url)}
-                      >
+                      <NavLink to={item.url} className={getNavCls}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </NavLink>
@@ -124,18 +119,16 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {canEdit && (
+        {/* Manager/Admin Dashboard Section */}
+        {(isAdmin || isManager) && (
           <SidebarGroup>
-            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {adminItems.map((item) => (
+                {managementItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClasses(item.url)}
-                      >
+                      <NavLink to={item.url} className={getNavCls}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </NavLink>
