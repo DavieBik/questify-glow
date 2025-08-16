@@ -838,6 +838,145 @@ export type Database = {
           },
         ]
       }
+      curricula: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      curriculum_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          created_at: string
+          curriculum_id: string
+          due_at: string | null
+          id: string
+          organization_id: string
+          status: Database["public"]["Enums"]["curriculum_assignment_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          created_at?: string
+          curriculum_id: string
+          due_at?: string | null
+          id?: string
+          organization_id?: string
+          status?: Database["public"]["Enums"]["curriculum_assignment_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          created_at?: string
+          curriculum_id?: string
+          due_at?: string | null
+          id?: string
+          organization_id?: string
+          status?: Database["public"]["Enums"]["curriculum_assignment_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_assignments_curriculum_id_fkey"
+            columns: ["curriculum_id"]
+            isOneToOne: false
+            referencedRelation: "curricula"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_items: {
+        Row: {
+          course_id: string
+          created_at: string
+          curriculum_id: string
+          due_days_offset: number | null
+          id: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          curriculum_id: string
+          due_days_offset?: number | null
+          id?: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          curriculum_id?: string
+          due_days_offset?: number | null
+          id?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_items_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_items_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_performance_analytics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "curriculum_items_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "v_skills_gap"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "curriculum_items_curriculum_id_fkey"
+            columns: ["curriculum_id"]
+            isOneToOne: false
+            referencedRelation: "curricula"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           created_at: string | null
@@ -2366,6 +2505,14 @@ export type Database = {
         Args: { "": unknown }
         Returns: undefined
       }
+      assign_curriculum_to_user: {
+        Args: {
+          p_assigned_by: string
+          p_curriculum_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       change_user_organization: {
         Args: { new_org_id: string; target_user_id: string }
         Returns: boolean
@@ -2646,6 +2793,11 @@ export type Database = {
       }
     }
     Enums: {
+      curriculum_assignment_status:
+        | "assigned"
+        | "in_progress"
+        | "completed"
+        | "overdue"
       difficulty_level: "beginner" | "intermediate" | "advanced"
       user_role: "admin" | "manager" | "worker"
     }
@@ -2775,6 +2927,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      curriculum_assignment_status: [
+        "assigned",
+        "in_progress",
+        "completed",
+        "overdue",
+      ],
       difficulty_level: ["beginner", "intermediate", "advanced"],
       user_role: ["admin", "manager", "worker"],
     },
