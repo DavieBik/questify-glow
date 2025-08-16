@@ -1189,6 +1189,48 @@ export type Database = {
           },
         ]
       }
+      notification_logs: {
+        Row: {
+          created_at: string
+          enrollment_id: string | null
+          error_message: string | null
+          id: string
+          notification_method: string
+          notification_type: string
+          organization_id: string
+          sent_at: string
+          status: string
+          template_used: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enrollment_id?: string | null
+          error_message?: string | null
+          id?: string
+          notification_method?: string
+          notification_type: string
+          organization_id?: string
+          sent_at?: string
+          status?: string
+          template_used?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enrollment_id?: string | null
+          error_message?: string | null
+          id?: string
+          notification_method?: string
+          notification_type?: string
+          organization_id?: string
+          sent_at?: string
+          status?: string
+          template_used?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       org_members: {
         Row: {
           id: string
@@ -1849,6 +1891,7 @@ export type Database = {
       user_course_enrollments: {
         Row: {
           course_id: string
+          due_at: string | null
           due_date: string | null
           enrolled_by: string | null
           enrollment_date: string
@@ -1859,6 +1902,7 @@ export type Database = {
         }
         Insert: {
           course_id: string
+          due_at?: string | null
           due_date?: string | null
           enrolled_by?: string | null
           enrollment_date?: string
@@ -1869,6 +1913,7 @@ export type Database = {
         }
         Update: {
           course_id?: string
+          due_at?: string | null
           due_date?: string | null
           enrolled_by?: string | null
           enrollment_date?: string
@@ -2353,6 +2398,20 @@ export type Database = {
       get_default_org_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_due_enrollments: {
+        Args: { days_ahead?: number }
+        Returns: {
+          course_id: string
+          course_title: string
+          days_until_due: number
+          due_at: string
+          enrollment_id: string
+          is_overdue: boolean
+          user_email: string
+          user_id: string
+          user_name: string
+        }[]
       }
       get_or_create_direct_conversation: {
         Args: { other_user_id: string }
