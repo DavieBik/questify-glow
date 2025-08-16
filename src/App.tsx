@@ -38,6 +38,8 @@ import AdminModuleEdit from "./pages/AdminModuleEdit";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminApprovals from "./pages/AdminApprovals";
 import AdminNotifications from "./pages/AdminNotifications";
+import AdminCurricula from "./pages/AdminCurricula";
+import CurriculaProgress from "./pages/CurriculaProgress";
 // Organization setup/settings removed in single-tenant mode
 import NotFound from "./pages/NotFound";
 
@@ -179,6 +181,13 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               } />
+            <Route path="/curricula" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CurriculaProgress />
+                </Layout>
+              </ProtectedRoute>
+            } />
               <Route path="/admin/dashboard" element={
                 <ProtectedRoute requireRole={['admin']}>
                   <Layout>
@@ -246,6 +255,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminNotifications />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/curricula" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminCurricula />
                   </Layout>
                 </ProtectedRoute>
               } />

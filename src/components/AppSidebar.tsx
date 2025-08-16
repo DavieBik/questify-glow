@@ -24,12 +24,14 @@ import {
   User,
   Building2,
   Clock,
-  Bell
+  Bell,
+  GraduationCap
 } from 'lucide-react';
 
 const navigationItems = [
   { title: 'Dashboard', url: '/', icon: Home },
   { title: 'Courses', url: '/courses', icon: BookOpen },
+  { title: 'Curricula', url: '/curricula', icon: GraduationCap },
   { title: 'Messages', url: '/messages', icon: MessageCircle },
   { title: 'Announcements', url: '/announcements', icon: Megaphone },
   { title: 'Group Projects', url: '/projects', icon: Users },
@@ -42,6 +44,7 @@ const adminItems = [
   { title: 'Admin Dashboard', url: '/admin/dashboard', icon: Settings },
   { title: 'Admin Users', url: '/admin/users', icon: Settings },
   { title: 'Course Management', url: '/admin/courses', icon: BookOpen },
+  { title: 'Curricula Management', url: '/admin/curricula', icon: GraduationCap },
   { title: 'Approvals', url: '/admin/approvals', icon: Clock },
   { title: 'Notifications', url: '/admin/notifications', icon: Bell },
   { title: 'Analytics', url: '/admin/analytics', icon: FileText },
