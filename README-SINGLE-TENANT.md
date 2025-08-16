@@ -1,334 +1,236 @@
-# SkillBridge - Single-Tenant Deployment Guide
+# Single-Tenant Learning Management System
 
-## Overview
+## Clone in 10 Minutes ⚡
 
-SkillBridge has been converted to a **single-tenant, clonable architecture**. Each deployment serves one organization but can be easily cloned for new clients by changing environment variables and redeploying.
+This guide will help you set up a complete learning management system with demo data in under 10 minutes.
 
-## Features
+### Prerequisites
 
-✅ **Single Organization**: All users belong to one organization  
-✅ **Easy Cloning**: Deploy new instances by changing `.env` and redeploying  
-✅ **Automatic Setup**: Users auto-assigned to the organization on signup  
-✅ **Centralized Config**: All org settings in one configuration file  
-✅ **Docker Ready**: Complete Docker setup for easy deployment  
-✅ **Seed Scripts**: Automated setup with sample data  
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [Supabase CLI](https://supabase.com/docs/guides/cli) 
+- Git
 
-## Quick Start
-
-### 1. Clone for a New Client
+### Step 1: Clone and Setup 📁
 
 ```bash
 # Clone the repository
-git clone [your-repo-url] skillbridge-client-name
-cd skillbridge-client-name
+git clone [YOUR_REPO_URL]
+cd [YOUR_PROJECT_NAME]
 
-# Copy environment template
-cp .env.example .env
-
-# Edit .env with client-specific settings
-nano .env
-```
-
-### 2. Configure Environment
-
-Edit `.env` with your client's details:
-
-```bash
-# Required: Generate a new UUID for each deployment
-ORG_ID=12345678-1234-1234-1234-123456789012
-
-# Organization details
-ORG_NAME=Acme Disability Services
-ORG_SLUG=acme-disability
-ORG_CONTACT_EMAIL=admin@acme.org.au
-
-# Application URLs
-APP_URL=https://acme.skillbridge.com.au
-APP_DOMAIN=acme.skillbridge.com.au
-
-# Branding
-ORG_PRIMARY_COLOR=#2563eb
-ORG_LOGO_URL=https://acme.org.au/logo.png
-
-# Admin user
-DEFAULT_ADMIN_EMAIL=admin@acme.org.au
-DEFAULT_ADMIN_PASSWORD=SecurePassword2024!
-
-# Supabase (create new project for each client)
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
-
-### 3. Deploy with Docker
-
-```bash
-# Build and start
-docker-compose up -d
-
-# Or use the npm script
-npm run docker:up
-```
-
-### 4. Initialize Data
-
-```bash
-# Seed with default organization and admin user
-npm run seed:single
-```
-
-### 5. Access Your Instance
-
-- **URL**: Your configured `APP_URL`
-- **Admin Login**: Your configured `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD`
-
-## Deployment Options
-
-### Option 1: Docker Compose (Recommended)
-
-```bash
-# Fresh deployment
-npm run docker:fresh
-
-# Update deployment
-npm run docker:build
-npm run docker:up
-```
-
-### Option 2: Manual Deployment
-
-```bash
 # Install dependencies
 npm install
-
-# Build for production
-npm run build
-
-# Serve with your web server (nginx, Apache, etc.)
 ```
 
-### Option 3: Cloud Platforms
+### Step 2: Create Supabase Project 🗃️
 
-- **Vercel**: Connect your repo and set environment variables
-- **Netlify**: Same as Vercel
-- **Railway**: Deploy directly from GitHub
-- **DigitalOcean App Platform**: Use the Docker setup
+1. **Create a new Supabase project** at [supabase.com/dashboard](https://supabase.com/dashboard)
+2. **Note down your project details:**
+   - Project URL (e.g., `https://abcdefghijk.supabase.co`)
+   - Project API Keys (anon public key and service_role key)
 
-## Environment Variables Reference
+### Step 3: Environment Setup 🔧
 
-### Required Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `ORG_ID` | Unique UUID for this deployment | `12345678-1234-1234-1234-123456789012` |
-| `ORG_NAME` | Organization display name | `Acme Disability Services` |
-| `ORG_CONTACT_EMAIL` | Main contact email | `admin@acme.org.au` |
-| `APP_URL` | Full application URL | `https://acme.skillbridge.com.au` |
-| `VITE_SUPABASE_URL` | Supabase project URL | `https://xyz.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJ...` |
-
-### Optional Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ORG_SLUG` | URL-friendly org name | Generated from `ORG_NAME` |
-| `ORG_PRIMARY_COLOR` | Brand color (hex) | `#059669` |
-| `ORG_LOGO_URL` | Logo image URL | Empty |
-| `MAX_USERS` | Maximum users allowed | `999` |
-| `ENABLE_SIGNUP` | Allow user registration | `true` |
-| `SINGLE_TENANT_STRICT` | Remove org columns from DB | `false` |
-
-## Scripts Reference
-
-| Command | Description |
-|---------|-------------|
-| `npm run seed:single` | Set up organization and admin user |
-| `npm run truncate:org` | Delete all data (keeps org structure) |
-| `npm run docker:up` | Start Docker containers |
-| `npm run docker:down` | Stop Docker containers |
-| `npm run docker:fresh` | Rebuild and restart containers |
-
-## Customization
-
-### Branding
-
-1. **Colors**: Set `ORG_PRIMARY_COLOR` in `.env`
-2. **Logo**: Upload logo and set `ORG_LOGO_URL`
-3. **Favicon**: Replace `public/favicon.ico`
-4. **App Title**: Update `index.html` title tag
-
-### Advanced Configuration
-
-Edit `src/config/organization.ts` for additional customization:
-
-- Email templates
-- Feature flags
-- Default user roles
-- System limits
-
-## Database Setup
-
-### New Supabase Project
-
-1. Create new Supabase project for each client
-2. Run the single-tenant migration (automatic on first deployment)
-3. Configure RLS policies (pre-configured)
-4. Set up authentication (pre-configured)
-
-### Existing Database
+Create a `.env.local` file in the project root:
 
 ```bash
-# Apply single-tenant migration
-# (This is automatic on first deployment)
+# Supabase Configuration
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+
+# Optional: Organization Name (fallback)
+VITE_ORG_NAME=Your Organization Name
+VITE_PRIMARY_COLOR=#059669
 ```
 
-## Security Considerations
+**⚠️ Important:** Replace the placeholder values with your actual Supabase project details.
 
-1. **Unique UUIDs**: Always generate new `ORG_ID` for each deployment
-2. **Separate Databases**: Use different Supabase projects for each client
-3. **Environment Isolation**: Never share `.env` files between deployments
-4. **Strong Passwords**: Use secure `DEFAULT_ADMIN_PASSWORD`
+### Step 4: Database Setup 🗄️
 
-## Troubleshooting
+```bash
+# Initialize Supabase locally
+supabase init
+
+# Link to your remote project (use your project reference ID)
+supabase link --project-ref your-project-id
+
+# Run migrations to create all tables
+supabase db reset
+
+# Seed the database with demo data
+node scripts/seed-single.js
+```
+
+The seeding will create:
+- ✅ Default organization
+- ✅ Admin user (admin@demo-org.com / admin123!)
+- ✅ 4 demo users (password123!)
+- ✅ 4 departments
+- ✅ 4 courses with modules
+- ✅ 2 curricula with assigned courses
+- ✅ Sample enrollments
+- ✅ Welcome announcements
+- ✅ Branding defaults
+
+### Step 5: Configure Supabase Auth 🔐
+
+In your Supabase dashboard, go to **Authentication > URL Configuration**:
+
+1. **Site URL:** `http://localhost:5173` (for development)
+2. **Redirect URLs:** Add these URLs:
+   ```
+   http://localhost:5173
+   http://localhost:5173/**
+   ```
+
+3. **Optional: Disable email confirmation** for faster testing:
+   - Go to **Authentication > Settings**
+   - Turn off "Enable email confirmations"
+
+### Step 6: Launch the Application 🚀
+
+```bash
+# Start the development server
+npm run dev
+
+# Or build and preview
+npm run build
+npm run preview
+```
+
+Visit `http://localhost:5173` and sign in with:
+- **Email:** admin@demo-org.com
+- **Password:** admin123!
+
+### Demo User Accounts 👥
+
+After seeding, you can also test with these demo accounts:
+
+| Email | Password | Role | Department |
+|-------|----------|------|------------|
+| admin@demo-org.com | admin123! | Admin | - |
+| manager@demo-org.com | password123! | Manager | Management |
+| john.smith@demo-org.com | password123! | Worker | Customer Service |
+| mary.jones@demo-org.com | password123! | Worker | Human Resources |
+| bob.davis@demo-org.com | password123! | Worker | Operations |
+
+## Production Deployment 🌐
+
+### Using Vercel (Recommended)
+
+1. **Connect your repository** to Vercel
+2. **Set environment variables** in Vercel dashboard:
+   ```
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_ANON_KEY=your-anon-key
+   VITE_ORG_NAME=Your Organization Name
+   VITE_PRIMARY_COLOR=#059669
+   ```
+3. **Update Supabase Auth URLs** with your Vercel domain:
+   - Site URL: `https://your-app.vercel.app`
+   - Redirect URLs: `https://your-app.vercel.app/**`
+
+### Using Other Platforms
+
+The app is a standard Vite React application and can be deployed to:
+- Netlify
+- Railway
+- DigitalOcean App Platform
+- AWS Amplify
+- Any static hosting service
+
+## Features Overview 🎯
+
+### For Administrators
+- **User Management:** Invite users, assign roles, manage departments
+- **Course Management:** Create courses, modules, quizzes
+- **Curricula:** Build structured learning paths
+- **Analytics:** Track progress, completion rates, performance
+- **Approvals:** Review and approve course completions
+- **Branding:** Customize colors, logos, external links
+
+### For Managers
+- **Team Dashboard:** Monitor team progress and compliance
+- **Approval Queue:** Process pending requests
+- **Reports:** Export compliance and progress data
+
+### For Learners
+- **Personal Dashboard:** Track progress and assignments
+- **Course Catalog:** Browse and enroll in courses
+- **Messaging:** Communicate with peers and instructors
+- **Certificates:** View and download completion certificates
+
+## Customization 🎨
+
+### Branding
+1. Sign in as admin
+2. Go to **Settings > Branding**
+3. Upload logo, set colors, add external links
+
+### Content
+1. **Courses:** Go to **Admin > Courses** to add your content
+2. **Curricula:** Create learning paths in **Admin > Curricula**
+3. **Users:** Invite real users in **Admin > Users**
+
+### Remove Demo Data
+To start fresh after testing:
+```bash
+# Reset database and re-run migrations only (no demo data)
+supabase db reset
+```
+
+## Troubleshooting 🔧
 
 ### Common Issues
 
-**Issue: Users can't access the system**
-```bash
-# Check if organization exists
-# Run seed script to ensure setup
-npm run seed:single
-```
+**"Invalid credentials" error:**
+- Verify your Supabase URL and keys in `.env.local`
+- Check that your project is active and billing is set up
 
-**Issue: Docker won't start**
-```bash
-# Check environment variables
-cat .env
+**"useBranding must be used within a BrandingProvider" error:**
+- This should be fixed in the latest version
+- Try refreshing the page
 
-# Rebuild containers
-npm run docker:fresh
-```
+**Auth redirect issues:**
+- Ensure redirect URLs are properly configured in Supabase
+- Check that Site URL matches your domain
 
-**Issue: Database connection fails**
-```bash
-# Verify Supabase credentials in .env
-# Check Supabase project status
-```
+**Database errors:**
+- Run `supabase db reset` to ensure all migrations are applied
+- Check Supabase dashboard for any policy or permission issues
 
-### Logs
+### Getting Help
 
-```bash
-# Docker logs
-docker-compose logs -f skillbridge-web
+1. Check the browser console for detailed error messages
+2. Verify Supabase project status in the dashboard
+3. Ensure all environment variables are set correctly
 
-# Application logs
-# Check browser console for frontend errors
-```
+## Security Notes 🔒
 
-## Migration from Multi-Tenant
+### Development
+- The seeded admin password should be changed immediately
+- Demo users should be deleted before production use
 
-If migrating from the old multi-tenant version:
+### Production
+- Enable email confirmation for user registration
+- Set up proper RLS policies for your use case
+- Configure proper CORS settings
+- Use strong passwords for admin accounts
+- Enable 2FA where possible
 
-1. **Backup Data**: Export all important data
-2. **Update Code**: Pull latest single-tenant changes
-3. **Configure Environment**: Set up `.env` as above
-4. **Run Migration**: The single-tenant migration runs automatically
-5. **Import Data**: Re-import your organization's data
+## Next Steps 📈
 
-## Support
+After successful setup:
 
-For technical support:
-
-1. Check this README first
-2. Review application logs
-3. Check Supabase project logs
-4. Contact development team with:
-   - Environment configuration (without secrets)
-   - Error messages
-   - Steps to reproduce
-
-## Development
-
-### Local Development
-
-```bash
-# Install dependencies
-npm install
-
-# Set up environment
-cp .env.example .env
-# Edit .env with development values
-
-# Start development server
-npm run dev
-
-# Run with specific organization
-ORG_NAME="Dev Org" npm run dev
-```
-
-### Contributing
-
-1. Follow existing code patterns
-2. Update documentation for any changes
-3. Test with fresh deployments
-4. Ensure Docker builds work
+1. **Change admin password** for security
+2. **Add your organization's branding**
+3. **Create your actual courses and content**
+4. **Invite real users** and delete demo accounts
+5. **Configure email settings** for notifications
+6. **Set up backups** for your Supabase project
 
 ---
 
-## 📋 How to Clone for a New Client (5 Steps)
+**🎉 Congratulations!** You now have a fully functional learning management system. The platform is ready for customization and production use.
 
-1. **Copy repository and update environment**:
-   ```bash
-   # Clone to new directory
-   git clone <your-repo-url> client-name-skillbridge
-   cd client-name-skillbridge
-   
-   # Update .env with new client details
-   cp .env.example .env
-   # Set ORG_ID to a new UUID
-   # Update ORG_NAME, ORG_CONTACT_EMAIL, etc.
-   ```
-
-2. **Generate new organization UUID**:
-   ```bash
-   # Generate a new UUID for the client
-   node -e "console.log(require('crypto').randomUUID())"
-   # Update ORG_ID in .env with this new UUID
-   ```
-
-3. **Update app_settings in database**:
-   ```sql
-   -- Connect to your Supabase project and run:
-   UPDATE app_settings SET default_org_id = 'NEW_UUID_HERE' WHERE id = 1;
-   -- The FK constraint ensures the UUID exists in organizations table
-   ```
-
-4. **Run seed script**:
-   ```bash
-   npm run seed:single
-   ```
-
-5. **Deploy and test**:
-   ```bash
-   # Deploy to your hosting platform
-   # Test signup, course creation, and all core features
-   ```
-
-**Quick Go/No-Go Test Plan:**
-- ✅ Signup assigns correct ORG_ID automatically
-- ✅ CRUD operations (courses, departments) use default org
-- ✅ Bad insert attempts with different org ID are rejected
-- ✅ All pages load without org context errors  
-- ✅ RLS policies enforce single-tenant access
-- ✅ Fresh admin can create and access content
-
-## Success Checklist
-
-✅ Environment variables configured  
-✅ Docker containers running  
-✅ Seed script executed  
-✅ Admin user can log in  
-✅ Users can sign up and are auto-assigned to organization  
-✅ Courses and content accessible  
-✅ Branding appears correctly  
-
-**Your SkillBridge instance is ready! 🚀**
+For advanced configuration and features, refer to the main documentation or contact support.
