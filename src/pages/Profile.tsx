@@ -58,24 +58,35 @@ const Profile = () => {
   const fetchProfile = async () => {
     if (!user) return;
 
+    console.debug('[Profile] fetching profile data...', { userId: user.id });
+
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Get profile data from auth user metadata instead of users table
+      const profileFromAuth: UserProfile = {
+        id: user.id,
+        email: user.email || '',
+        first_name: user.user_metadata?.first_name || '',
+        last_name: user.user_metadata?.last_name || '',
+        phone: user.user_metadata?.phone || '',
+        department: user.user_metadata?.department || '',
+        role: 'learner', // Default role since we don't have role management in this context
+        employee_id: user.user_metadata?.employee_id || '',
+        is_active: true,
+        created_at: user.created_at || new Date().toISOString(),
+        last_login: user.last_sign_in_at || undefined,
+      };
 
-      if (error) throw error;
-
-      setProfile(data);
+      console.debug('[Profile] profile data loaded:', profileFromAuth);
+      
+      setProfile(profileFromAuth);
       setProfileData({
-        first_name: data.first_name || '',
-        last_name: data.last_name || '',
-        phone: data.phone || '',
-        department: data.department || '',
+        first_name: profileFromAuth.first_name || '',
+        last_name: profileFromAuth.last_name || '',
+        phone: profileFromAuth.phone || '',
+        department: profileFromAuth.department || '',
       });
     } catch (error: any) {
-      console.error('Error fetching profile:', error);
+      console.error('[Profile] Error fetching profile:', error);
       toast.error('Failed to load profile data');
     }
   };
@@ -86,15 +97,15 @@ const Profile = () => {
     setError(null);
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({
+      // Update auth user metadata instead of users table
+      const { error } = await supabase.auth.updateUser({
+        data: {
           first_name: profileData.first_name,
           last_name: profileData.last_name,
           phone: profileData.phone,
           department: profileData.department,
-        })
-        .eq('id', user!.id);
+        }
+      });
 
       if (error) throw error;
 
