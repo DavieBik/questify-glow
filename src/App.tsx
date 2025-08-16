@@ -10,7 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout";
 
 // Pages
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./routes/Dashboard";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import PasswordReset from "./pages/PasswordReset";
@@ -73,13 +73,8 @@ const App = () => (
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            } />
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/courses" element={
               <ProtectedRoute>
                 <Layout>
