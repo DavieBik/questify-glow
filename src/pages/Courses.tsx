@@ -7,9 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Clock, Edit, Trash2, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { CourseCard } from '@/components/course/CourseCard';
+import { CourseCardSkeleton } from '@/components/ui/loading-skeleton';
+import { CoursesEmptyState } from '@/components/ui/empty-state';
+import { ManagerOrAdmin } from '@/components/auth/RoleGuard';
+import { handleSupabaseError, withErrorHandling } from '@/utils/error-handling';
 
 interface Course {
   id: string;
@@ -27,8 +31,10 @@ interface Course {
 
 const Courses = () => {
   const { canEdit, user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const [formatFilter, setFormatFilter] = useState('all');
@@ -39,7 +45,8 @@ const Courses = () => {
   }, [user]);
 
   const fetchCourses = async () => {
-    try {
+    setError(null);
+    const result = await withErrorHandling(async () => {
       const { data: coursesData, error } = await supabase
         .from('courses')
         .select('*')
@@ -66,16 +73,17 @@ const Courses = () => {
       } else {
         setCourses(coursesData || []);
       }
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      toast.error('Failed to load courses');
-    } finally {
-      setLoading(false);
+      return coursesData;
+    });
+
+    if (!result) {
+      setError('Failed to load courses');
     }
+    setLoading(false);
   };
 
   const enrollInCourse = async (courseId: string) => {
-    try {
+    await withErrorHandling(async () => {
       const { error } = await supabase
         .from('user_course_enrollments')
         .insert({
@@ -87,10 +95,7 @@ const Courses = () => {
 
       toast.success('Successfully enrolled in course!');
       fetchCourses(); // Refresh to update enrollment status
-    } catch (error) {
-      console.error('Error enrolling in course:', error);
-      toast.error('Failed to enroll in course');
-    }
+    });
   };
 
   const filteredCourses = courses.filter(course => {
@@ -114,8 +119,37 @@ const Courses = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Courses</h1>
+            <p className="text-muted-foreground">
+              Discover and enroll in courses to enhance your skills
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CourseCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Courses</h1>
+          <p className="text-muted-foreground">
+            Discover and enroll in courses to enhance your skills
+          </p>
+        </div>
+        <CoursesEmptyState 
+          canCreate={canEdit}
+          onCreateCourse={() => navigate('/admin/courses/create')}
+        />
       </div>
     );
   }
@@ -130,14 +164,14 @@ const Courses = () => {
             Discover and enroll in courses to enhance your skills
           </p>
         </div>
-        {canEdit && (
+        <ManagerOrAdmin>
           <Button asChild>
-            <Link to="/courses/new">
+            <Link to="/admin/courses/create">
               <Plus className="h-4 w-4 mr-2" />
               Add Course
             </Link>
           </Button>
-        )}
+        </ManagerOrAdmin>
       </div>
 
       {/* Filters */}
@@ -210,7 +244,14 @@ const Courses = () => {
         ))}
       </div>
 
-      {filteredCourses.length === 0 && (
+      {filteredCourses.length === 0 && courses.length === 0 && (
+        <CoursesEmptyState 
+          canCreate={canEdit}
+          onCreateCourse={() => navigate('/admin/courses/create')}
+        />
+      )}
+
+      {filteredCourses.length === 0 && courses.length > 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No courses found matching your criteria.</p>
         </div>

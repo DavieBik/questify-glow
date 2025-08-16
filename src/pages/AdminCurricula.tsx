@@ -9,6 +9,10 @@ import { Search, Plus, Edit, Users, BookOpen, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { AssignCurriculumDialog } from '@/components/curriculum/AssignCurriculumDialog';
+import { CurriculumCardSkeleton } from '@/components/ui/loading-skeleton';
+import { CurriculaEmptyState, ErrorEmptyState } from '@/components/ui/empty-state';
+import { RoleGuard, ManagerOrAdmin } from '@/components/auth/RoleGuard';
+import { withErrorHandling } from '@/utils/error-handling';
 
 interface Curriculum {
   id: string;
@@ -24,6 +28,7 @@ const AdminCurricula = () => {
   const { canEdit } = useAuth();
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCurriculum, setSelectedCurriculum] = useState<Curriculum | null>(null);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
@@ -33,7 +38,8 @@ const AdminCurricula = () => {
   }, []);
 
   const fetchCurricula = async () => {
-    try {
+    setError(null);
+    const result = await withErrorHandling(async () => {
       const { data: curriculaData, error } = await supabase
         .from('curricula')
         .select(`
@@ -52,20 +58,17 @@ const AdminCurricula = () => {
       })) || [];
 
       setCurricula(formattedCurricula);
-    } catch (error) {
-      console.error('Error fetching curricula:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load curricula",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      return formattedCurricula;
+    });
+
+    if (!result) {
+      setError('Failed to load curricula');
     }
+    setLoading(false);
   };
 
   const toggleCurriculumStatus = async (curriculumId: string, isActive: boolean) => {
-    try {
+    await withErrorHandling(async () => {
       const { error } = await supabase
         .from('curricula')
         .update({ is_active: !isActive })
@@ -79,14 +82,7 @@ const AdminCurricula = () => {
       });
       
       fetchCurricula();
-    } catch (error) {
-      console.error('Error updating curriculum status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update curriculum status",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   const filteredCurricula = curricula.filter(curriculum =>
@@ -101,14 +97,47 @@ const AdminCurricula = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Curricula Management</h1>
+            <p className="text-muted-foreground">
+              Create and manage learning curricula for your organization
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CurriculumCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Curricula Management</h1>
+            <p className="text-muted-foreground">
+              Create and manage learning curricula for your organization
+            </p>
+          </div>
+        </div>
+        <ErrorEmptyState 
+          title="Failed to load curricula"
+          description="We encountered an error while loading your curricula. Please try again."
+          onRetry={fetchCurricula}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <RoleGuard allowedRoles={['admin', 'manager']}>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -117,14 +146,14 @@ const AdminCurricula = () => {
             Create and manage learning curricula for your organization
           </p>
         </div>
-        {canEdit && (
+        <ManagerOrAdmin>
           <Button asChild>
             <Link to="/admin/curricula/new">
               <Plus className="h-4 w-4 mr-2" />
               Create Curriculum
             </Link>
           </Button>
-        )}
+        </ManagerOrAdmin>
       </div>
 
       {/* Search */}
@@ -180,35 +209,33 @@ const AdminCurricula = () => {
 
               <div className="flex items-center justify-between pt-2">
                 <div className="flex gap-2">
-                  {canEdit && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleCurriculumStatus(curriculum.id, curriculum.is_active)}
-                      >
-                        {curriculum.is_active ? 'Deactivate' : 'Activate'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAssignCurriculum(curriculum)}
-                      >
-                        <Users className="h-4 w-4 mr-1" />
-                        Assign
-                      </Button>
-                    </>
-                  )}
+                  <ManagerOrAdmin>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleCurriculumStatus(curriculum.id, curriculum.is_active)}
+                    >
+                      {curriculum.is_active ? 'Deactivate' : 'Activate'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAssignCurriculum(curriculum)}
+                    >
+                      <Users className="h-4 w-4 mr-1" />
+                      Assign
+                    </Button>
+                  </ManagerOrAdmin>
                 </div>
                 <div className="flex gap-2">
-                  {canEdit && (
+                  <ManagerOrAdmin>
                     <Button asChild size="sm" variant="outline">
                       <Link to={`/admin/curricula/${curriculum.id}/edit`}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
                       </Link>
                     </Button>
-                  )}
+                  </ManagerOrAdmin>
                   <Button asChild size="sm">
                     <Link to={`/admin/curricula/${curriculum.id}`}>
                       View
@@ -221,30 +248,38 @@ const AdminCurricula = () => {
         ))}
       </div>
 
-      {filteredCurricula.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">No curricula found matching your criteria.</p>
-          {canEdit && (
-            <Button asChild>
-              <Link to="/admin/curricula/new">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Curriculum
-              </Link>
-            </Button>
-          )}
-        </div>
-      )}
+        {filteredCurricula.length === 0 && curricula.length === 0 && (
+          <CurriculaEmptyState 
+            canCreate={canEdit}
+            onCreateCurriculum={() => window.location.href = '/admin/curricula/new'}
+          />
+        )}
 
-      {/* Assign Curriculum Dialog */}
-      {selectedCurriculum && (
-        <AssignCurriculumDialog
-          curriculum={selectedCurriculum}
-          open={showAssignDialog}
-          onOpenChange={setShowAssignDialog}
-          onSuccess={fetchCurricula}
-        />
-      )}
-    </div>
+        {filteredCurricula.length === 0 && curricula.length > 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">No curricula found matching your criteria.</p>
+            <ManagerOrAdmin>
+              <Button asChild>
+                <Link to="/admin/curricula/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Curriculum
+                </Link>
+              </Button>
+            </ManagerOrAdmin>
+          </div>
+        )}
+
+        {/* Assign Curriculum Dialog */}
+        {selectedCurriculum && (
+          <AssignCurriculumDialog
+            curriculum={selectedCurriculum}
+            open={showAssignDialog}
+            onOpenChange={setShowAssignDialog}
+            onSuccess={fetchCurricula}
+          />
+        )}
+      </div>
+    </RoleGuard>
   );
 };
 

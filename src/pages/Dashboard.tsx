@@ -15,6 +15,9 @@ import { RequiredCoursesSection } from '@/components/dashboard/RequiredCoursesSe
 import { OptionalCoursesSection } from '@/components/dashboard/OptionalCoursesSection';
 import { SelfAssignedSection } from '@/components/dashboard/SelfAssignedSection';
 import { TeamViewWidget } from '@/components/dashboard/TeamViewWidget';
+import { DashboardStatsSkeleton } from '@/components/ui/loading-skeleton';
+import { ManagerOrAdmin } from '@/components/auth/RoleGuard';
+import { withErrorHandling } from '@/utils/error-handling';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -49,7 +52,7 @@ const Dashboard = () => {
   }, [user]);
 
   const fetchDashboardData = async () => {
-    try {
+    await withErrorHandling(async () => {
       // Fetch enrollment stats
       const { data: enrollments, error: enrollmentError } = await supabase
         .from('user_course_enrollments')
@@ -103,11 +106,8 @@ const Dashboard = () => {
         .slice(0, 3) || [];
 
       setRecentCourses(recent);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
+    });
+    setLoading(false);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -121,8 +121,14 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Learning Dashboard</h1>
+          <p className="text-muted-foreground">
+            Track your progress and continue your learning journey
+          </p>
+        </div>
+        <DashboardStatsSkeleton />
       </div>
     );
   }
@@ -210,7 +216,9 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <SelfAssignedSection />
-        {(isManager || isAdmin) && <TeamViewWidget />}
+        <ManagerOrAdmin>
+          <TeamViewWidget />
+        </ManagerOrAdmin>
       </div>
 
       {/* Gamification Section */}

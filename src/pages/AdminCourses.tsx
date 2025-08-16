@@ -8,6 +8,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { Plus, Edit, Eye, Users, Upload } from 'lucide-react';
 import { ContentImportDialog } from '@/components/content/ContentImportDialog';
+import { CourseCardSkeleton, DashboardStatsSkeleton } from '@/components/ui/loading-skeleton';
+import { CoursesEmptyState, ErrorEmptyState } from '@/components/ui/empty-state';
+import { RoleGuard } from '@/components/auth/RoleGuard';
+import { withErrorHandling } from '@/utils/error-handling';
 
 interface Course {
   id: string;
@@ -26,6 +30,7 @@ interface Course {
 const AdminCourses: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,7 +38,8 @@ const AdminCourses: React.FC = () => {
   }, []);
 
   const fetchCourses = async () => {
-    try {
+    setError(null);
+    const result = await withErrorHandling(async () => {
       const { data, error } = await supabase
         .from('courses')
         .select(`
@@ -50,20 +56,17 @@ const AdminCourses: React.FC = () => {
       })) || [];
 
       setCourses(coursesWithEnrollments);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch courses",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      return coursesWithEnrollments;
+    });
+
+    if (!result) {
+      setError('Failed to load courses');
     }
+    setLoading(false);
   };
 
   const toggleCourseStatus = async (courseId: string, isActive: boolean) => {
-    try {
+    await withErrorHandling(async () => {
       const { error } = await supabase
         .from('courses')
         .update({ is_active: isActive })
@@ -81,14 +84,7 @@ const AdminCourses: React.FC = () => {
         title: "Success",
         description: `Course ${isActive ? 'activated' : 'deactivated'} successfully`,
       });
-    } catch (error) {
-      console.error('Error updating course status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update course status",
-        variant: "destructive",
-      });
-    }
+    });
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -102,14 +98,48 @@ const AdminCourses: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Course Management</h1>
+            <p className="text-muted-foreground">
+              Manage and organize learning courses for your platform.
+            </p>
+          </div>
+        </div>
+        <DashboardStatsSkeleton />
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <CourseCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Course Management</h1>
+            <p className="text-muted-foreground">
+              Manage and organize learning courses for your platform.
+            </p>
+          </div>
+        </div>
+        <ErrorEmptyState 
+          title="Failed to load courses"
+          description="We encountered an error while loading your courses. Please try again."
+          onRetry={fetchCourses}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <RoleGuard allowedRoles={['admin', 'manager']}>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Course Management</h1>
@@ -243,20 +273,14 @@ const AdminCourses: React.FC = () => {
         ))}
       </div>
 
-      {courses.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No courses available</p>
-            <Button asChild>
-              <Link to="/admin/courses/create">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Course
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        {courses.length === 0 && (
+          <CoursesEmptyState 
+            canCreate={true}
+            onCreateCourse={() => window.location.href = '/admin/courses/create'}
+          />
+        )}
+      </div>
+    </RoleGuard>
   );
 };
 
