@@ -42,6 +42,7 @@ const navigationItems = [
 
 const adminItems = [
   { title: 'Admin Dashboard', url: '/admin/dashboard', icon: Settings },
+  { title: 'Manager Dashboard', url: '/manager/dashboard', icon: Settings },
   { title: 'Admin Users', url: '/admin/users', icon: Settings },
   { title: 'Course Management', url: '/admin/courses', icon: BookOpen },
   { title: 'Curricula Management', url: '/admin/curricula', icon: GraduationCap },

@@ -2711,6 +2711,19 @@ export type Database = {
           user_name: string
         }[]
       }
+      rpc_approvals_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          course_title: string
+          id: string
+          request_type: string
+          requested_at: string
+          reviewer_notes: string
+          status: string
+          user_email: string
+          user_name: string
+        }[]
+      }
       rpc_bulk_assign: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -2739,6 +2752,15 @@ export type Database = {
           bucket: string
           bucket_type: string
           completions: number
+        }[]
+      }
+      rpc_manager_dashboard_metrics: {
+        Args: { date_from?: string; date_to?: string }
+        Returns: {
+          active_learners_7d: number
+          completion_rate_30d: number
+          due_soon_enrollments: number
+          overdue_enrollments: number
         }[]
       }
       rpc_module_metrics: {
@@ -2785,6 +2807,26 @@ export type Database = {
           role: string
           skills_gaps: string[]
           total_users: number
+        }[]
+      }
+      rpc_team_compliance: {
+        Args: {
+          date_from?: string
+          date_to?: string
+          department_filter?: string
+        }
+        Returns: {
+          assigned_courses: number
+          completed_courses: number
+          completion_percentage: number
+          department: string
+          email: string
+          last_activity: string
+          overdue_courses: number
+          required_courses: number
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          user_name: string
         }[]
       }
       text2ltree: {

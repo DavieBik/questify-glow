@@ -29,6 +29,7 @@ import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
 import Badges from "./pages/Badges";
 import AdminDashboard from "./pages/AdminDashboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCourses from "./pages/AdminCourses";
 import AdminCourseCreate from "./pages/AdminCourseCreate";
@@ -192,6 +193,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin']}>
                   <Layout>
                     <AdminDashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/manager/dashboard" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <ManagerDashboard />
                   </Layout>
                 </ProtectedRoute>
               } />
