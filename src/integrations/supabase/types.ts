@@ -182,6 +182,57 @@ export type Database = {
           },
         ]
       }
+      approvals: {
+        Row: {
+          course_id: string
+          created_at: string
+          enrollment_id: string
+          id: string
+          organization_id: string
+          request_type: string
+          requested_at: string
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          enrollment_id: string
+          id?: string
+          organization_id?: string
+          request_type?: string
+          requested_at?: string
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          enrollment_id?: string
+          id?: string
+          organization_id?: string
+          request_type?: string
+          requested_at?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           created_at: string
@@ -2265,6 +2316,15 @@ export type Database = {
         Args: { new_org_id: string; target_user_id: string }
         Returns: boolean
       }
+      create_approval_request: {
+        Args: {
+          p_course_id: string
+          p_enrollment_id: string
+          p_request_type?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       create_org: {
         Args: { p_contact_email: string; p_name: string; p_slug: string }
         Returns: {
@@ -2407,6 +2467,10 @@ export type Database = {
       nlevel: {
         Args: { "": unknown }
         Returns: number
+      }
+      process_approval: {
+        Args: { p_approval_id: string; p_notes?: string; p_status: string }
+        Returns: boolean
       }
       refresh_all_analytics: {
         Args: Record<PropertyKey, never>
