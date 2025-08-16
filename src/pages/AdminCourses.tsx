@@ -89,10 +89,10 @@ const AdminCourses: React.FC = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-500/10 text-green-700 border-green-200';
-      case 'intermediate': return 'bg-yellow-500/10 text-yellow-700 border-yellow-200';
-      case 'advanced': return 'bg-red-500/10 text-red-700 border-red-200';
-      default: return 'bg-gray-500/10 text-gray-700 border-gray-200';
+      case 'beginner': return 'bg-accent/20 text-accent border-accent';
+      case 'intermediate': return 'bg-primary/20 text-primary border-primary';
+      case 'advanced': return 'bg-destructive/20 text-destructive border-destructive';
+      default: return 'bg-secondary text-secondary-foreground border-border';
     }
   };
 
@@ -157,7 +157,7 @@ const AdminCourses: React.FC = () => {
               }
               onImportComplete={fetchCourses}
             />
-            <Button asChild>
+            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link to="/admin/courses/create">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Course
@@ -254,13 +254,13 @@ const AdminCourses: React.FC = () => {
                   )}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="border-primary/20 hover:bg-primary/10">
                     <Link to={`/courses/${course.id}`}>
                       <Eye className="h-4 w-4 mr-1" />
                       View
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="border-secondary/20 hover:bg-secondary/10">
                     <Link to={`/admin/courses/${course.id}/edit`}>
                       <Edit className="h-4 w-4 mr-1" />
                       Edit

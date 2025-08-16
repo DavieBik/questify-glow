@@ -110,10 +110,10 @@ const Courses = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'beginner': return 'bg-accent/20 text-accent border-accent';
+      case 'intermediate': return 'bg-primary/20 text-primary border-primary';
+      case 'advanced': return 'bg-destructive/20 text-destructive border-destructive';
+      default: return 'bg-secondary text-secondary-foreground border-border';
     }
   };
 
@@ -165,7 +165,7 @@ const Courses = () => {
           </p>
         </div>
         <ManagerOrAdmin>
-          <Button asChild>
+          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Link to="/admin/courses/create">
               <Plus className="h-4 w-4 mr-2" />
               Add Course

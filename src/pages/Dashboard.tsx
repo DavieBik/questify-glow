@@ -113,10 +113,10 @@ const Dashboard = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'beginner': return 'bg-accent/20 text-accent border-accent';
+      case 'intermediate': return 'bg-primary/20 text-primary border-primary';
+      case 'advanced': return 'bg-destructive/20 text-destructive border-destructive';
+      default: return 'bg-secondary text-secondary-foreground border-border';
     }
   };
 
@@ -233,24 +233,24 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button asChild variant="outline" className="h-auto p-4">
+            <Button asChild variant="outline" className="h-auto p-4 border-primary/20 hover:bg-primary/10">
               <Link to="/courses" className="flex flex-col items-center gap-2">
-                <BookOpen className="h-6 w-6" />
+                <BookOpen className="h-6 w-6 text-primary" />
                 <span>Browse Courses</span>
               </Link>
             </Button>
             
-            <Button asChild variant="outline" className="h-auto p-4">
+            <Button asChild variant="outline" className="h-auto p-4 border-accent/20 hover:bg-accent/10">
               <Link to="/certificates" className="flex flex-col items-center gap-2">
-                <Award className="h-6 w-6" />
+                <Award className="h-6 w-6 text-accent" />
                 <span>View Certificates</span>
               </Link>
             </Button>
             
             <ManagerOrAdmin>
-              <Button asChild variant="outline" className="h-auto p-4">
+              <Button asChild variant="outline" className="h-auto p-4 border-secondary/20 hover:bg-secondary/10">
                 <Link to="/admin/analytics" className="flex flex-col items-center gap-2">
-                  <TrendingUp className="h-6 w-6" />
+                  <TrendingUp className="h-6 w-6 text-secondary-foreground" />
                   <span>Team Reports</span>
                 </Link>
               </Button>

@@ -125,7 +125,7 @@ const Certificates = () => {
           <Card key={certificate.id} className="flex flex-col">
             <CardHeader>
               <div className="flex items-start justify-between">
-                <Award className="h-8 w-8 text-yellow-600 mb-2" />
+                <Award className="h-8 w-8 text-accent mb-2" />
                 <div className="flex flex-col gap-1">
                   <Badge 
                     variant={certificate.is_valid ? "default" : "destructive"}
@@ -165,7 +165,7 @@ const Certificates = () => {
                     <span className="text-muted-foreground">Expires:</span>
                     <div className="flex items-center">
                       <Calendar className="h-3 w-3 mr-1" />
-                      <span className={isExpired(certificate.expiry_date) ? 'text-red-600' : ''}>
+                      <span className={isExpired(certificate.expiry_date) ? 'text-destructive' : ''}>
                         {new Date(certificate.expiry_date).toLocaleDateString()}
                       </span>
                     </div>
@@ -174,7 +174,7 @@ const Certificates = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button asChild size="sm" className="flex-1">
+                <Button asChild size="sm" className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link to={`/certificates/${certificate.id}`}>
                     <Eye className="h-4 w-4 mr-1" />
                     View
@@ -207,7 +207,7 @@ const Certificates = () => {
             }
           </p>
           {!searchTerm && (
-            <Button asChild>
+            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link to="/courses">Browse Courses</Link>
             </Button>
           )}

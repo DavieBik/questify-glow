@@ -199,9 +199,9 @@ const Profile = () => {
                 {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
               </Badge>
               {profile.is_active ? (
-                <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
+                <Badge variant="outline" className="text-accent border-accent">Active</Badge>
               ) : (
-                <Badge variant="outline" className="text-red-600 border-red-600">Inactive</Badge>
+                <Badge variant="outline" className="text-destructive border-destructive">Inactive</Badge>
               )}
             </div>
           </div>
@@ -328,7 +328,7 @@ const Profile = () => {
                     </Alert>
                   )}
 
-                  <Button type="submit" disabled={isLoading}>
+                  <Button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     {isLoading ? 'Updating...' : 'Update Profile'}
                   </Button>
                 </form>
@@ -406,7 +406,7 @@ const Profile = () => {
                     </Alert>
                   )}
 
-                  <Button type="submit" disabled={isLoading}>
+                  <Button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90">
                     {isLoading ? 'Updating...' : 'Change Password'}
                   </Button>
                 </form>
