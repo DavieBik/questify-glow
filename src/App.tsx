@@ -36,6 +36,7 @@ import AdminCourseEdit from "./pages/AdminCourseEdit";
 import AdminModuleCreate from "./pages/AdminModuleCreate";
 import AdminModuleEdit from "./pages/AdminModuleEdit";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminApprovals from "./pages/AdminApprovals";
 // Organization setup/settings removed in single-tenant mode
 import NotFound from "./pages/NotFound";
 
@@ -230,6 +231,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminAnalytics />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/approvals" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminApprovals />
                   </Layout>
                 </ProtectedRoute>
               } />

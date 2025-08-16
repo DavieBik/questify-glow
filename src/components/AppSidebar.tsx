@@ -22,7 +22,8 @@ import {
   Users,
   Settings,
   User,
-  Building2
+  Building2,
+  Clock
 } from 'lucide-react';
 
 const navigationItems = [
@@ -40,6 +41,7 @@ const adminItems = [
   { title: 'Admin Dashboard', url: '/admin/dashboard', icon: Settings },
   { title: 'Admin Users', url: '/admin/users', icon: Settings },
   { title: 'Course Management', url: '/admin/courses', icon: BookOpen },
+  { title: 'Approvals', url: '/admin/approvals', icon: Clock },
   { title: 'Analytics', url: '/admin/analytics', icon: FileText },
 ];
 
