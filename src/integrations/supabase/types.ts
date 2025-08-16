@@ -741,7 +741,9 @@ export type Database = {
           created_by: string | null
           description: string | null
           difficulty: Database["public"]["Enums"]["difficulty_level"]
+          duration_minutes: number | null
           estimated_duration_minutes: number | null
+          format: string | null
           id: string
           is_active: boolean
           is_mandatory: boolean
@@ -763,7 +765,9 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          duration_minutes?: number | null
           estimated_duration_minutes?: number | null
+          format?: string | null
           id?: string
           is_active?: boolean
           is_mandatory?: boolean
@@ -785,7 +789,9 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          duration_minutes?: number | null
           estimated_duration_minutes?: number | null
+          format?: string | null
           id?: string
           is_active?: boolean
           is_mandatory?: boolean
@@ -1111,6 +1117,7 @@ export type Database = {
       }
       modules: {
         Row: {
+          body: string | null
           content_type: string
           content_url: string | null
           course_id: string
@@ -1127,6 +1134,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          body?: string | null
           content_type: string
           content_url?: string | null
           course_id: string
@@ -1143,6 +1151,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          body?: string | null
           content_type?: string
           content_url?: string | null
           course_id?: string
