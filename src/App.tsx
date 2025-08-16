@@ -62,7 +62,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <BrandingProvider>
-          <Routes>
+              <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/reset-password" element={<PasswordReset />} />
             {/* Organization setup/settings removed in single-tenant mode */}
