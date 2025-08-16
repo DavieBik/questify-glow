@@ -298,7 +298,7 @@ const GroupProjects: React.FC = () => {
           </p>
         </div>
         {canEdit && (
-          <Button onClick={() => setCreateProjectOpen(true)}>
+          <Button onClick={() => setCreateProjectOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             Create Project
           </Button>
@@ -306,10 +306,10 @@ const GroupProjects: React.FC = () => {
       </div>
 
       <Tabs defaultValue="available" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="available">Available Projects</TabsTrigger>
-          <TabsTrigger value="my-teams">My Teams</TabsTrigger>
-          <TabsTrigger value="submissions">Submissions</TabsTrigger>
+        <TabsList className="bg-secondary">
+          <TabsTrigger value="available" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Available Projects</TabsTrigger>
+          <TabsTrigger value="my-teams" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">My Teams</TabsTrigger>
+          <TabsTrigger value="submissions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Submissions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="available" className="space-y-4">

@@ -227,13 +227,13 @@ const Announcements: React.FC = () => {
       case 'urgent':
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
       case 'high':
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+        return <AlertTriangle className="h-4 w-4 text-destructive" />;
       case 'normal':
-        return <Info className="h-4 w-4 text-blue-500" />;
+        return <Info className="h-4 w-4 text-primary" />;
       case 'low':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-accent" />;
       default:
-        return <Info className="h-4 w-4 text-blue-500" />;
+        return <Info className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -280,7 +280,7 @@ const Announcements: React.FC = () => {
           </p>
         </div>
         {canEdit && (
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button onClick={() => setCreateDialogOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             Create Announcement
           </Button>
@@ -307,8 +307,8 @@ const Announcements: React.FC = () => {
           {announcements.map((announcement) => (
             <Card 
               key={announcement.id}
-              className={`transition-all hover:shadow-md cursor-pointer ${
-                !announcement.is_read ? 'ring-2 ring-primary/20' : ''
+              className={`transition-all hover:shadow-md cursor-pointer border-border ${
+                !announcement.is_read ? 'ring-2 ring-accent/30 border-accent/20' : ''
               } ${
                 isExpired(announcement.expires_at) ? 'opacity-60' : ''
               }`}
@@ -323,7 +323,7 @@ const Announcements: React.FC = () => {
                         <Pin className="h-4 w-4 text-primary" />
                       )}
                       {!announcement.is_read && (
-                        <div className="w-2 h-2 bg-primary rounded-full" />
+                        <div className="w-2 h-2 bg-accent rounded-full" />
                       )}
                     </div>
                     <div className="flex-1">
