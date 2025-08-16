@@ -25,10 +25,12 @@ interface Course {
   description: string;
   short_description: string;
   difficulty: string;
+  duration_minutes: number;
   estimated_duration_minutes: number;
   category: string;
   thumbnail_url: string;
   video_url: string;
+  format: string;
   is_mandatory: boolean;
   ndis_compliant: boolean;
 }
@@ -37,6 +39,8 @@ interface Module {
   id: string;
   title: string;
   description: string;
+  body: string;
+  content_url: string;
   order_index: number;
   content_type: string;
   is_required: boolean;
@@ -163,6 +167,21 @@ const CourseDetail = () => {
     }
   };
 
+  const getFormatBadge = (format: string) => {
+    switch (format) {
+      case 'online': return 'Online';
+      case 'instructor_led': return 'Instructor Led';
+      case 'external': return 'External';
+      default: return format;
+    }
+  };
+
+  const handleLaunchModule = (module: Module) => {
+    if (module.content_url) {
+      window.open(module.content_url, '_blank');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -223,10 +242,10 @@ const CourseDetail = () => {
                     {course.difficulty}
                   </Badge>
                 </div>
-                {course.estimated_duration_minutes && (
+                {(course.duration_minutes || course.estimated_duration_minutes) && (
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="h-4 w-4 mr-1" />
-                    {Math.round(course.estimated_duration_minutes / 60)} hours
+                    {Math.round((course.duration_minutes || course.estimated_duration_minutes) / 60)} hours
                   </div>
                 )}
                 {course.category && (
@@ -234,6 +253,11 @@ const CourseDetail = () => {
                     <BookOpen className="h-4 w-4 mr-1" />
                     {course.category}
                   </div>
+                )}
+                {course.format && (
+                  <Badge variant="secondary">
+                    {getFormatBadge(course.format)}
+                  </Badge>
                 )}
               </div>
               
@@ -283,6 +307,9 @@ const CourseDetail = () => {
                             <Badge variant="outline" className="text-xs">Required</Badge>
                           )}
                         </div>
+                        {module.body && (
+                          <p className="text-sm text-muted-foreground">{module.body}</p>
+                        )}
                         {module.description && (
                           <p className="text-sm text-muted-foreground">{module.description}</p>
                         )}
@@ -296,11 +323,21 @@ const CourseDetail = () => {
                       </div>
                     </div>
                     {enrollment && (
-                      <Button asChild size="sm">
-                        <Link to={`/modules/${module.id}`}>
-                          {module.is_completed ? 'Review' : 'Start'}
-                        </Link>
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button asChild size="sm" variant="outline">
+                          <Link to={`/modules/${module.id}`}>
+                            {module.is_completed ? 'Review' : 'Start'}
+                          </Link>
+                        </Button>
+                        {module.content_url && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleLaunchModule(module)}
+                          >
+                            Launch
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}

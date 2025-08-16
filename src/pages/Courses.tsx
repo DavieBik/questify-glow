@@ -14,11 +14,14 @@ import { CourseCard } from '@/components/course/CourseCard';
 interface Course {
   id: string;
   title: string;
+  description: string;
   short_description: string;
   difficulty: string;
+  duration_minutes: number;
   estimated_duration_minutes: number;
   category: string;
   thumbnail_url: string;
+  format: string;
   is_enrolled?: boolean;
 }
 
@@ -28,6 +31,8 @@ const Courses = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [formatFilter, setFormatFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   useEffect(() => {
     fetchCourses();
@@ -90,9 +95,12 @@ const Courses = () => {
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.short_description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDifficulty = difficultyFilter === 'all' || course.difficulty === difficultyFilter;
-    return matchesSearch && matchesDifficulty;
+    const matchesFormat = formatFilter === 'all' || course.format === formatFilter;
+    const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
+    return matchesSearch && matchesDifficulty && matchesFormat && matchesCategory;
   });
 
   const getDifficultyColor = (difficulty: string) => {
@@ -143,6 +151,30 @@ const Courses = () => {
             className="pl-10"
           />
         </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filter by category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="Disability Studies">Disability Studies</SelectItem>
+            <SelectItem value="NDIS">NDIS</SelectItem>
+            <SelectItem value="Communication">Communication</SelectItem>
+            <SelectItem value="Personal Care">Personal Care</SelectItem>
+            <SelectItem value="Community Support">Community Support</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={formatFilter} onValueChange={setFormatFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filter by format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Formats</SelectItem>
+            <SelectItem value="online">Online</SelectItem>
+            <SelectItem value="instructor_led">Instructor Led</SelectItem>
+            <SelectItem value="external">External</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter by difficulty" />
@@ -167,7 +199,7 @@ const Courses = () => {
               description: course.short_description,
               difficulty: course.difficulty,
               category: course.category,
-              estimated_duration_minutes: course.estimated_duration_minutes,
+              estimated_duration_minutes: course.duration_minutes || course.estimated_duration_minutes,
               thumbnail_url: course.thumbnail_url
             }}
             enrollment={course.is_enrolled ? {
