@@ -10,6 +10,10 @@ import { LeaderboardCard } from '@/components/gamification/LeaderboardCard';
 import { LearningStreakCard } from '@/components/gamification/LearningStreakCard';
 import { PointsSystemCard } from '@/components/gamification/PointsSystemCard';
 import { OrgSwitcher } from '@/components/demo/OrgSwitcher';
+import { RequiredCoursesSection } from '@/components/dashboard/RequiredCoursesSection';
+import { OptionalCoursesSection } from '@/components/dashboard/OptionalCoursesSection';
+import { SelfAssignedSection } from '@/components/dashboard/SelfAssignedSection';
+import { TeamViewWidget } from '@/components/dashboard/TeamViewWidget';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -26,7 +30,7 @@ interface RecentCourse {
 }
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, isManager, isAdmin } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     enrolledCourses: 0,
     completedCourses: 0,
@@ -176,6 +180,17 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Course Sections */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <RequiredCoursesSection />
+        <OptionalCoursesSection />
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <SelfAssignedSection />
+        {(isManager || isAdmin) && <TeamViewWidget />}
+      </div>
+
       {/* Gamification Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <LeaderboardCard />
@@ -183,7 +198,7 @@ const Dashboard = () => {
         <PointsSystemCard />
       </div>
 
-      {/* Recent Courses */}
+      {/* Continue Learning - Recent Courses */}
       <Card>
         <CardHeader>
           <CardTitle>Continue Learning</CardTitle>
