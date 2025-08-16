@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { AccountDrawer } from '@/components/app/AccountDrawer';
 import { AnnouncementCard } from '@/components/app/AnnouncementCard';
 import { WelcomeHeader } from '@/components/app/WelcomeHeader';
@@ -8,26 +9,12 @@ import { CourseCard } from '@/components/courses/CourseCard';
 import { BottomTabs } from '@/components/app/BottomTabs';
 import { Button } from '@/components/ui/button';
 
-// Mock data for development
-const mockCourses = [
-  {
-    id: '1',
-    title: 'Introduction to React Development',
-    code: 'CS101',
-    color: '#0B2447'
-  },
-  {
-    id: '2', 
-    title: 'Advanced TypeScript Patterns',
-    code: 'CS301',
-    color: '#C08B00'
-  },
-  {
-    id: '3',
-    title: 'Database Design Fundamentals',
-    code: 'DB201'
-  }
-];
+interface Course {
+  id: string;
+  title: string;
+  category?: string;
+  difficulty: string;
+}
 
 const mockAnnouncement = {
   title: 'New course materials available for CS101',
@@ -36,12 +23,69 @@ const mockAnnouncement = {
 
 export default function Dashboard() {
   const [showAnnouncement, setShowAnnouncement] = useState(true);
-  const [courses, setCourses] = useState(mockCourses);
-  const [loading, setLoading] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      
+      // First, get user enrollments
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: enrollments } = await supabase
+        .from('user_course_enrollments')
+        .select(`
+          course_id,
+          courses (
+            id,
+            title,
+            category,
+            difficulty
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (enrollments && enrollments.length > 0) {
+        // Show enrolled courses
+        const enrolledCourses = enrollments
+          .map(enrollment => enrollment.courses)
+          .filter(Boolean) as Course[];
+        setCourses(enrolledCourses);
+      } else {
+        // If no enrollments, show available courses
+        const { data: availableCourses } = await supabase
+          .from('courses')
+          .select('id, title, category, difficulty')
+          .eq('is_active', true)
+          .limit(6);
+
+        setCourses(availableCourses || []);
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAnnouncementClick = () => {
     // Navigate to announcement details
     console.log('Navigate to announcement');
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'beginner': return '#10B981'; // green
+      case 'intermediate': return '#F59E0B'; // amber  
+      case 'advanced': return '#EF4444'; // red
+      default: return 'hsl(var(--brand-gold))'; // gold fallback
+    }
   };
 
   const CourseSkeletons = () => (
@@ -98,8 +142,8 @@ export default function Dashboard() {
                   key={course.id}
                   id={course.id}
                   title={course.title}
-                  code={course.code}
-                  color={course.color}
+                  code={course.category}
+                  color={getDifficultyColor(course.difficulty)}
                 />
               ))
             ) : (
