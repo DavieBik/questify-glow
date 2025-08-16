@@ -97,24 +97,83 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-40 bg-background border-b border-border">
-        <div className="flex items-center justify-between px-4 h-14">
-          <AccountDrawer />
-          <h1 className="font-semibold text-lg">Dashboard</h1>
-          <div className="w-10" /> {/* Spacer for centering */}
-        </div>
-      </header>
+    <>
+      {/* Mobile Canvas-like Interface */}
+      <div className="md:hidden min-h-screen bg-background pb-20">
+        {/* Top Bar */}
+        <header className="sticky top-0 z-40 bg-background border-b border-border">
+          <div className="flex items-center justify-between px-4 h-14">
+            <AccountDrawer />
+            <h1 className="font-semibold text-lg">Dashboard</h1>
+            <div className="w-10" /> {/* Spacer for centering */}
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <div className="px-4 py-6 space-y-6">
+        {/* Main Content */}
+        <div className="px-4 py-6 space-y-6">
+          {/* Announcement */}
+          {showAnnouncement && (
+            <AnnouncementCard
+              title={mockAnnouncement.title}
+              onClick={handleAnnouncementClick}
+            />
+          )}
+
+          {/* Welcome Header */}
+          <WelcomeHeader />
+
+          {/* Courses Section */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Courses</h2>
+              <Link to="/courses">
+                <Button variant="ghost" size="sm" className="text-brand-navy">
+                  All Courses
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Course Grid */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {loading ? (
+                <CourseSkeletons />
+              ) : courses.length > 0 ? (
+                courses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    id={course.id}
+                    title={course.title}
+                    code={course.category}
+                    color={getDifficultyColor(course.difficulty)}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12 text-muted-foreground">
+                  <p>No courses enrolled yet</p>
+                  <Link to="/courses">
+                    <Button className="mt-4">Browse Courses</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* Bottom Navigation */}
+        <BottomTabs />
+      </div>
+
+      {/* Desktop Interface - Traditional Layout */}
+      <div className="hidden md:block">
         {/* Announcement */}
         {showAnnouncement && (
-          <AnnouncementCard
-            title={mockAnnouncement.title}
-            onClick={handleAnnouncementClick}
-          />
+          <div className="mb-6">
+            <AnnouncementCard
+              title={mockAnnouncement.title}
+              onClick={handleAnnouncementClick}
+            />
+          </div>
         )}
 
         {/* Welcome Header */}
@@ -122,18 +181,18 @@ export default function Dashboard() {
 
         {/* Courses Section */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Courses</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Courses</h2>
             <Link to="/courses">
-              <Button variant="ghost" size="sm" className="text-brand-navy">
+              <Button variant="ghost" className="text-primary">
                 All Courses
-                <ChevronRight className="ml-1 h-4 w-4" />
+                <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
 
           {/* Course Grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               <CourseSkeletons />
             ) : courses.length > 0 ? (
@@ -157,9 +216,6 @@ export default function Dashboard() {
           </div>
         </section>
       </div>
-
-      {/* Bottom Navigation */}
-      <BottomTabs />
-    </div>
+    </>
   );
 }
