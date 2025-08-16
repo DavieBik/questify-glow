@@ -53,7 +53,12 @@ const Announcements: React.FC = () => {
   const { toast } = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     if (user) {
@@ -61,62 +66,124 @@ const Announcements: React.FC = () => {
     }
   }, [user]);
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = async (pageNum = 0, append = false) => {
+    console.debug('[Announcements] fetching...', { userId: user?.id, page: pageNum, pageSize: PAGE_SIZE });
     try {
+      if (!append) {
+        setLoading(true);
+        setPage(0);
+      } else {
+        setLoadingMore(true);
+      }
+      
+      // Simple fetch without FK joins - same pattern as Messages/GroupProjects
       const { data, error } = await supabase
         .from('announcements')
-        .select(`
-          *,
-          users!created_by(first_name, last_name, role),
-          courses(title)
-        `)
+        .select('id, title, content, priority, is_pinned, created_at, updated_at, created_by, course_id, expires_at')
         .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
 
       if (error) throw error;
+      
+      console.debug('[Announcements] fetched announcements:', data?.length || 0);
 
-      // Check read status and get stats for each announcement
-      const announcementsWithStatus = await Promise.all(
-        (data || []).map(async (announcement) => {
-          // Check if user has read this announcement
-          const { data: readData } = await supabase
-            .from('announcement_reads')
-            .select('id')
-            .eq('announcement_id', announcement.id)
-            .eq('user_id', user?.id)
-            .maybeSingle();
+      // Handle pagination
+      setHasMore(data?.length === PAGE_SIZE);
+      
+      if (!data || data.length === 0) {
+        if (!append) {
+          setAnnouncements([]);
+        }
+        return;
+      }
 
-          // Get read statistics if user can edit
-          let readStats;
-          if (canEdit) {
+      // Get unique creator and course IDs for follow-up fetches
+      const creatorIds = [...new Set(data.map(a => a.created_by).filter(Boolean))];
+      const courseIds = [...new Set(data.map(a => a.course_id).filter(Boolean))];
+
+      // Fetch creators separately (lightweight)
+      const creators: Record<string, any> = {};
+      if (creatorIds.length > 0) {
+        const { data: creatorData } = await supabase
+          .from('users')
+          .select('id, first_name, last_name, role')
+          .in('id', creatorIds);
+        
+        creatorData?.forEach(creator => {
+          creators[creator.id] = creator;
+        });
+      }
+
+      // Fetch courses separately (lightweight)
+      const courses: Record<string, any> = {};
+      if (courseIds.length > 0) {
+        const { data: courseData } = await supabase
+          .from('courses')
+          .select('id, title')
+          .in('id', courseIds);
+        
+        courseData?.forEach(course => {
+          courses[course.id] = course;
+        });
+      }
+
+      // Check read status for current user
+      const readStatuses: Record<string, boolean> = {};
+      if (user?.id) {
+        const { data: readData } = await supabase
+          .from('announcement_reads')
+          .select('announcement_id')
+          .eq('user_id', user.id)
+          .in('announcement_id', data.map(a => a.id));
+        
+        readData?.forEach(read => {
+          readStatuses[read.announcement_id] = true;
+        });
+      }
+
+      // Get read statistics if user can edit (optional enhancement)
+      const readStats: Record<string, any> = {};
+      if (canEdit) {
+        for (const announcement of data) {
+          try {
             const { data: statsData } = await supabase
               .rpc('get_announcement_stats', { 
                 announcement_id_param: announcement.id 
               })
               .single();
-            readStats = statsData;
+            if (statsData) {
+              readStats[announcement.id] = statsData;
+            }
+          } catch (error) {
+            console.debug('Failed to get stats for announcement:', announcement.id);
           }
+        }
+      }
 
-          return {
-            ...announcement,
-            priority: announcement.priority as 'low' | 'normal' | 'high' | 'urgent',
-            creator: announcement.users ? {
-              first_name: (announcement.users as any).first_name,
-              last_name: (announcement.users as any).last_name,
-              role: (announcement.users as any).role
-            } : undefined,
-            course: announcement.courses ? {
-              title: (announcement.courses as any).title
-            } : undefined,
-            is_read: !!readData,
-            read_stats: readStats
-          };
-        })
-      );
+      // Combine all data
+      const enrichedAnnouncements = data.map(announcement => ({
+        ...announcement,
+        priority: announcement.priority as 'low' | 'normal' | 'high' | 'urgent',
+        creator: announcement.created_by ? creators[announcement.created_by] : undefined,
+        course: announcement.course_id ? courses[announcement.course_id] : undefined,
+        is_read: !!readStatuses[announcement.id],
+        read_stats: readStats[announcement.id]
+      }));
 
-      setAnnouncements(announcementsWithStatus);
+      // Update state with new data
+      if (append) {
+        setAnnouncements(prev => [...prev, ...enrichedAnnouncements]);
+        setPage(pageNum);
+      } else {
+        setAnnouncements(enrichedAnnouncements);
+        setPage(0);
+      }
+      
+      console.debug('[Announcements] successfully loaded:', enrichedAnnouncements.length);
+      
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      console.error('[Announcements] Error fetching:', error);
       toast({
         title: "Error",
         description: "Failed to fetch announcements",
@@ -124,7 +191,13 @@ const Announcements: React.FC = () => {
       });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMore = async () => {
+    if (!hasMore || loadingMore) return;
+    await fetchAnnouncements(page + 1, true);
   };
 
   const markAsRead = async (announcementId: string) => {
@@ -310,13 +383,26 @@ const Announcements: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+          
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center pt-4">
+              <Button 
+                variant="outline" 
+                onClick={loadMore} 
+                disabled={loadingMore}
+              >
+                {loadingMore ? 'Loading...' : 'Load More'}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
       <CreateAnnouncementDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onAnnouncementCreated={fetchAnnouncements}
+        onAnnouncementCreated={() => fetchAnnouncements(0, false)}
       />
     </div>
   );
