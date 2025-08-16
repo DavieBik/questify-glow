@@ -148,101 +148,101 @@ All colors MUST be HSL.
     --brand-gold: 42 100% 38%;
     --brand-sky: 212 88% 24%;
     
-    /* Core Brand Colors - Canvas-inspired */
+    /* Core Canvas-inspired Design System */
     --background: 0 0% 100%;
     --foreground: 210 100% 15%;
     
-    /* Brand Primary - Professional Emerald */
-    --primary: 160 84% 39%;
+    /* Primary - Canvas Navy */
+    --primary: 210 100% 15%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 160 84% 45%;
+    --primary-glow: 210 100% 20%;
     
-    /* Brand Secondary - Subtle Grey */
-    --secondary: 215 20% 96%;
-    --secondary-foreground: 215 25% 27%;
+    /* Secondary - Light Navy */
+    --secondary: 210 25% 95%;
+    --secondary-foreground: 210 100% 15%;
     
-    /* Accent - Emerald Variant */
-    --accent: 160 84% 39%;
+    /* Accent - Canvas Gold */
+    --accent: 42 100% 38%;
     --accent-foreground: 0 0% 100%;
     
     /* Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 210 100% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 210 100% 15%;
     
-    /* Muted Colors - Clean Greys */
-    --muted: 215 20% 96%;
-    --muted-foreground: 215 13% 47%;
+    /* Muted Colors - Subtle Navy Greys */
+    --muted: 210 25% 96%;
+    --muted-foreground: 210 15% 45%;
     
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders & Inputs - Subtle */
-    --border: 215 20% 89%;
-    --input: 215 20% 89%;
-    --ring: 160 84% 39%;
+    /* Borders & Inputs - Navy-tinted */
+    --border: 210 25% 88%;
+    --input: 210 25% 88%;
+    --ring: 210 100% 15%;
     
-    /* Enhanced Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    /* Enhanced Gradients - Canvas Style */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-sky)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
     
-    /* Shadows - Subtle and Clean */
-    --shadow-elegant: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.1);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    /* Shadows - Navy-tinted */
+    --shadow-elegant: 0 1px 3px 0 hsl(var(--primary) / 0.1), 0 1px 2px -1px hsl(var(--primary) / 0.1);
+    --shadow-glow: 0 0 0 1px hsl(var(--accent) / 0.2);
+    --shadow-card: 0 1px 3px 0 hsl(var(--primary) / 0.1), 0 1px 2px -1px hsl(var(--primary) / 0.1);
     
     --radius: 0.75rem;
     
-    /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Canvas-style Sidebar */
+    --sidebar-background: 210 100% 15%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 42 100% 38%;
+    --sidebar-primary-foreground: 210 100% 15%;
+    --sidebar-accent: 210 90% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 210 90% 20%;
+    --sidebar-ring: 42 100% 38%;
   }
 
   .dark {
-    /* Dark Mode Core - Clean Dark */
-    --background: 215 28% 5%;
-    --foreground: 0 0% 98%;
+    /* Canvas Dark Mode - Dark Navy Base */
+    --background: 210 100% 8%;
+    --foreground: 0 0% 95%;
     
-    /* Dark Mode Primary - Emerald */
-    --primary: 160 84% 45%;
-    --primary-foreground: 215 28% 5%;
-    --primary-glow: 160 84% 50%;
+    /* Dark Mode Primary - Brighter Navy */
+    --primary: 210 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 210 100% 30%;
     
     /* Dark Mode Secondary */
-    --secondary: 215 25% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 210 50% 15%;
+    --secondary-foreground: 0 0% 95%;
     
     /* Dark Mode Surfaces */
-    --card: 224 71% 4%;
-    --card-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
+    --card: 210 100% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 210 100% 10%;
+    --popover-foreground: 0 0% 95%;
     
     /* Dark Mode Muted */
-    --muted: 215 25% 15%;
-    --muted-foreground: 215 13% 63%;
+    --muted: 210 50% 15%;
+    --muted-foreground: 210 15% 65%;
     
-    /* Dark Mode Accent */
-    --accent: 160 84% 45%;
-    --accent-foreground: 215 28% 5%;
+    /* Dark Mode Accent - Canvas Gold */
+    --accent: 42 100% 45%;
+    --accent-foreground: 210 100% 8%;
     
     /* Dark Mode Destructive */
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     
     /* Dark Mode Borders */
-    --border: 215 25% 20%;
-    --input: 215 25% 20%;
-    --ring: 160 84% 45%;
+    --border: 210 50% 18%;
+    --input: 210 50% 18%;
+    --ring: 210 100% 25%;
     
     /* Dark Mode Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
@@ -250,19 +250,19 @@ All colors MUST be HSL.
     --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
     
     /* Dark Mode Shadows */
-    --shadow-elegant: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.2);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-elegant: 0 1px 3px 0 hsl(var(--primary) / 0.3), 0 1px 2px -1px hsl(var(--primary) / 0.3);
+    --shadow-glow: 0 0 0 1px hsl(var(--accent) / 0.3);
+    --shadow-card: 0 1px 3px 0 hsl(var(--primary) / 0.3), 0 1px 2px -1px hsl(var(--primary) / 0.3);
     
-    /* Dark Sidebar */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark Canvas Sidebar */
+    --sidebar-background: 210 100% 6%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 42 100% 45%;
+    --sidebar-primary-foreground: 210 100% 6%;
+    --sidebar-accent: 210 100% 12%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 210 100% 12%;
+    --sidebar-ring: 42 100% 45%;
   }
 }
 
