@@ -28,7 +28,7 @@ import Announcements from "./pages/Announcements";
 import GroupProjects from "./pages/GroupProjects";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
-import Badges from "./pages/Badges";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import BrandingSettings from "./pages/BrandingSettings";
@@ -126,13 +126,6 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <SessionDetail />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/badges" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Badges />
                 </Layout>
               </ProtectedRoute>
             } />

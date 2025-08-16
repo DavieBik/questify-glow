@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Award, Clock, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { LeaderboardCard } from '@/components/gamification/LeaderboardCard';
-import { LearningStreakCard } from '@/components/gamification/LearningStreakCard';
-import { PointsSystemCard } from '@/components/gamification/PointsSystemCard';
+import { ComplianceOverview } from '@/components/dashboard/ComplianceOverview';
+import { MyAssignedCourses } from '@/components/dashboard/MyAssignedCourses';
+import { CertificatesSection } from '@/components/dashboard/CertificatesSection';
+import { ManagerComplianceView } from '@/components/dashboard/ManagerComplianceView';
 import { OrgSwitcher } from '@/components/demo/OrgSwitcher';
 import { RequiredCoursesSection } from '@/components/dashboard/RequiredCoursesSection';
 import { OptionalCoursesSection } from '@/components/dashboard/OptionalCoursesSection';
@@ -156,9 +157,9 @@ const Dashboard = () => {
       )}
 
       <div>
-        <h1 className="text-3xl font-bold">Learning Dashboard</h1>
+        <h1 className="text-3xl font-bold">Compliance Dashboard</h1>
         <p className="text-muted-foreground">
-          Track your progress and continue your learning journey
+          Track your training compliance and required certifications
         </p>
       </div>
 
@@ -208,66 +209,53 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Course Sections */}
+      {/* Compliance Sections */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <RequiredCoursesSection />
-        <OptionalCoursesSection />
+        <ComplianceOverview />
+        <MyAssignedCourses />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <SelfAssignedSection />
+        <CertificatesSection />
         <ManagerOrAdmin>
-          <TeamViewWidget />
+          <ManagerComplianceView />
         </ManagerOrAdmin>
       </div>
 
-      {/* Gamification Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <LeaderboardCard />
-        <LearningStreakCard />
-        <PointsSystemCard />
-      </div>
-
       {/* Continue Learning - Recent Courses */}
+      {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Continue Learning</CardTitle>
+          <CardTitle>Quick Actions</CardTitle>
           <CardDescription>
-            Pick up where you left off with your recent courses
+            Common tasks and navigation shortcuts
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {recentCourses.length > 0 ? (
-            <div className="space-y-4">
-              {recentCourses.map((course) => (
-                <div key={course.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">{course.title}</h3>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getDifficultyColor(course.difficulty)}>
-                        {course.difficulty}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {course.progress_percentage}% complete
-                      </span>
-                    </div>
-                  </div>
-                  <Button asChild>
-                    <Link to={`/courses/${course.id}`}>
-                      Continue
-                    </Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No courses enrolled yet</p>
-              <Button asChild>
-                <Link to="/courses">Browse Courses</Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button asChild variant="outline" className="h-auto p-4">
+              <Link to="/courses" className="flex flex-col items-center gap-2">
+                <BookOpen className="h-6 w-6" />
+                <span>Browse Courses</span>
+              </Link>
+            </Button>
+            
+            <Button asChild variant="outline" className="h-auto p-4">
+              <Link to="/certificates" className="flex flex-col items-center gap-2">
+                <Award className="h-6 w-6" />
+                <span>View Certificates</span>
+              </Link>
+            </Button>
+            
+            <ManagerOrAdmin>
+              <Button asChild variant="outline" className="h-auto p-4">
+                <Link to="/admin/analytics" className="flex flex-col items-center gap-2">
+                  <TrendingUp className="h-6 w-6" />
+                  <span>Team Reports</span>
+                </Link>
               </Button>
-            </div>
-          )}
+            </ManagerOrAdmin>
+          </div>
         </CardContent>
       </Card>
     </div>
