@@ -9,6 +9,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: string;
@@ -23,8 +25,14 @@ interface User {
 export function AccountDrawer() {
   const [user, setUser] = useState<User | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedDevRole, setSelectedDevRole] = useState<string>('');
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const navigate = useNavigate();
   const { userRole } = useAuth();
+  const { toast } = useToast();
+  
+  // Check if role elevation is enabled in dev
+  const isRoleElevationEnabled = import.meta.env.VITE_ALLOW_ROLE_ELEVATION === 'true';
   
   // Role preview functionality
   const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
@@ -80,6 +88,38 @@ export function AccountDrawer() {
       return (words[0][0] + words[1][0]).toUpperCase();
     }
     return name.slice(0, 2).toUpperCase();
+  };
+
+  const handleDevRoleChange = async () => {
+    if (!selectedDevRole) return;
+    
+    setIsUpdatingRole(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('dev-set-role', {
+        body: { role: selectedDevRole }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Role updated",
+        description: `Role updated to ${selectedDevRole}`,
+      });
+
+      // Reload the page to refresh all auth state
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to update role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update role. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingRole(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -215,6 +255,40 @@ export function AccountDrawer() {
                         Reset to real role
                       </Button>
                     )}
+                  </div>
+                </>
+              )}
+              
+              {/* Dev Role Elevation */}
+              {isRoleElevationEnabled && (
+                <>
+                  <Separator className="my-4" />
+                  <div className="px-3 py-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Set my real role (dev)</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Changes actual role in database</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Select value={selectedDevRole} onValueChange={setSelectedDevRole}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select role..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="staff">Staff</SelectItem>
+                        <SelectItem value="manager">Manager</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button
+                      variant="outline"
+                      className="w-full h-8 text-sm"
+                      onClick={handleDevRoleChange}
+                      disabled={!selectedDevRole || isUpdatingRole}
+                    >
+                      {isUpdatingRole ? 'Updating...' : 'Apply'}
+                    </Button>
                   </div>
                 </>
               )}
