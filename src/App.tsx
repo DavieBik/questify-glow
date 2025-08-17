@@ -42,6 +42,7 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminApprovals from "./pages/AdminApprovals";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminImportCoursesModules from "./pages/AdminImportCoursesModules";
+import AdminImportUsersEnrollments from "./pages/AdminImportUsersEnrollments";
 import AdminCurricula from "./pages/AdminCurricula";
 import CurriculaProgress from "./pages/CurriculaProgress";
 // Organization setup/settings removed in single-tenant mode
@@ -288,6 +289,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminImportCoursesModules />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/imports/users-enrollments" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminImportUsersEnrollments />
                   </Layout>
                 </ProtectedRoute>
               } />
