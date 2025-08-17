@@ -27,15 +27,16 @@ export function AccountDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDevRole, setSelectedDevRole] = useState<string>('');
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [forceDevMode, setForceDevMode] = useState(false);
   const navigate = useNavigate();
   const { userRole } = useAuth();
   const { toast } = useToast();
   
-  // Check if role elevation is enabled in dev
-  const isRoleElevationEnabled = import.meta.env.VITE_ALLOW_ROLE_ELEVATION === 'true';
+  // Check if role elevation is enabled in dev (or forced on)
+  const isRoleElevationEnabled = import.meta.env.VITE_ALLOW_ROLE_ELEVATION === 'true' || forceDevMode;
   
-  // Role preview functionality
-  const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
+  // Role preview functionality (also enable with force dev mode)
+  const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true' || forceDevMode;
   let previewRole = null;
   let setPreviewRole = null;
   let clearPreview = null;
@@ -292,6 +293,17 @@ export function AccountDrawer() {
                   </div>
                 </>
               )}
+              
+              
+              {/* Dev Mode Toggle */}
+              <Button
+                variant="outline"
+                className="w-full justify-start h-10 mb-2"
+                onClick={() => setForceDevMode(!forceDevMode)}
+              >
+                <Settings className="mr-3 h-4 w-4" />
+                {forceDevMode ? 'Disable' : 'Enable'} Dev Tools
+              </Button>
               
               <Button
                 variant="ghost"
