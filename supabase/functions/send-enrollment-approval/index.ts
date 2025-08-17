@@ -7,10 +7,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface EnrollmentApprovalRequest {
+interface EnrolmentApprovalRequest {
   userId: string;
   courseId: string;
-  enrollmentId: string;
+  enrolmentId: string;
   courseName: string;
 }
 
@@ -41,9 +41,9 @@ serve(async (req) => {
     );
 
     // Parse request body
-    const { userId, courseId, enrollmentId, courseName }: EnrollmentApprovalRequest = await req.json();
+    const { userId, courseId, enrolmentId, courseName }: EnrolmentApprovalRequest = await req.json();
 
-    console.log("Processing enrollment approval request:", { userId, courseId, courseName });
+    console.log("Processing enrolment approval request:", { userId, courseId, courseName });
 
     // Get user details
     const { data: userData, error: userError } = await supabaseClient
@@ -89,16 +89,16 @@ serve(async (req) => {
 
     // Send approval email to each manager
     const emailPromises = managerEmails.map(async (managerEmail) => {
-      const approvalUrl = `${appUrl}/admin/approvals?enrollment=${enrollmentId}`;
+      const approvalUrl = `${appUrl}/admin/approvals?enrolment=${enrolmentId}`;
       
       return resend.emails.send({
         from: Deno.env.get("FROM_EMAIL") || "noreply@lovable.dev",
         to: [managerEmail],
-        subject: `Course Enrollment Approval Required: ${courseName}`,
+        subject: `Course Enrolment Approval Required: ${courseName}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
-              Course Enrollment Approval Required
+              Course Enrolment Approval Required
             </h2>
             
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -111,7 +111,7 @@ serve(async (req) => {
             <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #1976d2; margin-top: 0;">Course Information</h3>
               <p><strong>Course:</strong> ${courseName}</p>
-              <p><strong>Request Type:</strong> Course Enrollment</p>
+              <p><strong>Request Type:</strong> Course Enrolment</p>
             </div>
 
             <div style="margin: 30px 0; text-align: center;">
@@ -126,7 +126,7 @@ serve(async (req) => {
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; 
                         color: #6c757d; font-size: 14px;">
               <p>This is an automated message from your Learning Management System.</p>
-              <p>Please review the enrollment request and approve or deny it through the admin dashboard.</p>
+              <p>Please review the enrolment request and approve or deny it through the admin dashboard.</p>
             </div>
           </div>
         `,

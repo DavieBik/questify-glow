@@ -66,12 +66,12 @@ export default function CourseEnrollment() {
   };
 
   const canSelfEnroll = (course: Course) => {
-    // Allow self-enrollment if course doesn't require approval
+    // Allow self-enrolment if course doesn't require approval
     // This is based on mandatory status, free cost, or explicit requires_approval field
     return !course.requires_approval;
   };
 
-  const handleSelfEnrollment = async () => {
+  const handleSelfEnrolment = async () => {
     if (!user || !course) return;
 
     setEnrolling(true);
@@ -107,7 +107,7 @@ export default function CourseEnrollment() {
 
     setEnrolling(true);
     try {
-      // Create pending enrollment
+      // Create pending enrolment
       const { data: enrollmentData, error: enrollmentError } = await supabase
         .from('user_course_enrollments')
         .insert({
@@ -120,7 +120,7 @@ export default function CourseEnrollment() {
 
       if (enrollmentError) {
         if (enrollmentError.code === '23505') {
-          toast({ title: "Error", description: "You have already requested enrollment for this course", variant: "destructive" });
+          toast({ title: "Error", description: "You have already requested enrolment for this course", variant: "destructive" });
           return;
         }
         throw enrollmentError;
@@ -131,7 +131,7 @@ export default function CourseEnrollment() {
         body: {
           userId: user.id,
           courseId: course.id,
-          enrollmentId: enrollmentData.id,
+          enrolmentId: enrollmentData.id,
           courseName: course.title
         }
       });
@@ -141,11 +141,11 @@ export default function CourseEnrollment() {
         // Don't fail the enrollment if email fails
       }
 
-      toast({ title: "Success", description: "Enrollment request submitted! You will be notified when approved." });
+      toast({ title: "Success", description: "Enrolment request submitted! You will be notified when approved." });
       setEnrollment(enrollmentData);
     } catch (error) {
       console.error('Error requesting enrollment approval:', error);
-      toast({ title: "Error", description: "Failed to submit enrollment request", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to submit enrolment request", variant: "destructive" });
     } finally {
       setEnrolling(false);
     }
@@ -226,7 +226,7 @@ export default function CourseEnrollment() {
           </CardContent>
         </Card>
 
-        {/* Enrollment Status Card */}
+        {/* Enrolment Status Card */}
         {enrollment?.status === 'pending_approval' ? (
           <Card className="border-yellow-200 bg-yellow-50/50">
             <CardHeader>
@@ -235,7 +235,7 @@ export default function CourseEnrollment() {
                 <CardTitle className="text-yellow-800">Approval Pending</CardTitle>
               </div>
               <CardDescription className="text-yellow-700">
-                Your enrollment request has been submitted and is awaiting manager approval.
+                Your enrolment request has been submitted and is awaiting manager approval.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -253,13 +253,13 @@ export default function CourseEnrollment() {
                   <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-primary">Instant Enrollment Available</h3>
+                      <h3 className="font-semibold text-primary">Instant Enrolment Available</h3>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">
-                      This course allows immediate enrollment. You can start learning right away.
+                      This course allows immediate enrolment. You can start learning right away.
                     </p>
                     <Button 
-                      onClick={handleSelfEnrollment} 
+                      onClick={handleSelfEnrolment} 
                       disabled={enrolling}
                       className="w-full"
                     >
@@ -283,7 +283,7 @@ export default function CourseEnrollment() {
                       variant="outline"
                       className="w-full"
                     >
-                      {enrolling ? 'Submitting...' : 'Request Enrollment Approval'}
+                      {enrolling ? 'Submitting...' : 'Request Enrolment Approval'}
                     </Button>
                   </div>
                 </div>

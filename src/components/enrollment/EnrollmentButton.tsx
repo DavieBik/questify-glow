@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-interface EnrollmentButtonProps {
+interface EnrolmentButtonProps {
   courseId: string;
   courseTitle: string;
   requiresApproval?: boolean;
@@ -12,27 +12,27 @@ interface EnrollmentButtonProps {
   children?: React.ReactNode;
 }
 
-export const EnrollmentButton = ({ 
+export const EnrolmentButton = ({ 
   courseId, 
   courseTitle, 
   requiresApproval = false,
   className,
-  children = "Enroll"
-}: EnrollmentButtonProps) => {
+  children = "Enrol"
+}: EnrolmentButtonProps) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const handleEnrollment = async () => {
+  const handleEnrolment = async () => {
     if (!user) {
-      toast.error('Please log in to enroll');
+      toast.error('Please log in to enrol');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Create enrollment record
-      const { data: enrollment, error: enrollmentError } = await supabase
+      // Create enrolment record
+      const { data: enrolment, error: enrolmentError } = await supabase
         .from('user_course_enrollments')
         .insert({
           user_id: user.id,
@@ -42,12 +42,12 @@ export const EnrollmentButton = ({
         .select()
         .single();
 
-      if (enrollmentError) {
-        if (enrollmentError.code === '23505') { // Unique constraint violation
+      if (enrolmentError) {
+        if (enrolmentError.code === '23505') { // Unique constraint violation
           toast.error('You are already enrolled in this course');
           return;
         }
-        throw enrollmentError;
+        throw enrolmentError;
       }
 
       if (requiresApproval) {
@@ -56,9 +56,9 @@ export const EnrollmentButton = ({
           'create_approval_request',
           {
             p_user_id: user.id,
-            p_enrollment_id: enrollment.id,
+            p_enrollment_id: enrolment.id,
             p_course_id: courseId,
-            p_request_type: 'enrollment'
+            p_request_type: 'enrolment'
           }
         );
 
@@ -75,16 +75,16 @@ export const EnrollmentButton = ({
         });
 
         if (emailError) {
-          console.warn('[EnrollmentButton] Email notification failed:', emailError);
+          console.warn('[EnrolmentButton] Email notification failed:', emailError);
         }
 
-        toast.success('Enrollment request submitted for approval');
+        toast.success('Enrolment request submitted for approval');
       } else {
         toast.success('Successfully enrolled in course');
       }
     } catch (error: any) {
-      console.error('[EnrollmentButton] Error during enrollment:', error);
-      toast.error('Failed to enroll in course');
+      console.error('[EnrolmentButton] Error during enrolment:', error);
+      toast.error('Failed to enrol in course');
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export const EnrollmentButton = ({
 
   return (
     <Button 
-      onClick={handleEnrollment} 
+      onClick={handleEnrolment} 
       disabled={loading}
       className={className}
     >
