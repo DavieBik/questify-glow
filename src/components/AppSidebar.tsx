@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotificationCount } from '@/hooks/useNotificationCount';
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
 import { 
   BookOpen, 
   FileText, 
@@ -37,6 +39,7 @@ const navigationItems = [
   { title: 'Announcements', url: '/announcements', icon: Megaphone },
   { title: 'Group Projects', url: '/projects', icon: Users },
   { title: 'Certificates', url: '/certificates', icon: Award },
+  { title: 'Alerts', url: '/alerts', icon: Bell, showBadge: true },
   
   { title: 'Profile', url: '/profile', icon: User },
 ];
@@ -66,6 +69,7 @@ export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
   const { isAdmin, isManager } = useAuth();
+  const { unreadCount } = useNotificationCount();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => {
@@ -92,7 +96,14 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span className="flex items-center gap-2">
+                        {item.title}
+                        {item.showBadge && unreadCount > 0 && (
+                          <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </Badge>
+                        )}
+                      </span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

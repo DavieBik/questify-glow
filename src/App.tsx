@@ -28,6 +28,7 @@ import Announcements from "./pages/Announcements";
 import GroupProjects from "./pages/GroupProjects";
 import Certificates from "./pages/Certificates";
 import CertificateDetail from "./pages/CertificateDetail";
+import Alerts from "./pages/Alerts";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
@@ -174,6 +175,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <GroupProjects />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/alerts" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Alerts />
                 </Layout>
               </ProtectedRoute>
             } />
