@@ -2,6 +2,7 @@ import React, { useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Upload, FileText } from 'lucide-react'
+import { validateFileType, formatFileSize } from '@/lib/parsers/fileParser'
 
 interface ImportUploadStepProps {
   onFileUpload: (file: File) => void
@@ -11,7 +12,7 @@ interface ImportUploadStepProps {
 export function ImportUploadStep({ onFileUpload, loading }: ImportUploadStepProps) {
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
+    if (file && validateFileType(file)) {
       onFileUpload(file)
     }
   }, [onFileUpload])
