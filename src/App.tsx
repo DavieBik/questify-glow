@@ -53,6 +53,7 @@ import AdminScorm from "./pages/admin/AdminScorm";
 import ScormUpload from "./pages/admin/ScormUpload";
 import ScormReport from "./pages/admin/ScormReport";
 // Organization setup/settings removed in single-tenant mode
+import CourseEnrollment from "./pages/CourseEnrollment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +108,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <CourseDetail />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/courses/:id/enroll" element={
+              <ProtectedRoute>
+                <Layout>
+                  <CourseEnrollment />
                 </Layout>
               </ProtectedRoute>
             } />

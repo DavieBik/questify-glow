@@ -131,35 +131,8 @@ const CourseDetail = () => {
     }
   };
 
-  const enrollInCourse = async () => {
-    if (!user) {
-      toast.error('Please log in to enrol');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('user_course_enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: id,
-          status: 'enrolled'
-        });
-
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          toast.error('You are already enrolled in this course');
-          return;
-        }
-        throw error;
-      }
-
-      toast.success('Successfully enrolled in course!');
-      fetchCourseDetails(); // Refresh enrollment status
-    } catch (error) {
-      console.error('Error enrolling in course:', error);
-      toast.error('Failed to enrol in course');
-    }
+  const redirectToEnrollment = () => {
+    navigate(`/courses/${id}/enroll`);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -388,8 +361,8 @@ const CourseDetail = () => {
                   <p className="text-sm text-muted-foreground">
                     You are not enrolled in this course yet.
                   </p>
-                  <Button onClick={enrollInCourse} className="w-full">
-                    Enroll Now
+                  <Button onClick={redirectToEnrollment} className="w-full">
+                    Enrol Now
                   </Button>
                 </div>
               )}
