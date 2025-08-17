@@ -34,6 +34,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import BrandingSettings from "./pages/BrandingSettings";
 import AdminUsers from "./pages/AdminUsers";
+import AdminManagement from "./pages/AdminManagement";
 import AdminCourses from "./pages/AdminCourses";
 import AdminCourseCreate from "./pages/AdminCourseCreate";
 import AdminCourseEdit from "./pages/AdminCourseEdit";
@@ -224,6 +225,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminUsers />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/management" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminManagement />
                   </Layout>
                 </ProtectedRoute>
               } />

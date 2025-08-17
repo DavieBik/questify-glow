@@ -50,15 +50,16 @@ const managementItems = [
 ];
 
 const adminItems = [
-  { title: 'Branding', url: '/admin/branding', icon: Settings },
-  { title: 'Admin Users', url: '/admin/users', icon: Settings },
-  { title: 'Course Management', url: '/admin/courses', icon: BookOpen },
-  { title: 'Curricula Management', url: '/admin/curricula', icon: GraduationCap },
+  { title: 'Management Hub', url: '/admin/management', icon: Settings },
+  { title: 'Users', url: '/admin/users', icon: Users },
+  { title: 'Courses', url: '/admin/courses', icon: BookOpen },
+  { title: 'Curricula', url: '/admin/curricula', icon: GraduationCap },
   { title: 'Import Courses', url: '/admin/imports/courses-modules', icon: Upload },
   { title: 'Import Users & Enrollments', url: '/admin/imports/users-enrollments', icon: Upload },
   { title: 'Approvals', url: '/admin/approvals', icon: Clock },
   { title: 'Notifications', url: '/admin/notifications', icon: Bell },
   { title: 'Analytics', url: '/admin/analytics', icon: FileText },
+  { title: 'Branding', url: '/admin/branding', icon: Building2 },
 ];
 
 const organizationItems = [
