@@ -2710,17 +2710,17 @@ export type Database = {
         Row: {
           avg_score: number | null
           completed_courses: number | null
+          completions_last_30d: number | null
           department: string | null
           email: string | null
           enrolled_courses: number | null
-          first_completed_at: string | null
           first_name: string | null
-          last_activity_at: string | null
+          last_completed_at: string | null
           last_completion_date: string | null
           last_name: string | null
           manager_id: string | null
           role: Database["public"]["Enums"]["user_role"] | null
-          total_time_minutes: number | null
+          total_learning_time_minutes: number | null
           user_id: string | null
         }
         Relationships: [
