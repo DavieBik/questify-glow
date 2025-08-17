@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AccountDrawer } from '@/components/app/AccountDrawer';
-import { AnnouncementCard } from '@/components/app/AnnouncementCard';
 import { WelcomeHeader } from '@/components/app/WelcomeHeader';
 import { CourseCard } from '@/components/courses/CourseCard';
 import { BottomTabs } from '@/components/app/BottomTabs';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 interface Course {
   id: string;
@@ -16,18 +17,24 @@ interface Course {
   difficulty: string;
 }
 
-const mockAnnouncement = {
-  title: 'New course materials available for CS101',
-  content: 'Updated lecture slides and assignments are now available.'
-};
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  priority: string;
+  created_at: string;
+  expires_at?: string;
+}
 
 export default function Dashboard() {
-  const [showAnnouncement, setShowAnnouncement] = useState(true);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCourses();
+    fetchAnnouncements();
   }, []);
 
   const fetchCourses = async () => {
@@ -74,10 +81,29 @@ export default function Dashboard() {
     }
   };
 
-  const handleAnnouncementClick = () => {
-    // Navigate to announcement details
-    console.log('Navigate to announcement');
+  const fetchAnnouncements = async () => {
+    try {
+      const { data } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .or('expires_at.is.null,expires_at.gt.now()')
+        .eq('priority', 'high')
+        .limit(3);
+      
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+    }
   };
+
+  const handleDismissAnnouncement = (announcementId: string) => {
+    setDismissedAnnouncements(prev => [...prev, announcementId]);
+  };
+
+  const visibleAnnouncements = announcements.filter(
+    announcement => !dismissedAnnouncements.includes(announcement.id)
+  );
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty?.toLowerCase()) {
@@ -111,13 +137,37 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div className="px-4 py-6 space-y-6">
-          {/* Announcement */}
-          {showAnnouncement && (
-            <AnnouncementCard
-              title={mockAnnouncement.title}
-              onClick={handleAnnouncementClick}
-            />
-          )}
+          {/* Urgent Announcements */}
+          {visibleAnnouncements.map((announcement) => (
+            <Alert key={announcement.id} className="border-l-4 border-l-destructive bg-destructive/5">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="destructive" className="text-xs">URGENT</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(announcement.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <AlertDescription className="font-medium text-sm">
+                    {announcement.title}
+                  </AlertDescription>
+                  {announcement.content && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {announcement.content}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                  onClick={() => handleDismissAnnouncement(announcement.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </Alert>
+          ))}
 
           {/* Welcome Header */}
           <WelcomeHeader />
@@ -166,15 +216,37 @@ export default function Dashboard() {
 
       {/* Desktop Interface - Traditional Layout */}
       <div className="hidden md:block">
-        {/* Announcement */}
-        {showAnnouncement && (
-          <div className="mb-6">
-            <AnnouncementCard
-              title={mockAnnouncement.title}
-              onClick={handleAnnouncementClick}
-            />
-          </div>
-        )}
+        {/* Urgent Announcements */}
+        {visibleAnnouncements.map((announcement) => (
+          <Alert key={announcement.id} className="border-l-4 border-l-destructive bg-destructive/5 mb-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="destructive" className="text-xs">URGENT</Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(announcement.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <AlertDescription className="font-medium">
+                  {announcement.title}
+                </AlertDescription>
+                {announcement.content && (
+                  <p className="text-muted-foreground mt-2">
+                    {announcement.content}
+                  </p>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => handleDismissAnnouncement(announcement.id)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </Alert>
+        ))}
 
         {/* Welcome Header */}
         <WelcomeHeader />
