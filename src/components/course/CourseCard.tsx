@@ -27,10 +27,10 @@ interface CourseCardProps {
 export function CourseCard({ course, enrollment, showProgress = false }: CourseCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'intermediate': return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'advanced': return 'bg-rose-100 text-rose-800 border-rose-200';
-      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+      case 'beginner': return 'bg-accent/10 text-accent-foreground border-accent/20';
+      case 'intermediate': return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
+      case 'advanced': return 'bg-destructive/10 text-destructive-foreground border-destructive/20';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -47,11 +47,11 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">Completed</Badge>;
+        return <Badge className="bg-accent/10 text-accent-foreground border-accent/20">Completed</Badge>;
       case 'in_progress':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
+        return <Badge className="bg-primary/10 text-primary border-primary/20">In Progress</Badge>;
       case 'enrolled':
-        return <Badge className="bg-slate-100 text-slate-800 border-slate-200">Enrolled</Badge>;
+        return <Badge className="bg-muted text-muted-foreground border-border">Enrolled</Badge>;
       default:
         return null;
     }
@@ -72,7 +72,7 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
                 </Badge>
               )}
               {course.is_mandatory && (
-                <Badge className="bg-red-100 text-red-800 border-red-200">
+                <Badge className="bg-destructive/10 text-destructive-foreground border-destructive/20">
                   Mandatory
                 </Badge>
               )}
@@ -101,7 +101,7 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
             <span>Online</span>
           </div>
           {enrollment?.status === 'completed' && (
-            <div className="flex items-center gap-1 text-emerald-600">
+            <div className="flex items-center gap-1 text-accent-foreground">
               <Award className="h-4 w-4" />
               <span>Certified</span>
             </div>
@@ -125,7 +125,7 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
           <div className="flex items-center gap-2">
             {enrollment && getStatusBadge(enrollment.status)}
           </div>
-          <Button asChild size="sm" className="ml-auto">
+          <Button asChild size="sm" variant="canvas" className="ml-auto">
             <Link to={`/courses/${course.id}`}>
               {enrollment ? 'Continue' : 'Start Course'}
             </Link>

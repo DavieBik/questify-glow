@@ -187,7 +187,7 @@ const Profile = () => {
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
             <AvatarImage src="" />
-            <AvatarFallback className="text-lg font-semibold">
+            <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
               {getInitials(profile.first_name, profile.last_name)}
             </AvatarFallback>
           </Avatar>
@@ -199,7 +199,7 @@ const Profile = () => {
                 {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
               </Badge>
               {profile.is_active ? (
-                <Badge variant="outline" className="text-accent border-accent">Active</Badge>
+                <Badge variant="outline" className="text-primary border-primary">Active</Badge>
               ) : (
                 <Badge variant="outline" className="text-destructive border-destructive">Inactive</Badge>
               )}

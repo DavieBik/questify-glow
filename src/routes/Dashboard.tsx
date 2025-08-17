@@ -107,9 +107,9 @@ export default function Dashboard() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty?.toLowerCase()) {
-      case 'beginner': return '#10B981'; // green
-      case 'intermediate': return '#F59E0B'; // amber  
-      case 'advanced': return '#EF4444'; // red
+      case 'beginner': return 'hsl(var(--accent))'; // accent
+      case 'intermediate': return 'hsl(var(--secondary))'; // secondary  
+      case 'advanced': return 'hsl(var(--destructive))'; // destructive
       default: return 'hsl(var(--accent))'; // accent fallback
     }
   };
@@ -177,7 +177,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Courses</h2>
               <Link to="/courses">
-                <Button variant="ghost" size="sm" className="text-brand-navy">
+                <Button variant="ghost" size="sm" className="text-primary">
                   All Courses
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
