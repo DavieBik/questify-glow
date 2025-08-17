@@ -133,7 +133,7 @@ const CourseDetail = () => {
 
   const enrollInCourse = async () => {
     if (!user) {
-      toast.error('Please log in to enroll');
+      toast.error('Please log in to enrol');
       return;
     }
 
@@ -158,7 +158,7 @@ const CourseDetail = () => {
       fetchCourseDetails(); // Refresh enrollment status
     } catch (error) {
       console.error('Error enrolling in course:', error);
-      toast.error('Failed to enroll in course');
+      toast.error('Failed to enrol in course');
     }
   };
 
