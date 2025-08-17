@@ -250,7 +250,7 @@ export function LeaderboardCard() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    <Badge variant="secondary" className="bg-accent/20 text-accent-foreground">
                       {leader.total_points} pts
                     </Badge>
                   </div>
@@ -284,7 +284,7 @@ export function LeaderboardCard() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  <Badge variant="secondary" className="bg-primary/20 text-primary-foreground">
                     {leader.total_points} pts
                   </Badge>
                 </div>

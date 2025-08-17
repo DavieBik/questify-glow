@@ -257,12 +257,12 @@ export function PointsSystemCard() {
                 </div>
                 <p className="text-sm text-blue-600 dark:text-blue-500">This Week</p>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <Star className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-green-700 dark:text-green-400">
+              <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg border border-primary/20">
+                <Star className="h-8 w-8 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-bold text-primary">
                   {pointsData.monthly_points}
                 </div>
-                <p className="text-sm text-green-600 dark:text-green-500">This Month</p>
+                <p className="text-sm text-primary">This Month</p>
               </div>
             </div>
 
@@ -276,7 +276,7 @@ export function PointsSystemCard() {
                     <p className="text-sm text-muted-foreground">Level {pointsData.level}</p>
                   </div>
                 </div>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                <Badge variant="secondary" className="bg-primary/20 text-primary-foreground">
                   {pointsData.points_to_next_level} pts to next level
                 </Badge>
               </div>
@@ -305,7 +305,7 @@ export function PointsSystemCard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 border rounded-lg">
-                  <Award className="h-5 w-5 text-green-500" />
+                  <Award className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium text-sm">Pass Quiz</p>
                     <p className="text-xs text-muted-foreground">5-20 points</p>
@@ -333,8 +333,8 @@ export function PointsSystemCard() {
             {pointsHistory.length > 0 ? (
               pointsHistory.map((activity) => (
                 <div key={activity.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 text-xs font-bold">+{activity.points}</span>
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                    <span className="text-primary text-xs font-bold">+{activity.points}</span>
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{activity.source}</p>

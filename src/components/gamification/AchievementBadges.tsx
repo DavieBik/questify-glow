@@ -392,7 +392,7 @@ export function AchievementBadges() {
                         {achievement.rarity}
                       </Badge>
                       {achievement.earned && (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
+                        <Badge variant="default" className="bg-primary text-primary-foreground">
                           ✓ Earned
                         </Badge>
                       )}
@@ -449,7 +449,7 @@ export function AchievementBadges() {
                           {achievement.rarity}
                         </Badge>
                         {achievement.earned && (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
+                          <Badge variant="default" className="bg-primary text-primary-foreground">
                             ✓ Earned
                           </Badge>
                         )}
