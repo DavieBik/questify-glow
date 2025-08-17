@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { VideoPlayer } from '@/components/video/VideoPlayer';
 import { 
   Clock, 
   Play,
@@ -22,6 +23,11 @@ interface Module {
   description: string;
   content_type: string;
   content_url: string;
+  provider: 'storage' | 'youtube' | 'vimeo' | 'mux' | 'cloudflare';
+  poster_url?: string;
+  captions_url?: string;
+  duration_seconds?: number;
+  require_watch_pct?: number;
   is_required: boolean;
   pass_threshold_percentage: number;
   max_attempts: number;
@@ -69,7 +75,7 @@ const ModuleDetail = () => {
         .single();
 
       if (moduleError) throw moduleError;
-      setModule(moduleData);
+      setModule(moduleData as Module);
 
       // Fetch completion status
       if (user) {
@@ -130,46 +136,58 @@ const ModuleDetail = () => {
       );
     }
 
-    switch (module.content_type) {
-      case 'video':
-        return (
-          <div className="aspect-video">
-            <video
-              controls
-              className="w-full h-full rounded-lg"
-              src={module.content_url}
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        );
-      
-      case 'scorm':
-        return (
-          <div className="aspect-video">
-            <iframe
-              src={module.content_url}
-              className="w-full h-full rounded-lg border"
-              title={module.title}
-            />
-          </div>
-        );
-      
-      default:
-        return (
-          <div className="text-center py-8">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">
-              This module contains {module.content_type} content.
-            </p>
-            <Button asChild>
-              <a href={module.content_url} target="_blank" rel="noopener noreferrer">
-                Open Content
-              </a>
-            </Button>
-          </div>
-        );
+    const handleVideoProgress = (position: number, watchedPct: number) => {
+      console.log(`Video progress: ${position}s (${Math.round(watchedPct * 100)}%)`);
+    };
+
+    const handleVideoComplete = () => {
+      toast.success('Video completed! You can now take the quiz.');
+      fetchModuleDetails(); // Refresh to update completion status
+    };
+
+    // Use VideoPlayer for video content
+    if (module.content_type === 'video') {
+      return (
+        <VideoPlayer
+          moduleId={module.id}
+          provider={module.provider || 'storage'}
+          contentUrl={module.content_url}
+          posterUrl={module.poster_url}
+          captionsUrl={module.captions_url}
+          durationSeconds={module.duration_seconds}
+          requireWatchPct={module.require_watch_pct}
+          onProgress={handleVideoProgress}
+          onComplete={handleVideoComplete}
+        />
+      );
     }
+    
+    if (module.content_type === 'scorm') {
+      return (
+        <div className="aspect-video">
+          <iframe
+            src={module.content_url}
+            className="w-full h-full rounded-lg border"
+            title={module.title}
+          />
+        </div>
+      );
+    }
+    
+    // Default content renderer
+    return (
+      <div className="text-center py-8">
+        <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground mb-4">
+          This module contains {module.content_type} content.
+        </p>
+        <Button asChild>
+          <a href={module.content_url} target="_blank" rel="noopener noreferrer">
+            Open Content
+          </a>
+        </Button>
+      </div>
+    );
   };
 
   if (loading) {

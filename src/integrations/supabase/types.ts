@@ -1421,11 +1421,13 @@ export type Database = {
       modules: {
         Row: {
           body: string | null
+          captions_url: string | null
           content_type: string
           content_url: string | null
           course_id: string
           created_at: string
           description: string | null
+          duration_seconds: number | null
           external_id: string | null
           id: string
           is_required: boolean
@@ -1433,6 +1435,10 @@ export type Database = {
           order_index: number
           organization_id: string | null
           pass_threshold_percentage: number
+          poster_url: string | null
+          provider: string | null
+          require_watch_pct: number | null
+          status: string | null
           time_limit_minutes: number | null
           title: string
           type: string | null
@@ -1440,11 +1446,13 @@ export type Database = {
         }
         Insert: {
           body?: string | null
+          captions_url?: string | null
           content_type: string
           content_url?: string | null
           course_id: string
           created_at?: string
           description?: string | null
+          duration_seconds?: number | null
           external_id?: string | null
           id?: string
           is_required?: boolean
@@ -1452,6 +1460,10 @@ export type Database = {
           order_index: number
           organization_id?: string | null
           pass_threshold_percentage?: number
+          poster_url?: string | null
+          provider?: string | null
+          require_watch_pct?: number | null
+          status?: string | null
           time_limit_minutes?: number | null
           title: string
           type?: string | null
@@ -1459,11 +1471,13 @@ export type Database = {
         }
         Update: {
           body?: string | null
+          captions_url?: string | null
           content_type?: string
           content_url?: string | null
           course_id?: string
           created_at?: string
           description?: string | null
+          duration_seconds?: number | null
           external_id?: string | null
           id?: string
           is_required?: boolean
@@ -1471,6 +1485,10 @@ export type Database = {
           order_index?: number
           organization_id?: string | null
           pass_threshold_percentage?: number
+          poster_url?: string | null
+          provider?: string | null
+          require_watch_pct?: number | null
+          status?: string | null
           time_limit_minutes?: number | null
           title?: string
           type?: string | null
@@ -2419,6 +2437,58 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_skills_gap"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_module_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          last_position_seconds: number | null
+          module_id: string
+          updated_at: string
+          user_id: string
+          watched_pct: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          last_position_seconds?: number | null
+          module_id: string
+          updated_at?: string
+          user_id: string
+          watched_pct?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          last_position_seconds?: number | null
+          module_id?: string
+          updated_at?: string
+          user_id?: string
+          watched_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "mv_module_analytics"
+            referencedColumns: ["module_id"]
+          },
+          {
+            foreignKeyName: "user_module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "v_module_metrics"
+            referencedColumns: ["module_id"]
           },
         ]
       }
