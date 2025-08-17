@@ -1967,6 +1967,127 @@ export type Database = {
           },
         ]
       }
+      scorm_interactions: {
+        Row: {
+          created_at: string
+          element: string
+          id: string
+          session_id: string
+          ts: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          element: string
+          id?: string
+          session_id: string
+          ts?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          element?: string
+          id?: string
+          session_id?: string
+          ts?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorm_interactions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "scorm_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scorm_packages: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          storage_path: string
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id?: string
+          storage_path: string
+          title: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      scorm_sessions: {
+        Row: {
+          attempt: number
+          created_at: string
+          data: Json | null
+          ended_at: string | null
+          id: string
+          package_id: string
+          score: number | null
+          started_at: string | null
+          status: string
+          total_time: unknown | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          data?: Json | null
+          ended_at?: string | null
+          id?: string
+          package_id: string
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          total_time?: unknown | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          data?: Json | null
+          ended_at?: string | null
+          id?: string
+          package_id?: string
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          total_time?: unknown | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorm_sessions_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "scorm_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audit_log: {
         Row: {
           action: string
