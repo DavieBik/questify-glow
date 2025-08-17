@@ -1437,6 +1437,7 @@ export type Database = {
           pass_threshold_percentage: number
           poster_url: string | null
           provider: string | null
+          provider_asset_id: string | null
           require_watch_pct: number | null
           status: string | null
           time_limit_minutes: number | null
@@ -1462,6 +1463,7 @@ export type Database = {
           pass_threshold_percentage?: number
           poster_url?: string | null
           provider?: string | null
+          provider_asset_id?: string | null
           require_watch_pct?: number | null
           status?: string | null
           time_limit_minutes?: number | null
@@ -1487,6 +1489,7 @@ export type Database = {
           pass_threshold_percentage?: number
           poster_url?: string | null
           provider?: string | null
+          provider_asset_id?: string | null
           require_watch_pct?: number | null
           status?: string | null
           time_limit_minutes?: number | null
