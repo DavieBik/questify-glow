@@ -357,8 +357,8 @@ export function PointsSystemCard() {
               {rewards.map((reward) => (
                 <div key={reward.id} className={`p-4 border rounded-lg ${
                   reward.available && pointsData.total_points >= reward.cost
-                    ? 'border-green-200 bg-green-50 dark:bg-green-900/20'
-                    : 'border-gray-200'
+                    ? 'border-accent bg-accent/10'
+                    : 'border-border bg-card'
                 }`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">

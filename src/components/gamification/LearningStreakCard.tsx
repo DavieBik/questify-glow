@@ -238,14 +238,14 @@ export function LearningStreakCard() {
             
             return (
               <div key={milestone.days} className={`flex items-center gap-3 p-3 rounded-lg border ${
-                achieved ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
-                isNext ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
-                'bg-gray-50 dark:bg-gray-900/20'
+                achieved ? 'bg-secondary border-border' :
+                isNext ? 'bg-accent/10 border-accent/20' :
+                'bg-muted border-border'
               }`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  achieved ? 'bg-green-500 text-white' :
-                  isNext ? 'bg-blue-500 text-white' :
-                  'bg-gray-300 text-gray-600'
+                  achieved ? 'bg-primary text-primary-foreground' :
+                  isNext ? 'bg-accent text-accent-foreground' :
+                  'bg-muted text-muted-foreground'
                 }`}>
                   {achieved ? '✓' : milestone.days}
                 </div>

@@ -419,12 +419,12 @@ export default function AdminImportUsersEnrollments() {
                   <div className="text-2xl font-bold">{dryRunResult.total_rows}</div>
                   <div className="text-sm text-muted-foreground">Total Rows</div>
                 </div>
-                <div className="bg-green-50 p-4 rounded">
-                  <div className="text-2xl font-bold text-green-600">{dryRunResult.valid_rows}</div>
+                <div className="bg-secondary p-4 rounded">
+                  <div className="text-2xl font-bold text-primary">{dryRunResult.valid_rows}</div>
                   <div className="text-sm text-muted-foreground">Valid Rows</div>
                 </div>
-                <div className="bg-blue-50 p-4 rounded">
-                  <div className="text-2xl font-bold text-blue-600">{dryRunResult.new_users_count}</div>
+                <div className="bg-accent/10 p-4 rounded">
+                  <div className="text-2xl font-bold text-accent-foreground">{dryRunResult.new_users_count}</div>
                   <div className="text-sm text-muted-foreground">New Users</div>
                 </div>
                 <div className="bg-purple-50 p-4 rounded">
@@ -474,12 +474,12 @@ export default function AdminImportUsersEnrollments() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-green-50 p-4 rounded">
-                  <div className="text-2xl font-bold text-green-600">{commitResult.users_created}</div>
+                <div className="bg-secondary p-4 rounded">
+                  <div className="text-2xl font-bold text-primary">{commitResult.users_created}</div>
                   <div className="text-sm text-muted-foreground">Users Created</div>
                 </div>
-                <div className="bg-blue-50 p-4 rounded">
-                  <div className="text-2xl font-bold text-blue-600">{commitResult.enrollments_created}</div>
+                <div className="bg-accent/10 p-4 rounded">
+                  <div className="text-2xl font-bold text-accent-foreground">{commitResult.enrollments_created}</div>
                   <div className="text-sm text-muted-foreground">Enrollments Created</div>
                 </div>
               </div>

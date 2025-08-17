@@ -324,8 +324,8 @@ export function BulkAssignDialog({ open, onOpenChange, onSuccess }: BulkAssignDi
                 </div>
 
                 {selectedCourses.length > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <p className="text-sm font-medium text-green-900 mb-2">
+                  <div className="bg-secondary border border-border rounded-lg p-3">
+                    <p className="text-sm font-medium text-secondary-foreground mb-2">
                       Selected Courses ({selectedCourses.length})
                     </p>
                     <div className="flex flex-wrap gap-2">
