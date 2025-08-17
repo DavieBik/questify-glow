@@ -126,7 +126,7 @@ export function ManagerComplianceView() {
             <p className="text-xs text-muted-foreground">Total Staff</p>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{metrics.averageCompletion}%</div>
+            <div className="text-2xl font-bold text-primary">{metrics.averageCompletion}%</div>
             <p className="text-xs text-muted-foreground">Avg Completion</p>
           </div>
           <div className="text-center">
@@ -140,8 +140,8 @@ export function ManagerComplianceView() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium">Team Completion Rate</span>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-600" />
-              <span className="text-green-600">+{metrics.completionTrend}%</span>
+              <TrendingUp className="h-3 w-3 text-primary" />
+              <span className="text-primary">+{metrics.completionTrend}%</span>
             </div>
           </div>
           <Progress value={metrics.averageCompletion} className="h-3" />

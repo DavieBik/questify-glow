@@ -70,7 +70,7 @@ export function MyAssignedCourses() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Completed</Badge>;
+        return <Badge className="bg-primary/20 text-primary border-primary/20">Completed</Badge>;
       case 'in_progress':
         return <Badge className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
       default:
@@ -81,7 +81,7 @@ export function MyAssignedCourses() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <CheckCircle className="h-4 w-4 text-primary" />;
       case 'in_progress':
         return <PlayCircle className="h-4 w-4 text-blue-600" />;
       default:
