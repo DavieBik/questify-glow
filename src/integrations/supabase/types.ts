@@ -681,6 +681,8 @@ export type Database = {
           ndis_compliant: boolean
           organization_id: string | null
           owner_type: string | null
+          price: number | null
+          requires_approval: boolean | null
           scorm_package_url: string | null
           short_description: string | null
           thumbnail_url: string | null
@@ -706,6 +708,8 @@ export type Database = {
           ndis_compliant?: boolean
           organization_id?: string | null
           owner_type?: string | null
+          price?: number | null
+          requires_approval?: boolean | null
           scorm_package_url?: string | null
           short_description?: string | null
           thumbnail_url?: string | null
@@ -731,6 +735,8 @@ export type Database = {
           ndis_compliant?: boolean
           organization_id?: string | null
           owner_type?: string | null
+          price?: number | null
+          requires_approval?: boolean | null
           scorm_package_url?: string | null
           short_description?: string | null
           thumbnail_url?: string | null

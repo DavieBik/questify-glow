@@ -13,6 +13,8 @@ interface Course {
   title: string;
   description: string;
   is_mandatory: boolean;
+  requires_approval: boolean;
+  price: number;
   difficulty: string;
   category: string;
   estimated_duration_minutes: number;
@@ -64,8 +66,9 @@ export default function CourseEnrollment() {
   };
 
   const canSelfEnroll = (course: Course) => {
-    // Allow self-enrollment if course is mandatory (no cost) or meets other criteria
-    return course.is_mandatory; // Add other criteria like cost check here
+    // Allow self-enrollment if course doesn't require approval
+    // This is based on mandatory status, free cost, or explicit requires_approval field
+    return !course.requires_approval;
   };
 
   const handleSelfEnrollment = async () => {
@@ -205,6 +208,9 @@ export default function CourseEnrollment() {
                 <Badge variant={course.is_mandatory ? 'default' : 'secondary'}>
                   {course.is_mandatory ? 'Mandatory' : 'Optional'}
                 </Badge>
+                {course.price > 0 && (
+                  <Badge variant="outline">${course.price}</Badge>
+                )}
                 <Badge variant="outline">{course.difficulty}</Badge>
               </div>
             </div>
