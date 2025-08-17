@@ -132,15 +132,27 @@ const CourseDetail = () => {
   };
 
   const enrollInCourse = async () => {
+    if (!user) {
+      toast.error('Please log in to enroll');
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('user_course_enrollments')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           course_id: id,
+          status: 'enrolled'
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast.error('You are already enrolled in this course');
+          return;
+        }
+        throw error;
+      }
 
       toast.success('Successfully enrolled in course!');
       fetchCourseDetails(); // Refresh enrollment status
@@ -152,7 +164,7 @@ const CourseDetail = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
+      case 'beginner': return 'bg-primary/20 text-primary-foreground';
       case 'intermediate': return 'bg-yellow-100 text-yellow-800';
       case 'advanced': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -298,7 +310,7 @@ const CourseDetail = () => {
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
                         {module.is_completed ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <CheckCircle className="h-5 w-5 text-primary" />
                         ) : (
                           <Circle className="h-5 w-5 text-muted-foreground" />
                         )}
