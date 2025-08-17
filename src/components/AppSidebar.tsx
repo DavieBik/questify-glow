@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationCount } from '@/hooks/useNotificationCount';
+import { usePreviewRole } from '@/lib/rolePreview';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +17,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { 
   BookOpen, 
   FileText, 
@@ -72,6 +78,16 @@ export function AppSidebar() {
   const { isAdmin, isManager } = useAuth();
   const { unreadCount } = useNotificationCount();
   const currentPath = location.pathname;
+  const { toast } = useToast();
+  
+  // Role preview and dev elevation state
+  const { previewRole, setPreviewRole, clearPreview } = usePreviewRole();
+  const [selectedDevRole, setSelectedDevRole] = useState<string>('');
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  
+  // Check environment variables
+  const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
+  const isRoleElevationEnabled = import.meta.env.VITE_ALLOW_ROLE_ELEVATION === 'true';
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -82,6 +98,38 @@ export function AppSidebar() {
 
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"
+
+  const handleDevRoleChange = async () => {
+    if (!selectedDevRole) return;
+    
+    setIsUpdatingRole(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('dev-set-role', {
+        body: { role: selectedDevRole }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Role updated",
+        description: `Role updated to ${selectedDevRole}`,
+      });
+
+      // Reload the page to refresh all auth state
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to update role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update role. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingRole(false);
+    }
+  };
 
   return (
     <Sidebar
@@ -153,6 +201,92 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+        )}
+
+        {/* Dev Controls Section */}
+        {(isPreviewEnabled || isRoleElevationEnabled) && (
+          <>
+            <Separator className="mx-4 my-2" />
+            <SidebarGroup>
+              <SidebarGroupLabel>Development</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <div className="px-3 space-y-3">
+                  
+                  {/* Role Preview */}
+                  {isPreviewEnabled && (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        Role Preview (temp)
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {['student', 'staff', 'manager', 'admin'].map((role) => (
+                          <Button
+                            key={role}
+                            variant={previewRole === role ? "default" : "outline"}
+                            size="sm"
+                            className="h-7 text-xs relative"
+                            onClick={() => setPreviewRole(role as any)}
+                          >
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                            {previewRole === role && (
+                              <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+                                Active
+                              </Badge>
+                            )}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      {previewRole && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full h-7 text-xs"
+                          onClick={clearPreview}
+                        >
+                          Reset to real role
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Dev Role Elevation */}
+                  {isRoleElevationEnabled && (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        Set Real Role (dev)
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Changes actual role in database
+                      </div>
+                      
+                      <Select value={selectedDevRole} onValueChange={setSelectedDevRole}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select role..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="staff">Staff</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-7 text-xs"
+                        onClick={handleDevRoleChange}
+                        disabled={!selectedDevRole || isUpdatingRole}
+                      >
+                        {isUpdatingRole ? 'Updating...' : 'Apply'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
       </SidebarContent>
     </Sidebar>
