@@ -39,11 +39,16 @@ export default function Dashboard() {
 
   const fetchCourses = async () => {
     try {
+      console.log('Dashboard: Fetching courses');
       setLoading(true);
       
       // First, get user enrollments
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      console.log('Dashboard: Got user', { user: !!user });
+      if (!user) {
+        console.log('Dashboard: No user found, stopping fetch');
+        return;
+      }
 
       const { data: enrollments } = await supabase
         .from('user_course_enrollments')

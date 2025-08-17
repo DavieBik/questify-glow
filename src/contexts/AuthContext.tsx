@@ -93,18 +93,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    console.log('AuthProvider: Setting up auth state listener');
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('AuthProvider: Auth state changed', { event, session: !!session });
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('AuthProvider: User authenticated, fetching data');
           // Fetch user data and organization separately to avoid deadlock
           setTimeout(async () => {
             await fetchUserAndOrganization();
           }, 0);
         } else {
+          console.log('AuthProvider: No user session');
           setUserRole(null);
           setOrgRole(null);
         }

@@ -37,6 +37,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (loading) {
+    console.log('ProtectedRoute: Still loading authentication');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
