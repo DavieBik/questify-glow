@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Upload } from 'lucide-react';
+import { getClientVideoProvider, isClientMux } from '@/lib/video/provider';
 
 const moduleSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title must be less than 255 characters'),
@@ -20,6 +21,7 @@ const moduleSchema = z.object({
   order_index: z.number().min(1, 'Order must be at least 1'),
   content_type: z.enum(['quiz', 'video', 'document', 'scorm']),
   content_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  provider: z.enum(['storage', 'youtube', 'vimeo', 'mux', 'cloudflare']).optional(),
   pass_threshold_percentage: z.number().min(0, 'Must be at least 0').max(100, 'Must be at most 100'),
   max_attempts: z.number().min(1, 'Must allow at least 1 attempt'),
   time_limit_minutes: z.number().min(1, 'Time limit must be at least 1 minute').optional(),
@@ -36,6 +38,7 @@ interface Module {
   order_index: number;
   content_type: string;
   content_url: string;
+  provider: string;
   pass_threshold_percentage: number;
   max_attempts: number;
   time_limit_minutes: number;
@@ -48,6 +51,8 @@ const AdminModuleEdit: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [module, setModule] = useState<Module | null>(null);
+  const videoProvider = getClientVideoProvider();
+  const isMuxProvider = isClientMux();
 
   const form = useForm<ModuleFormData>({
     resolver: zodResolver(moduleSchema),
@@ -88,6 +93,7 @@ const AdminModuleEdit: React.FC = () => {
           order_index: data.order_index,
           content_type: data.content_type as 'quiz' | 'video' | 'document' | 'scorm',
           content_url: data.content_url || '',
+          provider: (data.provider || videoProvider) as 'storage' | 'youtube' | 'vimeo' | 'mux' | 'cloudflare',
           pass_threshold_percentage: data.pass_threshold_percentage,
           max_attempts: data.max_attempts,
           time_limit_minutes: data.time_limit_minutes || 30,
@@ -114,6 +120,7 @@ const AdminModuleEdit: React.FC = () => {
         order_index: data.order_index,
         content_type: data.content_type,
         content_url: data.content_url || null,
+        provider: data.provider || videoProvider,
         pass_threshold_percentage: data.pass_threshold_percentage,
         max_attempts: data.max_attempts,
         time_limit_minutes: data.time_limit_minutes || null,
@@ -272,27 +279,62 @@ const AdminModuleEdit: React.FC = () => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="content_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Content URL</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="url" 
-                          placeholder="https://example.com/content"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Link to the module content (optional)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {form.watch('content_type') === 'video' && (
+                  <FormField
+                    control={form.control}
+                    name="provider"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Video Provider *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select video provider" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="mux">Mux (Recommended)</SelectItem>
+                            <SelectItem value="storage">File Storage</SelectItem>
+                            <SelectItem value="youtube">YouTube</SelectItem>
+                            <SelectItem value="vimeo">Vimeo</SelectItem>
+                            {!isMuxProvider && (
+                              <SelectItem value="cloudflare">Cloudflare Stream</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Current system default: {videoProvider.toUpperCase()}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
+
+              <FormField
+                control={form.control}
+                name="content_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Content URL</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="url" 
+                        placeholder="https://example.com/content"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {form.watch('provider') === 'mux' 
+                        ? 'Leave empty for Mux videos - upload after module creation'
+                        : 'Link to the module content (optional)'
+                      }
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField

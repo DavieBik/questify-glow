@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getClientVideoProvider, isClientMux } from '@/lib/video/provider';
 
 interface VideoPlayerProps {
   moduleId: string;
@@ -142,6 +143,35 @@ export function VideoPlayer({
           allowFullScreen
           allow="autoplay; fullscreen; picture-in-picture"
         />
+      </div>
+    );
+  }
+
+  // Mux and Cloudflare signed video streams
+  if (provider === 'mux' || provider === 'cloudflare') {
+    return (
+      <div className="aspect-video">
+        <video
+          ref={videoRef}
+          className="w-full h-full rounded-lg"
+          controls
+          poster={posterUrl}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={handleEnded}
+          crossOrigin="anonymous"
+        >
+          <source src={contentUrl} type="application/x-mpegURL" />
+          {captionsUrl && (
+            <track
+              kind="captions"
+              src={captionsUrl}
+              srcLang="en"
+              label="English"
+              default
+            />
+          )}
+          Your browser does not support the video tag.
+        </video>
       </div>
     );
   }
