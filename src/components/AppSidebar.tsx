@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationCount } from '@/hooks/useNotificationCount';
-import { usePreviewRole } from '@/lib/rolePreview';
+import { usePreviewRole, type PreviewRole } from '@/lib/rolePreview';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -81,13 +81,28 @@ export function AppSidebar() {
   const { toast } = useToast();
   
   // Role preview and dev elevation state
-  const { previewRole, setPreviewRole, clearPreview } = usePreviewRole();
   const [selectedDevRole, setSelectedDevRole] = useState<string>('');
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   
   // Check environment variables
   const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
   const isRoleElevationEnabled = import.meta.env.VITE_ALLOW_ROLE_ELEVATION === 'true';
+  
+  // Safely get preview role context (only if preview is enabled)
+  let previewRole: PreviewRole = null;
+  let setPreviewRole: (role: PreviewRole) => void = () => {};
+  let clearPreview: () => void = () => {};
+  
+  if (isPreviewEnabled) {
+    try {
+      const previewContext = usePreviewRole();
+      previewRole = previewContext.previewRole;
+      setPreviewRole = previewContext.setPreviewRole;
+      clearPreview = previewContext.clearPreview;
+    } catch {
+      // Preview context not available, use defaults
+    }
+  }
 
   const isActive = (path: string) => {
     if (path === '/') {
