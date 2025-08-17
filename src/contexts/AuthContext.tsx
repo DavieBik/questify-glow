@@ -58,8 +58,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const organization = getOrganizationConfig();
 
   const fetchUserAndOrganization = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('AuthContext: No user, cannot fetch role');
+      return;
+    }
 
+    console.log('AuthContext: Fetching user data for user:', user.id);
     try {
       // Fetch user data (simplified for single-tenant)
       const { data: userData, error: userError } = await supabase
@@ -68,7 +72,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', user.id)
         .maybeSingle();
 
+      console.log('AuthContext: User data query result:', { userData, userError });
+
       if (!userError && userData) {
+        console.log('AuthContext: Setting user role to:', userData.role);
         setUserRole(userData.role);
         
         // Fetch org role from org_members
@@ -79,9 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('organization_id', organization.id)
           .maybeSingle();
 
+        console.log('AuthContext: Org member data:', orgMemberData);
+
         if (orgMemberData) {
           setOrgRole(orgMemberData.role);
         }
+      } else {
+        console.log('AuthContext: Error or no user data:', userError);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
