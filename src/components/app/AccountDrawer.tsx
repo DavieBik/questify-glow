@@ -38,9 +38,24 @@ export function AccountDrawer() {
   // Role preview functionality (also enable with force dev mode)
   const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true' || forceDevMode;
   
-  // Always call hooks at top level - never conditionally
-  const previewContext = isPreviewEnabled ? usePreviewRole() : { previewRole: null, setPreviewRole: () => {}, clearPreview: () => {}, effectiveRole: userRole };
-  const { previewRole, setPreviewRole, clearPreview, effectiveRole } = previewContext;
+  // Always call hooks at top level - handle missing provider gracefully
+  let previewRole = null;
+  let setPreviewRole = (role: any) => {};
+  let clearPreview = () => {};
+  let effectiveRole = userRole;
+  
+  if (isPreviewEnabled) {
+    try {
+      const context = usePreviewRole();
+      previewRole = context.previewRole;
+      setPreviewRole = context.setPreviewRole;
+      clearPreview = context.clearPreview;
+      effectiveRole = context.effectiveRole;
+    } catch {
+      // Preview context not available, use defaults
+      effectiveRole = userRole;
+    }
+  }
 
   useEffect(() => {
     const getUser = async () => {
