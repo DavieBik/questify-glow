@@ -42,6 +42,7 @@ import AdminModuleCreate from "./pages/AdminModuleCreate";
 import AdminModuleEdit from "./pages/AdminModuleEdit";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminApprovals from "./pages/AdminApprovals";
+import SegmentedDemo from "./pages/dev/SegmentedDemo";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminImportCoursesModules from "./pages/AdminImportCoursesModules";
 import AdminImportUsersEnrollments from "./pages/AdminImportUsersEnrollments";

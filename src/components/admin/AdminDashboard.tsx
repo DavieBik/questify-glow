@@ -135,7 +135,7 @@ export function AdminDashboard() {
       case 'enrollment':
         return <BookOpen className="h-4 w-4 text-blue-600" />;
       case 'completion':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <CheckCircle className="h-4 w-4 text-primary" />;
       case 'certificate':
         return <Award className="h-4 w-4 text-yellow-600" />;
       default:
@@ -174,7 +174,7 @@ export function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <UserCheck className="h-3 w-3 text-green-600" />
+              <UserCheck className="h-3 w-3 text-primary" />
               {stats.activeUsers} active
               <UserX className="h-3 w-3 text-red-600 ml-2" />
               {stats.totalUsers - stats.activeUsers} inactive
@@ -306,7 +306,7 @@ export function AdminDashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">User Engagement</span>
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className="text-primary">
                       Good
                     </Badge>
                   </div>
@@ -324,7 +324,7 @@ export function AdminDashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">System Load</span>
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className="text-primary">
                       Low
                     </Badge>
                   </div>

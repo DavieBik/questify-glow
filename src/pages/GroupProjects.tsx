@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { 
   Users, 
   Plus, 
@@ -100,6 +100,7 @@ const GroupProjects: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [submissionDialogOpen, setSubmissionDialogOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [activeTab, setActiveTab] = useState('available');
 
   useEffect(() => {
     if (user) {
@@ -305,280 +306,290 @@ const GroupProjects: React.FC = () => {
         )}
       </div>
 
-      <Tabs defaultValue="available" className="space-y-6">
-        <TabsList className="bg-secondary">
-          <TabsTrigger value="available" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Available Projects</TabsTrigger>
-          <TabsTrigger value="my-teams" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">My Teams</TabsTrigger>
-          <TabsTrigger value="submissions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Submissions</TabsTrigger>
-        </TabsList>
+      <div className="space-y-6">
+        <SegmentedTabs
+          items={[
+            { id: 'available', label: 'Available Projects', icon: <Calendar className="h-4 w-4" /> },
+            { id: 'my-teams', label: 'My Teams', icon: <Users className="h-4 w-4" /> },
+            { id: 'submissions', label: 'Submissions', icon: <CheckCircle className="h-4 w-4" /> }
+          ]}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
 
-        <TabsContent value="available" className="space-y-4">
-          {projects.length === 0 ? (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <div className="text-lg font-medium mb-2">No projects available</div>
-                  <div className="text-sm">
-                    {canEdit 
-                      ? "Create your first group project to get started"
-                      : "Check back later for new projects"
-                    }
+        {activeTab === 'available' && (
+          <div className="space-y-4">
+            {projects.length === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <div className="text-lg font-medium mb-2">No projects available</div>
+                    <div className="text-sm">
+                      {canEdit 
+                        ? "Create your first group project to get started"
+                        : "Check back later for new projects"
+                      }
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {projects.map((project) => (
-                <Card key={project.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {project.title}
-                          {project.user_team && (
-                            <Badge variant="default">
-                              In Team: {project.user_team.name}
-                            </Badge>
-                          )}
-                        </CardTitle>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {project.course?.title}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {getDueDateBadge(project.due_date)}
-                        <Badge variant="outline">
-                          {project.min_team_size}-{project.max_team_size} members
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-foreground mb-4 whitespace-pre-wrap">
-                      {project.description}
-                    </p>
-                    
-                    {project.instructions && (
-                      <div className="mb-4 p-3 bg-muted rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileText className="h-4 w-4" />
-                          <span className="font-medium text-sm">Instructions</span>
-                        </div>
-                        <p className="text-sm whitespace-pre-wrap">{project.instructions}</p>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {project.due_date && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>Due {format(new Date(project.due_date), 'PPP')}</span>
-                          </div>
-                        )}
-                        {project.submission_format && (
-                          <div className="flex items-center gap-1">
-                            <Upload className="h-4 w-4" />
-                            <span>Submit via {project.submission_format}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {!project.user_team && project.allow_self_enrollment && (
-                        <Button 
-                          onClick={() => handleCreateTeam(project)}
-                          size="sm"
-                        >
-                          <Users className="h-4 w-4 mr-2" />
-                          Create Team
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="my-teams" className="space-y-4">
-          {teams.filter(team => team.members?.some(m => m.user_id === user?.id)).length === 0 ? (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <div className="text-lg font-medium mb-2">No teams yet</div>
-                  <div className="text-sm">Join or create a team to get started</div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {teams
-                .filter(team => team.members?.some(m => m.user_id === user?.id))
-                .map((team) => (
-                  <Card key={team.id}>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {projects.map((project) => (
+                  <Card key={project.id}>
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle>{team.name}</CardTitle>
+                          <CardTitle className="flex items-center gap-2">
+                            {project.title}
+                            {project.user_team && (
+                              <Badge variant="default">
+                                In Team: {project.user_team.name}
+                              </Badge>
+                            )}
+                          </CardTitle>
                           <div className="text-sm text-muted-foreground mt-1">
-                            Project: {team.project?.title}
+                            {project.course?.title}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant={team.is_full ? "secondary" : "outline"}>
-                            {team.member_count} members
+                          {getDueDateBadge(project.due_date)}
+                          <Badge variant="outline">
+                            {project.min_team_size}-{project.max_team_size} members
                           </Badge>
-                          {team.members?.find(m => m.user_id === user?.id)?.role === 'leader' && (
-                            <Badge variant="default">Team Leader</Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-foreground mb-4 whitespace-pre-wrap">
+                        {project.description}
+                      </p>
+                      
+                      {project.instructions && (
+                        <div className="mb-4 p-3 bg-muted rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="font-medium text-sm">Instructions</span>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{project.instructions}</p>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          {project.due_date && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>Due {format(new Date(project.due_date), 'PPP')}</span>
+                            </div>
+                          )}
+                          {project.submission_format && (
+                            <div className="flex items-center gap-1">
+                              <Upload className="h-4 w-4" />
+                              <span>Submit via {project.submission_format}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {!project.user_team && project.allow_self_enrollment && (
+                          <Button 
+                            onClick={() => handleCreateTeam(project)}
+                            size="sm"
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            Create Team
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'my-teams' && (
+          <div className="space-y-4">
+            {teams.filter(team => team.members?.some(m => m.user_id === user?.id)).length === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <div className="text-lg font-medium mb-2">No teams yet</div>
+                    <div className="text-sm">Join or create a team to get started</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {teams
+                  .filter(team => team.members?.some(m => m.user_id === user?.id))
+                  .map((team) => (
+                    <Card key={team.id}>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle>{team.name}</CardTitle>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              Project: {team.project?.title}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={team.is_full ? "secondary" : "outline"}>
+                              {team.member_count} members
+                            </Badge>
+                            {team.members?.find(m => m.user_id === user?.id)?.role === 'leader' && (
+                              <Badge variant="default">Team Leader</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {team.description && (
+                          <p className="text-foreground mb-4">{team.description}</p>
+                        )}
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <h4 className="font-medium mb-2">Team Members</h4>
+                            <div className="space-y-2">
+                              {team.members?.map((member) => (
+                                <div key={member.user_id} className="flex items-center justify-between">
+                                  <div>
+                                    <span className="font-medium">
+                                      {member.user.first_name} {member.user.last_name}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground ml-2">
+                                      ({member.user.email})
+                                    </span>
+                                  </div>
+                                  <Badge variant={member.role === 'leader' ? 'default' : 'outline'}>
+                                    {member.role}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end">
+                            <Button 
+                              onClick={() => handleSubmission(team)}
+                              size="sm"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Submit Work
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'submissions' && (
+          <div className="space-y-4">
+            {submissions.length === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center text-muted-foreground">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <div className="text-lg font-medium mb-2">No submissions yet</div>
+                    <div className="text-sm">Submit your team's work to see it here</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {submissions.map((submission) => (
+                  <Card key={submission.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">
+                            {submission.team?.project.title}
+                          </CardTitle>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Team: {submission.team?.name}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={submission.is_final ? 'default' : 'outline'}>
+                            {submission.is_final ? 'Final' : 'Draft'}
+                          </Badge>
+                          {submission.grade && (
+                            <Badge variant="secondary">
+                              <Star className="h-3 w-3 mr-1" />
+                              {submission.grade}/100
+                            </Badge>
                           )}
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      {team.description && (
-                        <p className="text-foreground mb-4">{team.description}</p>
-                      )}
-                      
                       <div className="space-y-3">
-                        <div>
-                          <h4 className="font-medium mb-2">Team Members</h4>
-                          <div className="space-y-2">
-                            {team.members?.map((member) => (
-                              <div key={member.user_id} className="flex items-center justify-between">
-                                <div>
-                                  <span className="font-medium">
-                                    {member.user.first_name} {member.user.last_name}
-                                  </span>
-                                  <span className="text-sm text-muted-foreground ml-2">
-                                    ({member.user.email})
-                                  </span>
-                                </div>
-                                <Badge variant={member.role === 'leader' ? 'default' : 'outline'}>
-                                  {member.role}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="text-sm text-muted-foreground">
+                          Submitted on {format(new Date(submission.submitted_at), 'PPP')}
                         </div>
                         
-                        <div className="flex justify-end">
-                          <Button 
-                            onClick={() => handleSubmission(team)}
-                            size="sm"
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Submit Work
-                          </Button>
-                        </div>
+                        {submission.content && (
+                          <div>
+                            <h4 className="font-medium mb-2">Content</h4>
+                            <p className="text-sm bg-muted p-3 rounded whitespace-pre-wrap">
+                              {submission.content}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {submission.file_url && (
+                          <div>
+                            <h4 className="font-medium mb-2">File</h4>
+                            <a 
+                              href={submission.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              View submitted file
+                            </a>
+                          </div>
+                        )}
+                        
+                        {submission.link_url && (
+                          <div>
+                            <h4 className="font-medium mb-2">Link</h4>
+                            <a 
+                              href={submission.link_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              {submission.link_url}
+                            </a>
+                          </div>
+                        )}
+                        
+                        {submission.feedback && (
+                          <div>
+                            <h4 className="font-medium mb-2">Feedback</h4>
+                            <p className="text-sm bg-muted p-3 rounded whitespace-pre-wrap">
+                              {submission.feedback}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="submissions" className="space-y-4">
-          {submissions.length === 0 ? (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <div className="text-lg font-medium mb-2">No submissions yet</div>
-                  <div className="text-sm">Submit your team's work to see it here</div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {submissions.map((submission) => (
-                <Card key={submission.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">
-                          {submission.team?.project.title}
-                        </CardTitle>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          Team: {submission.team?.name}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={submission.is_final ? 'default' : 'outline'}>
-                          {submission.is_final ? 'Final' : 'Draft'}
-                        </Badge>
-                        {submission.grade && (
-                          <Badge variant="secondary">
-                            <Star className="h-3 w-3 mr-1" />
-                            {submission.grade}/100
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="text-sm text-muted-foreground">
-                        Submitted on {format(new Date(submission.submitted_at), 'PPP')}
-                      </div>
-                      
-                      {submission.content && (
-                        <div>
-                          <h4 className="font-medium mb-2">Content</h4>
-                          <p className="text-sm bg-muted p-3 rounded whitespace-pre-wrap">
-                            {submission.content}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {submission.file_url && (
-                        <div>
-                          <h4 className="font-medium mb-2">File</h4>
-                          <a 
-                            href={submission.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            View submitted file
-                          </a>
-                        </div>
-                      )}
-                      
-                      {submission.link_url && (
-                        <div>
-                          <h4 className="font-medium mb-2">Link</h4>
-                          <a 
-                            href={submission.link_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {submission.link_url}
-                          </a>
-                        </div>
-                      )}
-                      
-                      {submission.feedback && (
-                        <div>
-                          <h4 className="font-medium mb-2">Feedback</h4>
-                          <p className="text-sm bg-muted p-3 rounded whitespace-pre-wrap">
-                            {submission.feedback}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <CreateProjectDialog
         open={createProjectOpen}

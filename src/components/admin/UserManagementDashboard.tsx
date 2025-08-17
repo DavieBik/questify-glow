@@ -322,7 +322,7 @@ export function UserManagementDashboard() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.is_active ? 'outline' : 'secondary'} 
-                               className={user.is_active ? 'text-green-600 border-green-600' : 'text-red-600'}>
+                               className={user.is_active ? 'text-primary border-primary' : 'text-destructive'}>
                           {user.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>

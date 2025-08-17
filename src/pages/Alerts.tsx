@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bell, Check, Clock, AlertCircle, BookOpen, Calendar } from 'lucide-react';
 
@@ -24,6 +24,7 @@ const Alerts: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [markingAsRead, setMarkingAsRead] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('unread');
 
   useEffect(() => {
     loadNotifications();
@@ -288,35 +289,39 @@ const Alerts: React.FC = () => {
         )}
       </div>
 
-      <Tabs defaultValue="unread" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="unread" className="relative">
-            Unread
-            {unreadNotifications.length > 0 && (
-              <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 text-xs">
-                {unreadNotifications.length}
-              </Badge>
+      <div className="space-y-4">
+        <SegmentedTabs
+          items={[
+            { 
+              id: 'unread', 
+              label: `Unread${unreadNotifications.length > 0 ? ` (${unreadNotifications.length})` : ''}` 
+            },
+            { id: 'all', label: 'All' }
+          ]}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
+
+        {activeTab === 'unread' && (
+          <>
+            {unreadNotifications.length === 0 ? (
+              <EmptyState isUnread={true} />
+            ) : (
+              <NotificationList items={unreadNotifications} />
             )}
-          </TabsTrigger>
-          <TabsTrigger value="all">All</TabsTrigger>
-        </TabsList>
+          </>
+        )}
 
-        <TabsContent value="unread">
-          {unreadNotifications.length === 0 ? (
-            <EmptyState isUnread={true} />
-          ) : (
-            <NotificationList items={unreadNotifications} />
-          )}
-        </TabsContent>
-
-        <TabsContent value="all">
-          {notifications.length === 0 ? (
-            <EmptyState isUnread={false} />
-          ) : (
-            <NotificationList items={notifications} showActions={false} />
-          )}
-        </TabsContent>
-      </Tabs>
+        {activeTab === 'all' && (
+          <>
+            {notifications.length === 0 ? (
+              <EmptyState isUnread={false} />
+            ) : (
+              <NotificationList items={notifications} showActions={false} />
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

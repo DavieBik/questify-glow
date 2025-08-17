@@ -189,7 +189,7 @@ export function AuditLogViewer({ open, onOpenChange }: AuditLogViewerProps) {
   const getActionColor = (action: string) => {
     switch (action) {
       case 'USER_LOGIN':
-        return 'bg-green-100 text-green-800';
+        return 'bg-primary/20 text-primary-foreground';
       case 'USER_LOGOUT':
         return 'bg-gray-100 text-gray-800';
       case 'USER_CREATED':

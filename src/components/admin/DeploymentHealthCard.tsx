@@ -301,7 +301,7 @@ export function DeploymentHealthCard() {
 
           <div className="text-center p-3 border rounded-lg">
             <div className="flex items-center justify-center gap-1 mb-2">
-              <MessageSquare className="h-4 w-4 text-green-600" />
+              <MessageSquare className="h-4 w-4 text-primary" />
               {getStatusBadge(metrics.conversationCount, 'conversations')}
             </div>
             <div className="text-lg font-bold">

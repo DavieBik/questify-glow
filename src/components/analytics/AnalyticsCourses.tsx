@@ -95,13 +95,13 @@ export function AnalyticsCourses() {
   };
 
   const getCompletionRateColor = (rate: number) => {
-    if (rate >= 80) return "text-green-600";
+    if (rate >= 80) return "text-primary";
     if (rate >= 60) return "text-yellow-600";
     return "text-red-600";
   };
 
   const getTrendIcon = (current: number, previous: number) => {
-    if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />;
+    if (current > previous) return <TrendingUp className="h-4 w-4 text-primary" />;
     if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />;
     return <BarChart3 className="h-4 w-4 text-gray-500" />;
   };
