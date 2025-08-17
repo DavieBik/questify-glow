@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, X } from 'lucide-react';
+import { Bell, Award, BookOpen, TrendingUp, Calendar, AlertTriangle, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AccountDrawer } from '@/components/app/AccountDrawer';
 import { WelcomeHeader } from '@/components/app/WelcomeHeader';
-import { CourseCard } from '@/components/courses/CourseCard';
 import { BottomTabs } from '@/components/app/BottomTabs';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNotificationCount } from '@/hooks/useNotificationCount';
+import { withErrorHandling } from '@/utils/error-handling';
 
-interface Course {
-  id: string;
-  title: string;
-  category?: string;
-  difficulty: string;
+interface DashboardStats {
+  enrolledCourses: number;
+  completedCourses: number;
+  certificates: number;
+  totalHours: number;
 }
 
 interface Announcement {
@@ -27,68 +30,72 @@ interface Announcement {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const { unreadCount } = useNotificationCount();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    enrolledCourses: 0,
+    completedCourses: 0,
+    certificates: 0,
+    totalHours: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCourses();
-    fetchAnnouncements();
-  }, []);
+    if (user) {
+      fetchDashboardData();
+      fetchAnnouncements();
+    }
+  }, [user]);
 
-  const fetchCourses = async () => {
-    try {
-      console.log('Dashboard: Fetching courses');
-      setLoading(true);
-      
-      // First, get user enrollments
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('Dashboard: Got user', { user: !!user });
-      if (!user) {
-        console.log('Dashboard: No user found, stopping fetch');
-        return;
-      }
-
-      const { data: enrollments } = await supabase
+  const fetchDashboardData = async () => {
+    await withErrorHandling(async () => {
+      // Fetch enrollment stats
+      const { data: enrollments, error: enrollmentError } = await supabase
         .from('user_course_enrollments')
         .select(`
-          course_id,
+          id,
+          progress_percentage,
+          status,
           courses (
             id,
             title,
-            category,
-            difficulty
+            difficulty,
+            estimated_duration_minutes
           )
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user?.id);
 
-      if (enrollments && enrollments.length > 0) {
-        // Show enrolled courses
-        const enrolledCourses = enrollments
-          .map(enrollment => enrollment.courses)
-          .filter(Boolean) as Course[];
-        setCourses(enrolledCourses);
-      } else {
-        // If no enrollments, show available courses
-        const { data: availableCourses } = await supabase
-          .from('courses')
-          .select('id, title, category, difficulty')
-          .eq('is_active', true)
-          .limit(6);
+      if (enrollmentError) throw enrollmentError;
 
-        setCourses(availableCourses || []);
-      }
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-    } finally {
-      setLoading(false);
-    }
+      // Fetch certificates
+      const { data: certificates, error: certError } = await supabase
+        .from('certificates')
+        .select('id')
+        .eq('user_id', user?.id);
+
+      if (certError) throw certError;
+
+      // Calculate stats
+      const enrolled = enrollments?.length || 0;
+      const completed = enrollments?.filter(e => e.status === 'completed').length || 0;
+      const totalMinutes = enrollments?.reduce((acc, e) => {
+        return acc + (e.courses?.estimated_duration_minutes || 0);
+      }, 0) || 0;
+
+      setStats({
+        enrolledCourses: enrolled,
+        completedCourses: completed,
+        certificates: certificates?.length || 0,
+        totalHours: Math.round(totalMinutes / 60),
+      });
+    });
   };
 
   const fetchAnnouncements = async () => {
-    try {
-      const { data } = await supabase
+    await withErrorHandling(async () => {
+      const { data, error } = await supabase
         .from('announcements')
         .select('*')
         .order('created_at', { ascending: false })
@@ -96,10 +103,10 @@ export default function Dashboard() {
         .eq('priority', 'high')
         .limit(3);
       
+      if (error) throw error;
       setAnnouncements(data || []);
-    } catch (error) {
-      console.error('Error fetching announcements:', error);
-    }
+      setLoading(false);
+    });
   };
 
   const handleDismissAnnouncement = (announcementId: string) => {
@@ -110,26 +117,9 @@ export default function Dashboard() {
     announcement => !dismissedAnnouncements.includes(announcement.id)
   );
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'beginner': return 'hsl(var(--accent))'; // accent
-      case 'intermediate': return 'hsl(var(--secondary))'; // secondary  
-      case 'advanced': return 'hsl(var(--destructive))'; // destructive
-      default: return 'hsl(var(--accent))'; // accent fallback
-    }
-  };
-
-  const CourseSkeletons = () => (
-    <>
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-muted rounded-lg h-24 animate-pulse" />
-      ))}
-    </>
-  );
-
   return (
     <>
-      {/* Mobile Canvas-like Interface */}
+      {/* Mobile Dashboard */}
       <div className="md:hidden min-h-screen bg-background pb-20">
         {/* Top Bar */}
         <header className="sticky top-0 z-40 bg-background border-b border-border">
@@ -142,10 +132,11 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div className="px-4 py-6 space-y-6">
-          {/* Urgent Announcements */}
+          {/* Critical Announcements */}
           {visibleAnnouncements.map((announcement) => (
             <Alert key={announcement.id} className="border-l-4 border-l-destructive bg-destructive/5">
-              <div className="flex items-start justify-between">
+              <AlertTriangle className="h-4 w-4" />
+              <div className="flex items-start justify-between w-full">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="destructive" className="text-xs">URGENT</Badge>
@@ -165,7 +156,7 @@ export default function Dashboard() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground ml-2"
                   onClick={() => handleDismissAnnouncement(announcement.id)}
                 >
                   <X className="h-4 w-4" />
@@ -177,54 +168,113 @@ export default function Dashboard() {
           {/* Welcome Header */}
           <WelcomeHeader />
 
-          {/* Courses Section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Courses</h2>
-              <Link to="/courses">
-                <Button variant="ghost" size="sm" className="text-primary">
-                  All Courses
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs font-medium">Enrolled</CardTitle>
+                <BookOpen className="h-3 w-3 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold">{stats.enrolledCourses}</div>
+                <p className="text-xs text-muted-foreground">courses</p>
+              </CardContent>
+            </Card>
 
-            {/* Course Grid */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              {loading ? (
-                <CourseSkeletons />
-              ) : courses.length > 0 ? (
-                courses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    id={course.id}
-                    title={course.title}
-                    code={course.category}
-                    color={getDifficultyColor(course.difficulty)}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12 text-muted-foreground">
-                  <p>No courses enrolled yet</p>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs font-medium">Completed</CardTitle>
+                <TrendingUp className="h-3 w-3 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold">{stats.completedCourses}</div>
+                <p className="text-xs text-muted-foreground">courses</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs font-medium">Certificates</CardTitle>
+                <Award className="h-3 w-3 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold">{stats.certificates}</div>
+                <p className="text-xs text-muted-foreground">earned</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs font-medium">
+                  Notifications
+                  {unreadCount > 0 && (
+                    <Badge variant="destructive" className="ml-1 text-xs px-1">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </CardTitle>
+                <Bell className="h-3 w-3 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold">{unreadCount}</div>
+                <p className="text-xs text-muted-foreground">unread</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Quick Actions</CardTitle>
+              <CardDescription className="text-sm">
+                Access your most important tasks
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Button asChild variant="outline" className="h-16 flex-col gap-1">
                   <Link to="/courses">
-                    <Button className="mt-4">Browse Courses</Button>
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    <span className="text-xs">Browse Courses</span>
                   </Link>
-                </div>
-              )}
-            </div>
-          </section>
+                </Button>
+                
+                <Button asChild variant="outline" className="h-16 flex-col gap-1">
+                  <Link to="/alerts">
+                    <Bell className="h-5 w-5 text-destructive" />
+                    <span className="text-xs">Notifications</span>
+                  </Link>
+                </Button>
+
+                <Button asChild variant="outline" className="h-16 flex-col gap-1">
+                  <Link to="/certificates">
+                    <Award className="h-5 w-5 text-accent" />
+                    <span className="text-xs">Certificates</span>
+                  </Link>
+                </Button>
+                
+                <Button asChild variant="outline" className="h-16 flex-col gap-1">
+                  <Link to="/messages">
+                    <Calendar className="h-5 w-5 text-secondary-foreground" />
+                    <span className="text-xs">Messages</span>
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Bottom Navigation */}
         <BottomTabs />
       </div>
 
-      {/* Desktop Interface - Traditional Layout */}
-      <div className="hidden md:block">
-        {/* Urgent Announcements */}
+      {/* Desktop Interface */}
+      <div className="hidden md:block space-y-6">
+        {/* Critical Announcements */}
         {visibleAnnouncements.map((announcement) => (
-          <Alert key={announcement.id} className="border-l-4 border-l-destructive bg-destructive/5 mb-6">
-            <div className="flex items-start justify-between">
+          <Alert key={announcement.id} className="border-l-4 border-l-destructive bg-destructive/5">
+            <AlertTriangle className="h-4 w-4" />
+            <div className="flex items-start justify-between w-full">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="destructive" className="text-xs">URGENT</Badge>
@@ -244,7 +294,7 @@ export default function Dashboard() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground ml-4"
                 onClick={() => handleDismissAnnouncement(announcement.id)}
               >
                 <X className="h-4 w-4" />
@@ -256,42 +306,116 @@ export default function Dashboard() {
         {/* Welcome Header */}
         <WelcomeHeader />
 
-        {/* Courses Section */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Courses</h2>
-            <Link to="/courses">
-              <Button variant="ghost" className="text-primary">
-                All Courses
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+        {/* Critical Information Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Notifications */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notifications
+              </CardTitle>
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="rounded-full px-2 py-1">
+                  {unreadCount}
+                </Badge>
+              )}
+            </CardHeader>
+            <CardContent>
+              {unreadCount > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                  </p>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/alerts">View All Notifications</Link>
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No new notifications</p>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Course Grid */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {loading ? (
-              <CourseSkeletons />
-            ) : courses.length > 0 ? (
-              courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  id={course.id}
-                  title={course.title}
-                  code={course.category}
-                  color={getDifficultyColor(course.difficulty)}
-                />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                <p>No courses enrolled yet</p>
-                <Link to="/courses">
-                  <Button className="mt-4">Browse Courses</Button>
-                </Link>
+          {/* Quick Navigation */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Quick Access
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                  <Link to="/courses">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Browse All Courses
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                  <Link to="/certificates">
+                    <Award className="h-4 w-4 mr-2" />
+                    My Certificates
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                  <Link to="/messages">
+                    <Bell className="h-4 w-4 mr-2" />
+                    Messages
+                  </Link>
+                </Button>
               </div>
-            )}
-          </div>
-        </section>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Enrolled</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.enrolledCourses}</div>
+              <p className="text-xs text-muted-foreground">courses</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.completedCourses}</div>
+              <p className="text-xs text-muted-foreground">courses</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Certificates</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.certificates}</div>
+              <p className="text-xs text-muted-foreground">earned</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Hours</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalHours}</div>
+              <p className="text-xs text-muted-foreground">total</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   );
