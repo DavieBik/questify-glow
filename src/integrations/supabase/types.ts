@@ -2045,6 +2045,7 @@ export type Database = {
           data: Json | null
           ended_at: string | null
           id: string
+          organization_id: string | null
           package_id: string
           score: number | null
           started_at: string | null
@@ -2059,6 +2060,7 @@ export type Database = {
           data?: Json | null
           ended_at?: string | null
           id?: string
+          organization_id?: string | null
           package_id: string
           score?: number | null
           started_at?: string | null
@@ -2073,6 +2075,7 @@ export type Database = {
           data?: Json | null
           ended_at?: string | null
           id?: string
+          organization_id?: string | null
           package_id?: string
           score?: number | null
           started_at?: string | null
