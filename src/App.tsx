@@ -308,6 +308,9 @@ const App = () => (
                   <ScormPlayer />
                 </ProtectedRoute>
               } />
+              <Route path="/api/scorm-proxy/:packageId/*" element={
+                <div>SCORM Proxy - Should not be accessed directly</div>
+              } />
               <Route path="/admin/scorm" element={
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>

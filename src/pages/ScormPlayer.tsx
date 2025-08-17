@@ -60,14 +60,9 @@ const ScormPlayer: React.FC = () => {
       if (packageError) throw packageError;
       setScormPackage(packageData);
 
-      // Get package file URL
-      const { data: urlData } = await supabase.storage
-        .from('scorm')
-        .createSignedUrl(packageData.storage_path, 3600);
-
-      if (urlData?.signedUrl) {
-        setPackageUrl(urlData.signedUrl);
-      }
+      // Use SCORM proxy URL for same-origin access (enables window.parent.API)
+      const proxyUrl = `/api/scorm-proxy/${packageData.id}/index.html`;
+      setPackageUrl(proxyUrl);
 
       // Load or create session
       await loadOrCreateSession(packageData.id);
@@ -167,9 +162,8 @@ const ScormPlayer: React.FC = () => {
   };
 
   const setupScormAPI = () => {
-    if (!iframeRef.current?.contentWindow) return;
-
-    const iframe = iframeRef.current;
+    // Set up SCORM API on parent window (this window)
+    // The iframe content will access these via window.parent.API due to same-origin proxy
     
     // SCORM 1.2 API
     const scormAPI = {
@@ -196,12 +190,17 @@ const ScormPlayer: React.FC = () => {
         // Track important elements
         trackInteraction(element, value);
         
-        // Update session data
+        // Update session data based on SCORM elements
         if (element === 'cmi.core.lesson_status') {
           updateSessionStatus(value);
         }
         if (element === 'cmi.core.score.raw') {
           updateSessionScore(parseFloat(value));
+        }
+        if (element === 'cmi.core.session_time') {
+          // Convert SCORM time format to total minutes if needed
+          // Format: PT[hours]H[minutes]M[seconds]S or HH:MM:SS
+          sessionDataRef.current['session_time'] = value;
         }
         
         return 'true';
@@ -230,18 +229,11 @@ const ScormPlayer: React.FC = () => {
       GetDiagnostic: (errorCode: string) => scormAPI.LMSGetDiagnostic(errorCode)
     };
 
-    // Inject APIs into iframe
-    iframe.onload = () => {
-      try {
-        if (iframe.contentWindow) {
-          (iframe.contentWindow as any).API = scormAPI;
-          (iframe.contentWindow as any).API_1484_11 = scorm2004API;
-          console.log('SCORM APIs injected successfully');
-        }
-      } catch (error) {
-        console.error('Error injecting SCORM API:', error);
-      }
-    };
+    // Attach APIs to parent window so iframe can access via window.parent.API
+    (window as any).API = scormAPI;
+    (window as any).API_1484_11 = scorm2004API;
+    
+    console.log('SCORM APIs attached to parent window - iframe can access via window.parent.API');
   };
 
   const trackInteraction = async (element: string, value: string) => {
@@ -416,7 +408,10 @@ const ScormPlayer: React.FC = () => {
                 src={packageUrl}
                 className="w-full h-full"
                 title={scormPackage.title}
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+                onLoad={() => {
+                  console.log('SCORM iframe loaded via proxy - parent.API communication enabled');
+                }}
               />
             </div>
           ) : (
