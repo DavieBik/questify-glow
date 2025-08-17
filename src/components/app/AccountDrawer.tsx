@@ -3,10 +3,12 @@ import { Menu, LogOut, Files, Settings, HelpCircle, RefreshCw, Package } from 'l
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePreviewRole } from '@/lib/rolePreview';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 interface User {
   id: string;
@@ -23,6 +25,26 @@ export function AccountDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { userRole } = useAuth();
+  
+  // Role preview functionality
+  const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
+  let previewRole = null;
+  let setPreviewRole = null;
+  let clearPreview = null;
+  let effectiveRole = userRole;
+  
+  if (isPreviewEnabled) {
+    try {
+      const preview = usePreviewRole();
+      previewRole = preview.previewRole;
+      setPreviewRole = preview.setPreviewRole;
+      clearPreview = preview.clearPreview;
+      effectiveRole = preview.effectiveRole;
+    } catch {
+      // Preview context not available, use real role
+      effectiveRole = userRole;
+    }
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -131,7 +153,7 @@ export function AccountDrawer() {
                 Support
               </Button>
               
-              {(userRole === 'admin' || userRole === 'manager') && (
+              {(effectiveRole === 'admin' || effectiveRole === 'manager') && (
                 <>
                   <div className="px-3 py-2">
                     <h4 className="text-sm font-medium text-muted-foreground">Admin</h4>
@@ -147,6 +169,53 @@ export function AccountDrawer() {
                     <Package className="mr-3 h-4 w-4" />
                     SCORM Packages
                   </Button>
+                </>
+              )}
+              
+              {/* Role Preview Controls */}
+              {isPreviewEnabled && setPreviewRole && clearPreview && (
+                <>
+                  <Separator className="my-4" />
+                  <div className="px-3 py-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Preview as</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Preview only — data permissions unchanged</p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {(['student', 'staff', 'manager', 'admin'] as const).map((role) => (
+                      <Button
+                        key={role}
+                        variant={previewRole === role ? "secondary" : "ghost"}
+                        className="w-full justify-start h-8 text-sm"
+                        onClick={() => {
+                          setPreviewRole(role);
+                          setIsOpen(false);
+                        }}
+                        data-testid={`preview-role-${role}`}
+                      >
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                        {previewRole === role && (
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            Active
+                          </Badge>
+                        )}
+                      </Button>
+                    ))}
+                    
+                    {previewRole && (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start h-8 text-sm mt-2"
+                        onClick={() => {
+                          clearPreview();
+                          setIsOpen(false);
+                        }}
+                        data-testid="reset-preview-role"
+                      >
+                        Reset to real role
+                      </Button>
+                    )}
+                  </div>
                 </>
               )}
               

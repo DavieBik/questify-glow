@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { RolePreviewPill } from '@/components/RolePreviewPill';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBranding } from '@/contexts/BrandingContext';
 import { LogOut, ExternalLink } from 'lucide-react';
@@ -39,6 +40,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }}
                 />
               )}
+              
+              {/* Role Preview Pill */}
+              <RolePreviewPill />
             </div>
             
             <div className="flex items-center gap-4">

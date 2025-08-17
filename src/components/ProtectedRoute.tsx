@@ -1,6 +1,8 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { usePreviewRole } from '@/lib/rolePreview';
+import { Button } from '@/components/ui/button';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,7 +15,26 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireRole,
   roles
 }) => {
-  const { user, loading, userRole } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  
+  // Use effective role (preview or real)
+  const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
+  let effectiveRole: string | null = null;
+  
+  if (isPreviewEnabled) {
+    try {
+      const { effectiveRole: previewEffectiveRole } = usePreviewRole();
+      effectiveRole = previewEffectiveRole;
+    } catch {
+      // If preview context is not available, fall back to auth context
+      const { userRole } = useAuth();
+      effectiveRole = userRole;
+    }
+  } else {
+    const { userRole } = useAuth();
+    effectiveRole = userRole;
+  }
 
   if (loading) {
     return (
@@ -31,18 +52,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   const rolesToCheck = requireRole || roles;
-  if (rolesToCheck && userRole && !rolesToCheck.includes(userRole)) {
+  if (rolesToCheck && effectiveRole && !rolesToCheck.includes(effectiveRole)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md mx-auto">
           <h1 className="text-2xl font-bold text-destructive mb-2">Access Denied</h1>
-          <p className="text-muted-foreground mb-4">You don't have permission to access this page.</p>
-          <button 
-            onClick={() => window.history.back()}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+          <p className="text-muted-foreground mb-4">You don't have access to this page with your current role.</p>
+          <Button 
+            onClick={() => navigate('/')}
+            className="mr-2"
           >
             Back to Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     );
