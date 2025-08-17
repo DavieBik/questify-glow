@@ -10,7 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout";
 
 // Pages
-import Dashboard from "./routes/Dashboard";
+import DashboardRouter from "./pages/DashboardRouter";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import PasswordReset from "./pages/PasswordReset";
@@ -86,14 +86,14 @@ const App = () => (
             <Route path="/" element={
               <ProtectedRoute>
                 <Layout>
-                  <Dashboard />
+                  <DashboardRouter />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>
-                  <Dashboard />
+                  <DashboardRouter />
                 </Layout>
               </ProtectedRoute>
             } />
