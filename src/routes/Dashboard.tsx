@@ -84,7 +84,7 @@ export default function Dashboard() {
       case 'beginner': return '#10B981'; // green
       case 'intermediate': return '#F59E0B'; // amber  
       case 'advanced': return '#EF4444'; // red
-      default: return 'hsl(var(--brand-gold))'; // gold fallback
+      default: return 'hsl(var(--accent))'; // accent fallback
     }
   };
 

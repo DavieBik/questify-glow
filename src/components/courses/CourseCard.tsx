@@ -16,7 +16,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ id, title, code, color }: CourseCardProps) {
-  const headerColor = color || 'hsl(var(--brand-gold))';
+  const headerColor = color || 'hsl(var(--accent))';
   
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">

@@ -77,7 +77,7 @@ export function AccountDrawer() {
           <div className="p-6 pb-4">
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-brand-navy text-white font-semibold text-lg">
+                <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-lg">
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>

@@ -9,7 +9,7 @@ interface AnnouncementCardProps {
 export function AnnouncementCard({ title, onClick }: AnnouncementCardProps) {
   return (
     <Card 
-      className="p-4 bg-muted/50 border-l-4 border-l-brand-gold cursor-pointer hover:bg-muted/80 transition-colors"
+      className="p-4 bg-muted/50 border-l-4 border-l-accent cursor-pointer hover:bg-muted/80 transition-colors"
       onClick={onClick}
     >
       <div className="flex items-center justify-between">

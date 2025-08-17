@@ -27,13 +27,13 @@ export function BottomTabs() {
               className={cn(
                 "flex-1 flex flex-col items-center py-2 px-1 text-xs transition-colors",
                 isActive 
-                  ? "text-brand-gold" 
+                  ? "text-accent-foreground" 
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className={cn(
                 "h-5 w-5 mb-1",
-                isActive && "text-brand-gold"
+                isActive && "text-accent-foreground"
               )} />
               <span className="truncate">{label}</span>
             </NavLink>
