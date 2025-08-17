@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type PreviewRole = 'student' | 'staff' | 'manager' | 'admin' | null;
+export type PreviewRole = 'worker' | 'manager' | 'admin' | null;
 
 interface PreviewRoleContextType {
   realRole: string | null;
@@ -31,7 +31,7 @@ export const PreviewRoleProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Load preview role from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored && ['student', 'staff', 'manager', 'admin'].includes(stored)) {
+    if (stored && ['worker', 'manager', 'admin'].includes(stored)) {
       setPreviewRoleState(stored as PreviewRole);
     }
   }, []);
@@ -41,7 +41,7 @@ export const PreviewRoleProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const urlParams = new URLSearchParams(window.location.search);
     const roleParam = urlParams.get('as');
     
-    if (roleParam && ['student', 'staff', 'manager', 'admin'].includes(roleParam)) {
+    if (roleParam && ['worker', 'manager', 'admin'].includes(roleParam)) {
       setPreviewRole(roleParam as PreviewRole);
       
       // Remove the parameter from URL

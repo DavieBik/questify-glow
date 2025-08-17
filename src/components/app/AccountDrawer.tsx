@@ -225,7 +225,7 @@ export function AccountDrawer() {
                   </div>
                   
                   <div className="space-y-1">
-                    {(['student', 'staff', 'manager', 'admin'] as const).map((role) => (
+                    {(['worker', 'manager', 'admin'] as const).map((role) => (
                       <Button
                         key={role}
                         variant={previewRole === role ? "secondary" : "ghost"}
@@ -277,8 +277,7 @@ export function AccountDrawer() {
                         <SelectValue placeholder="Select role..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="student">Student</SelectItem>
-                        <SelectItem value="staff">Staff</SelectItem>
+                        <SelectItem value="worker">Worker</SelectItem>
                         <SelectItem value="manager">Manager</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>

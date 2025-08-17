@@ -29,6 +29,7 @@ const DashboardRouter = () => {
       return <AdminDashboard />;
     case 'manager':
       return <ManagerDashboard />;
+    case 'worker':
     case 'staff':
     case 'student':
     default:

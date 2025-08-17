@@ -234,7 +234,7 @@ export function AppSidebar() {
                         Role Preview (temp)
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {['student', 'staff', 'manager', 'admin'].map((role) => (
+                        {['worker', 'manager', 'admin'].map((role) => (
                           <Button
                             key={role}
                             variant={previewRole === role ? "default" : "outline"}
