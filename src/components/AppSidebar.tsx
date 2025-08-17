@@ -39,7 +39,7 @@ const navigationItems = [
   { title: 'Announcements', url: '/announcements', icon: Megaphone },
   { title: 'Group Projects', url: '/projects', icon: Users },
   { title: 'Certificates', url: '/certificates', icon: Award },
-  { title: 'Alerts', url: '/alerts', icon: Bell, showBadge: true },
+  { title: 'Notifications', url: '/alerts', icon: Bell, showBadge: true },
   
   { title: 'Profile', url: '/profile', icon: User },
 ];
