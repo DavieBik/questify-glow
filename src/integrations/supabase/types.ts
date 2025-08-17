@@ -743,6 +743,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes: number | null
           estimated_duration_minutes: number | null
+          external_id: string | null
           format: string | null
           id: string
           is_active: boolean
@@ -767,6 +768,7 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number | null
           estimated_duration_minutes?: number | null
+          external_id?: string | null
           format?: string | null
           id?: string
           is_active?: boolean
@@ -791,6 +793,7 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number | null
           estimated_duration_minutes?: number | null
+          external_id?: string | null
           format?: string | null
           id?: string
           is_active?: boolean
@@ -1210,6 +1213,118 @@ export type Database = {
           },
         ]
       }
+      import_job_errors: {
+        Row: {
+          code: string | null
+          created_at: string | null
+          id: string
+          job_id: string | null
+          message: string | null
+          raw: Json | null
+          row_number: number | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          message?: string | null
+          raw?: Json | null
+          row_number?: number | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          message?: string | null
+          raw?: Json | null
+          row_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_job_errors_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          file_path: string | null
+          id: string
+          kind: string
+          original_filename: string | null
+          source: string | null
+          status: string | null
+          totals: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          kind: string
+          original_filename?: string | null
+          source?: string | null
+          status?: string | null
+          totals?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          kind?: string
+          original_filename?: string | null
+          source?: string | null
+          status?: string | null
+          totals?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      import_mappings: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string | null
+          required: boolean | null
+          source_column: string | null
+          target_column: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          required?: boolean | null
+          source_column?: string | null
+          target_column?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          required?: boolean | null
+          source_column?: string | null
+          target_column?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_mappings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -1262,6 +1377,7 @@ export type Database = {
           course_id: string
           created_at: string
           description: string | null
+          external_id: string | null
           id: string
           is_required: boolean
           max_attempts: number
@@ -1270,6 +1386,7 @@ export type Database = {
           pass_threshold_percentage: number
           time_limit_minutes: number | null
           title: string
+          type: string | null
           updated_at: string
         }
         Insert: {
@@ -1279,6 +1396,7 @@ export type Database = {
           course_id: string
           created_at?: string
           description?: string | null
+          external_id?: string | null
           id?: string
           is_required?: boolean
           max_attempts?: number
@@ -1287,6 +1405,7 @@ export type Database = {
           pass_threshold_percentage?: number
           time_limit_minutes?: number | null
           title: string
+          type?: string | null
           updated_at?: string
         }
         Update: {
@@ -1296,6 +1415,7 @@ export type Database = {
           course_id?: string
           created_at?: string
           description?: string | null
+          external_id?: string | null
           id?: string
           is_required?: boolean
           max_attempts?: number
@@ -1304,6 +1424,7 @@ export type Database = {
           pass_threshold_percentage?: number
           time_limit_minutes?: number | null
           title?: string
+          type?: string | null
           updated_at?: string
         }
         Relationships: [
