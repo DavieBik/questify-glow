@@ -5,20 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Award, Clock, TrendingUp } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BookOpen, Award, Clock, TrendingUp, Bell, AlertTriangle, Calendar, CheckSquare, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ComplianceOverview } from '@/components/dashboard/ComplianceOverview';
-import { MyAssignedCourses } from '@/components/dashboard/MyAssignedCourses';
-import { CertificatesSection } from '@/components/dashboard/CertificatesSection';
-import { ManagerComplianceView } from '@/components/dashboard/ManagerComplianceView';
-import { OrgSwitcher } from '@/components/demo/OrgSwitcher';
-import { RequiredCoursesSection } from '@/components/dashboard/RequiredCoursesSection';
-import { OptionalCoursesSection } from '@/components/dashboard/OptionalCoursesSection';
-import { SelfAssignedSection } from '@/components/dashboard/SelfAssignedSection';
-import { TeamViewWidget } from '@/components/dashboard/TeamViewWidget';
+import { AnnouncementCard } from '@/components/app/AnnouncementCard';
 import { DashboardStatsSkeleton } from '@/components/ui/loading-skeleton';
 import { ManagerOrAdmin } from '@/components/auth/RoleGuard';
 import { withErrorHandling } from '@/utils/error-handling';
+import { useNotificationCount } from '@/hooks/useNotificationCount';
 
 interface DashboardStats {
   enrolledCourses: number;
@@ -27,28 +21,34 @@ interface DashboardStats {
   totalHours: number;
 }
 
-interface RecentCourse {
+interface Announcement {
   id: string;
   title: string;
-  difficulty: string;
-  progress_percentage: number;
+  content: string;
+  priority: string;
+  created_at: string;
+  expires_at?: string;
 }
+
 
 const Dashboard = () => {
   const { user, isManager, isAdmin } = useAuth();
   const { branding } = useBranding();
+  const { unreadCount } = useNotificationCount();
   const [stats, setStats] = useState<DashboardStats>({
     enrolledCourses: 0,
     completedCourses: 0,
     certificates: 0,
     totalHours: 0,
   });
-  const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
       fetchDashboardData();
+      fetchAnnouncements();
     }
   }, [user]);
 
@@ -93,40 +93,42 @@ const Dashboard = () => {
         certificates: certificates?.length || 0,
         totalHours: Math.round(totalMinutes / 60),
       });
-
-      // Set recent courses (top 3 by progress)
-      const recent = enrollments
-        ?.filter(e => e.courses)
-        .map(e => ({
-          id: e.courses.id,
-          title: e.courses.title,
-          difficulty: e.courses.difficulty,
-          progress_percentage: e.progress_percentage,
-        }))
-        .sort((a, b) => b.progress_percentage - a.progress_percentage)
-        .slice(0, 3) || [];
-
-      setRecentCourses(recent);
     });
     setLoading(false);
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'bg-accent/20 text-accent border-accent';
-      case 'intermediate': return 'bg-primary/20 text-primary border-primary';
-      case 'advanced': return 'bg-destructive/20 text-destructive border-destructive';
-      default: return 'bg-secondary text-secondary-foreground border-border';
-    }
+  const fetchAnnouncements = async () => {
+    await withErrorHandling(async () => {
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .or('expires_at.is.null,expires_at.gt.now()')
+        .eq('priority', 'high')
+        .limit(3);
+      
+      if (error) throw error;
+      setAnnouncements(data || []);
+    });
   };
+
+
+  const handleDismissAnnouncement = (announcementId: string) => {
+    setDismissedAnnouncements(prev => [...prev, announcementId]);
+  };
+
+  const visibleAnnouncements = announcements.filter(
+    announcement => !dismissedAnnouncements.includes(announcement.id)
+  );
+
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Learning Dashboard</h1>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Track your progress and continue your learning journey
+            Your learning overview and critical updates
           </p>
         </div>
         <DashboardStatsSkeleton />
@@ -136,45 +138,120 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Optional Banner */}
-      {branding?.banner_image_url && (
-        <div className="relative rounded-lg overflow-hidden h-48 bg-gradient-to-r from-primary/20 to-primary/5">
-          <img 
-            src={branding.banner_image_url} 
-            alt="Organization Banner" 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-            <div className="text-center text-white">
-              <h2 className="text-2xl font-bold mb-2">Welcome to Learning</h2>
-              <p className="text-white/90">Continue your learning journey</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div>
-        <h1 className="text-3xl font-bold">Compliance Dashboard</h1>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Track your training compliance and required certifications
+          Your learning overview and critical updates
         </p>
       </div>
 
-      {/* Demo Organization Switcher */}
-      <OrgSwitcher />
+      {/* Critical Announcements */}
+      {visibleAnnouncements.map((announcement) => (
+        <Alert key={announcement.id} className="border-l-4 border-l-destructive bg-destructive/5">
+          <AlertTriangle className="h-4 w-4" />
+          <div className="flex items-start justify-between w-full">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="destructive" className="text-xs">URGENT</Badge>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(announcement.created_at).toLocaleDateString()}
+                </span>
+              </div>
+              <AlertDescription className="font-medium">
+                {announcement.title}
+              </AlertDescription>
+              {announcement.content && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {announcement.content}
+                </p>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground ml-4"
+              onClick={() => handleDismissAnnouncement(announcement.id)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </Alert>
+      ))}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Critical Information Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Notifications */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Enrolled Courses</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notifications
+            </CardTitle>
+            {unreadCount > 0 && (
+              <Badge variant="destructive" className="rounded-full px-2 py-1">
+                {unreadCount}
+              </Badge>
+            )}
+          </CardHeader>
+          <CardContent>
+            {unreadCount > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                </p>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/alerts">View All Notifications</Link>
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No new notifications</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Navigation */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Quick Access
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                <Link to="/courses">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Browse All Courses
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                <Link to="/certificates">
+                  <Award className="h-4 w-4 mr-2" />
+                  My Certificates
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                <Link to="/messages">
+                  <Bell className="h-4 w-4 mr-2" />
+                  Messages
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Enrolled</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.enrolledCourses}</div>
+            <p className="text-xs text-muted-foreground">courses</p>
           </CardContent>
         </Card>
 
@@ -185,6 +262,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.completedCourses}</div>
+            <p className="text-xs text-muted-foreground">courses</p>
           </CardContent>
         </Card>
 
@@ -195,63 +273,58 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.certificates}</div>
+            <p className="text-xs text-muted-foreground">earned</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Hours</CardTitle>
+            <CardTitle className="text-sm font-medium">Hours</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalHours}</div>
+            <p className="text-xs text-muted-foreground">total</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Compliance Sections */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <ComplianceOverview />
-        <MyAssignedCourses />
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <CertificatesSection />
-        <ManagerOrAdmin>
-          <ManagerComplianceView />
-        </ManagerOrAdmin>
-      </div>
-
-      {/* Continue Learning - Recent Courses */}
       {/* Quick Actions */}
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>
-            Common tasks and navigation shortcuts
+            Access your most important learning tasks
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button asChild variant="outline" className="h-auto p-4 border-primary/20 hover:bg-primary/10">
-              <Link to="/courses" className="flex flex-col items-center gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Button asChild variant="outline" className="h-auto p-4 flex-col gap-2">
+              <Link to="/courses">
                 <BookOpen className="h-6 w-6 text-primary" />
-                <span>Browse Courses</span>
+                <span className="text-sm">Browse Courses</span>
               </Link>
             </Button>
             
-            <Button asChild variant="outline" className="h-auto p-4 border-accent/20 hover:bg-accent/10">
-              <Link to="/certificates" className="flex flex-col items-center gap-2">
+            <Button asChild variant="outline" className="h-auto p-4 flex-col gap-2">
+              <Link to="/alerts">
+                <Bell className="h-6 w-6 text-destructive" />
+                <span className="text-sm">Notifications</span>
+              </Link>
+            </Button>
+
+            <Button asChild variant="outline" className="h-auto p-4 flex-col gap-2">
+              <Link to="/certificates">
                 <Award className="h-6 w-6 text-accent" />
-                <span>View Certificates</span>
+                <span className="text-sm">Certificates</span>
               </Link>
             </Button>
             
             <ManagerOrAdmin>
-              <Button asChild variant="outline" className="h-auto p-4 border-secondary/20 hover:bg-secondary/10">
-                <Link to="/admin/analytics" className="flex flex-col items-center gap-2">
+              <Button asChild variant="outline" className="h-auto p-4 flex-col gap-2">
+                <Link to="/admin/analytics">
                   <TrendingUp className="h-6 w-6 text-secondary-foreground" />
-                  <span>Team Reports</span>
+                  <span className="text-sm">Analytics</span>
                 </Link>
               </Button>
             </ManagerOrAdmin>
