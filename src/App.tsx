@@ -43,6 +43,7 @@ import AdminModuleEdit from "./pages/AdminModuleEdit";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminApprovals from "./pages/AdminApprovals";
 import SegmentedDemo from "./pages/dev/SegmentedDemo";
+import SetupTestUsers from "./pages/dev/SetupTestUsers";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminImportCoursesModules from "./pages/AdminImportCoursesModules";
 import AdminImportUsersEnrollments from "./pages/AdminImportUsersEnrollments";
@@ -354,6 +355,13 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <ScormReport />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/dev/setup-users" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <SetupTestUsers />
                   </Layout>
                 </ProtectedRoute>
               } />
