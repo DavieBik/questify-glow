@@ -17,6 +17,7 @@ interface ScormPackage {
   created_at: string;
   created_by: string;
   storage_path: string;
+  entry_path?: string;
   session_count?: number;
   completion_rate?: number;
 }
@@ -177,6 +178,7 @@ const AdminScorm: React.FC = () => {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Version</TableHead>
+                    <TableHead>Launch File</TableHead>
                     <TableHead>Sessions</TableHead>
                     <TableHead>Completion Rate</TableHead>
                     <TableHead>Created</TableHead>
@@ -188,6 +190,16 @@ const AdminScorm: React.FC = () => {
                     <TableRow key={pkg.id}>
                       <TableCell className="font-medium">{pkg.title}</TableCell>
                       <TableCell>{getVersionBadge(pkg.version)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <code className="text-xs bg-muted px-2 py-1 rounded">
+                            {pkg.entry_path || 'Not detected'}
+                          </code>
+                          {!pkg.entry_path && (
+                            <span className="text-xs text-muted-foreground">(manual setup required)</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>{pkg.session_count || 0}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

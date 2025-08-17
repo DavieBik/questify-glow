@@ -2006,6 +2006,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          entry_path: string | null
           id: string
           organization_id: string
           storage_path: string
@@ -2016,6 +2017,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
+          entry_path?: string | null
           id?: string
           organization_id?: string
           storage_path: string
@@ -2026,6 +2028,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
+          entry_path?: string | null
           id?: string
           organization_id?: string
           storage_path?: string

@@ -41,35 +41,82 @@ const ScormUpload: React.FC = () => {
     try {
       setUploading(true);
 
-      // Generate unique filename
-      const fileExt = data.file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `packages/${fileName}`;
+      const file = data.file;
+      const version = data.version;
+      
+      // Generate unique storage path for extracting the package
+      const timestamp = Date.now();
+      const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+      const storagePath = `${timestamp}-${fileName}`;
 
-      // Upload file to storage
+      console.log('Uploading SCORM package:', { fileName, storagePath, version });
+
+      // Upload the zip file to storage (this will be the root for extraction)
       const { error: uploadError } = await supabase.storage
         .from('scorm')
-        .upload(filePath, data.file);
+        .upload(`${storagePath}/${file.name}`, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
 
-      // Create package record
-      const { error: packageError } = await supabase
+      // Create initial package record
+      const { data: packageData, error: insertError } = await supabase
         .from('scorm_packages')
         .insert({
-          title: data.title,
-          version: data.version,
-          storage_path: filePath,
-          created_by: user.id
+          title: data.title, // Will be updated after manifest parsing
+          version: version,
+          storage_path: storagePath,
+          created_by: user.id,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(`Failed to create package record: ${insertError.message}`);
+      }
+
+      console.log('Package record created:', packageData.id);
+
+      // Parse the manifest and update package details
+      try {
+        console.log('Calling manifest parser for package:', packageData.id);
+        const { data: manifestResponse, error: parseError } = await supabase.functions.invoke(
+          'scorm-manifest-parser',
+          {
+            body: { packageId: packageData.id }
+          }
+        );
+
+        if (parseError) {
+          console.warn('Manifest parsing failed:', parseError);
+          toast({
+            title: 'Warning',
+            description: 'Package uploaded but manifest parsing failed. You may need to set the launch file manually.',
+          });
+        } else if (manifestResponse?.success && manifestResponse?.data) {
+          console.log('Manifest parsed successfully:', manifestResponse.data);
+          toast({
+            title: 'Success',
+            description: `SCORM package uploaded successfully! Launch file: ${manifestResponse.data.entryPath}`,
+          });
+        } else {
+          console.warn('Manifest parsing returned unexpected response:', manifestResponse);
+          toast({
+            title: 'Warning',
+            description: 'Package uploaded but manifest could not be parsed completely.',
+          });
+        }
+      } catch (manifestError) {
+        console.warn('Manifest parsing error:', manifestError);
+        toast({
+          title: 'Warning', 
+          description: 'Package uploaded but manifest parsing failed. You may need to set the launch file manually.'
         });
+      }
 
-      if (packageError) throw packageError;
-
-      toast({
-        title: 'Success',
-        description: 'SCORM package uploaded successfully'
-      });
-
+      // Reset form and navigate back
+      form.reset();
       navigate('/admin/scorm');
 
     } catch (error) {

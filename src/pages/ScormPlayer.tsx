@@ -12,6 +12,7 @@ interface ScormPackage {
   title: string;
   version: string;
   storage_path: string;
+  entry_path?: string;
 }
 
 interface ScormSession {
@@ -60,8 +61,9 @@ const ScormPlayer: React.FC = () => {
       if (packageError) throw packageError;
       setScormPackage(packageData);
 
-      // Use SCORM proxy URL for same-origin access (enables window.parent.API)
-      const proxyUrl = `/api/scorm-proxy/${packageData.id}/index.html`;
+      // Use entry_path if available, otherwise fall back to index.html
+      const entryPath = packageData.entry_path || 'index.html';
+      const proxyUrl = `/api/scorm-proxy/${packageData.id}/${entryPath}`;
       setPackageUrl(proxyUrl);
 
       // Load or create session
