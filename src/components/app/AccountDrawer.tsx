@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Menu, LogOut, Files, Settings, HelpCircle, RefreshCw } from 'lucide-react';
+import { Menu, LogOut, Files, Settings, HelpCircle, RefreshCw, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -21,6 +22,7 @@ export function AccountDrawer() {
   const [user, setUser] = useState<User | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { userRole } = useAuth();
 
   useEffect(() => {
     const getUser = async () => {
@@ -128,6 +130,25 @@ export function AccountDrawer() {
                 <HelpCircle className="mr-3 h-4 w-4" />
                 Support
               </Button>
+              
+              {(userRole === 'admin' || userRole === 'manager') && (
+                <>
+                  <div className="px-3 py-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Admin</h4>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-10"
+                    onClick={() => {
+                      navigate('/admin/scorm');
+                      setIsOpen(false);
+                    }}
+                  >
+                    <Package className="mr-3 h-4 w-4" />
+                    SCORM Packages
+                  </Button>
+                </>
+              )}
               
               <Button
                 variant="ghost"

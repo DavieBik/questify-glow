@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,6 +59,7 @@ interface Enrollment {
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { canEdit, user } = useAuth();
+  const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
@@ -177,7 +178,10 @@ const CourseDetail = () => {
   };
 
   const handleLaunchModule = (module: Module) => {
-    if (module.content_url) {
+    if (module.content_type === 'scorm') {
+      // Navigate to SCORM player if it's a SCORM module
+      navigate(`/scorm/${module.id}/play`);
+    } else if (module.content_url) {
       window.open(module.content_url, '_blank');
     }
   };

@@ -45,6 +45,10 @@ import AdminImportCoursesModules from "./pages/AdminImportCoursesModules";
 import AdminImportUsersEnrollments from "./pages/AdminImportUsersEnrollments";
 import AdminCurricula from "./pages/AdminCurricula";
 import CurriculaProgress from "./pages/CurriculaProgress";
+import ScormPlayer from "./pages/ScormPlayer";
+import AdminScorm from "./pages/admin/AdminScorm";
+import ScormUpload from "./pages/admin/ScormUpload";
+import ScormReport from "./pages/admin/ScormReport";
 // Organization setup/settings removed in single-tenant mode
 import NotFound from "./pages/NotFound";
 
@@ -296,6 +300,32 @@ const App = () => (
                 <ProtectedRoute requireRole={['admin', 'manager']}>
                   <Layout>
                     <AdminImportUsersEnrollments />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/scorm/:packageId/play" element={
+                <ProtectedRoute>
+                  <ScormPlayer />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/scorm" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <AdminScorm />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/scorm/upload" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <ScormUpload />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/scorm/:packageId/report" element={
+                <ProtectedRoute requireRole={['admin', 'manager']}>
+                  <Layout>
+                    <ScormReport />
                   </Layout>
                 </ProtectedRoute>
               } />
