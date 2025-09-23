@@ -15,7 +15,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireRole,
   roles
 }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, userRole } = useAuth();
   const navigate = useNavigate();
   
   // Use effective role (preview or real)
@@ -28,13 +28,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       effectiveRole = previewEffectiveRole;
     } catch {
       // If preview context is not available, fall back to auth context
-      const { userRole } = useAuth();
       effectiveRole = userRole;
     }
   } else {
-    const { userRole } = useAuth();
     effectiveRole = userRole;
   }
+
+  console.log('ProtectedRoute DEBUG:', {
+    loading,
+    user: !!user,
+    userRole,
+    effectiveRole,
+    requireRole,
+    roles,
+    isPreviewEnabled
+  });
 
   if (loading) {
     return (
@@ -53,6 +61,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   const rolesToCheck = requireRole || roles;
   if (rolesToCheck && effectiveRole && !rolesToCheck.includes(effectiveRole)) {
+    console.log('ProtectedRoute ACCESS DENIED:', {
+      rolesToCheck,
+      effectiveRole,
+      includes: rolesToCheck.includes(effectiveRole)
+    });
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md mx-auto">

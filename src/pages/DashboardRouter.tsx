@@ -19,6 +19,16 @@ const DashboardRouter = () => {
     effectiveRole = userRole;
   }
 
+  console.log('DashboardRouter DEBUG:', {
+    loading,
+    user: !!user,
+    userRole,
+    effectiveRole,
+    willRenderComponent: effectiveRole === 'admin' ? 'AdminDashboard' :
+                       effectiveRole === 'manager' ? 'ManagerDashboard' :
+                       effectiveRole === 'worker' ? 'WorkerDashboard' : 'Dashboard'
+  });
+
   // Route to appropriate dashboard based on role
   switch (effectiveRole) {
     case 'admin':
