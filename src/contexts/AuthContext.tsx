@@ -57,19 +57,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Single-tenant: organization is now static from config
   const organization = getOrganizationConfig();
 
-  const fetchUserAndOrganization = async () => {
-    if (!user) {
+  const fetchUserAndOrganization = async (currentUser?: User | null) => {
+    const userToUse = currentUser || user;
+    if (!userToUse) {
       console.log('AuthContext: No user, cannot fetch role');
       return;
     }
 
-    console.log('AuthContext: Fetching user data for user:', user.id);
+    console.log('AuthContext: Fetching user data for user:', userToUse.id);
     try {
       // Fetch user data (simplified for single-tenant)
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('role')
-        .eq('id', user.id)
+        .eq('id', userToUse.id)
         .maybeSingle();
 
       console.log('AuthContext: User data query result:', { userData, userError });
@@ -82,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: orgMemberData } = await supabase
           .from('org_members')
           .select('role')
-          .eq('user_id', user.id)
+          .eq('user_id', userToUse.id)
           .eq('organization_id', organization.id)
           .maybeSingle();
 
@@ -116,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('AuthProvider: User authenticated, fetching data');
           // Fetch user data and organization separately to avoid deadlock
           setTimeout(async () => {
-            await fetchUserAndOrganization();
+            await fetchUserAndOrganization(session.user);
           }, 0);
         } else {
           console.log('AuthProvider: No user session');

@@ -18,8 +18,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   
-  console.log('ProtectedRoute - loading:', loading, 'user:', !!user);
-  
   // Use effective role (preview or real)
   const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
   let effectiveRole: string | null = null;
@@ -39,7 +37,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (loading) {
-    console.log('ProtectedRoute: Still loading authentication');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
