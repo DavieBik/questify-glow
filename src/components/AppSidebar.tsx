@@ -149,6 +149,8 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
+      className="border-r"
+      variant="sidebar"
     >
       <SidebarContent>
         <SidebarGroup>
