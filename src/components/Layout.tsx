@@ -7,6 +7,7 @@ import {
 import { AppSidebar } from '@/components/AppSidebar';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { RolePreviewPill } from '@/components/RolePreviewPill';
+import RoleSwitcher from '@/components/RoleSwitcher';
 import { BottomTabs } from '@/components/app/BottomTabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBranding } from '@/contexts/BrandingContext';
@@ -111,6 +112,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Bottom Navigation */}
         <BottomTabs />
+        
+        {/* Role Switcher - Always visible for easy role switching */}
+        <RoleSwitcher />
       </div>
     </SidebarProvider>
   );
