@@ -18,6 +18,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   
+  console.log('ProtectedRoute - loading:', loading, 'user:', !!user);
+  
   // Use effective role (preview or real)
   const isPreviewEnabled = import.meta.env.VITE_ENABLE_ROLE_PREVIEW === 'true';
   let effectiveRole: string | null = null;

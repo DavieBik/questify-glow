@@ -6,7 +6,9 @@ import WorkerDashboard from './WorkerDashboard';
 import Dashboard from './Dashboard';
 
 const DashboardRouter = () => {
-  const { userRole } = useAuth();
+  const { userRole, user, loading } = useAuth();
+  
+  console.log('DashboardRouter - loading:', loading, 'user:', !!user, 'userRole:', userRole);
   
   // Use preview role if available
   let effectiveRole = userRole;
@@ -14,12 +16,14 @@ const DashboardRouter = () => {
   try {
     const { effectiveRole: previewEffectiveRole } = usePreviewRole();
     effectiveRole = previewEffectiveRole;
-  } catch {
+    console.log('DashboardRouter - using preview role:', effectiveRole);
+  } catch (error) {
     // Preview context not available, use regular role
     effectiveRole = userRole;
+    console.log('DashboardRouter - using regular role:', effectiveRole, 'preview error:', error);
   }
 
-  console.log('DashboardRouter - userRole:', userRole, 'effectiveRole:', effectiveRole);
+  console.log('DashboardRouter - final effectiveRole:', effectiveRole);
 
   // Route to appropriate dashboard based on role
   switch (effectiveRole) {
