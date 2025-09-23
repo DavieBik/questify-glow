@@ -34,16 +34,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     effectiveRole = userRole;
   }
 
-  console.log('ProtectedRoute DEBUG:', {
-    loading,
-    user: !!user,
-    userRole,
-    effectiveRole,
-    requireRole,
-    roles,
-    isPreviewEnabled
-  });
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -61,11 +51,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   const rolesToCheck = requireRole || roles;
   if (rolesToCheck && effectiveRole && !rolesToCheck.includes(effectiveRole)) {
-    console.log('ProtectedRoute ACCESS DENIED:', {
-      rolesToCheck,
-      effectiveRole,
-      includes: rolesToCheck.includes(effectiveRole)
-    });
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md mx-auto">

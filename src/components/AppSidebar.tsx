@@ -75,7 +75,7 @@ const organizationItems = [
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
-  const { isAdmin, isManager } = useAuth();
+  const { isAdmin: realIsAdmin, isManager: realIsManager, userRole } = useAuth();
   const { unreadCount } = useNotificationCount();
   const currentPath = location.pathname;
   const { toast } = useToast();
@@ -92,6 +92,7 @@ export function AppSidebar() {
   let previewRole: PreviewRole = null;
   let setPreviewRole: (role: PreviewRole) => void = () => {};
   let clearPreview: () => void = () => {};
+  let effectiveRole: string | null = userRole;
   
   if (isPreviewEnabled) {
     try {
@@ -99,10 +100,16 @@ export function AppSidebar() {
       previewRole = previewContext.previewRole;
       setPreviewRole = previewContext.setPreviewRole;
       clearPreview = previewContext.clearPreview;
+      effectiveRole = previewContext.effectiveRole;
     } catch {
       // Preview context not available, use defaults
+      effectiveRole = userRole;
     }
   }
+
+  // Use effective role for permissions
+  const isAdmin = effectiveRole === 'admin';
+  const isManager = effectiveRole === 'manager' || effectiveRole === 'admin';
 
   const isActive = (path: string) => {
     if (path === '/') {
