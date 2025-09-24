@@ -115,8 +115,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile Bottom Navigation */}
         <BottomTabs />
         
-        {/* Role Switcher - Fixed positioning to avoid overlap */}
-        <div className="fixed top-16 right-4 z-50">
+        {/* Role Switcher - Positioned below header to avoid overlap */}
+        <div className="fixed top-20 right-4 z-40">
           <RoleSwitcher />
         </div>
       </div>
