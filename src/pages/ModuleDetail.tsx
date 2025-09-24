@@ -222,6 +222,16 @@ const ModuleDetail = () => {
         </div>
       );
     }
+
+    if (module.content_type === 'quiz') {
+      return (
+        <div className="space-y-6">
+          <div className="prose prose-sm max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: module.body || '' }} />
+          </div>
+        </div>
+      );
+    }
     
     // Default content renderer
     return (
