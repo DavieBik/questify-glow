@@ -138,11 +138,28 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Your learning overview and critical updates
-        </p>
+      {/* Diamond Care Victoria Welcome Header */}
+      <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg border">
+        <div className="flex items-center gap-4 mb-4">
+          {branding?.logo_url && (
+            <img 
+              src={branding.logo_url} 
+              alt="Diamond Care Victoria" 
+              className="h-12 w-auto object-contain"
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Diamond Care Victoria</h1>
+            <p className="text-lg text-muted-foreground">Learning Management System</p>
+          </div>
+        </div>
+        <div className="bg-card/50 p-4 rounded border">
+          <h2 className="text-xl font-semibold mb-2">Welcome to Your Learning Dashboard</h2>
+          <p className="text-muted-foreground">
+            Access your training courses, track progress, and manage your professional development 
+            with Diamond Care Victoria's comprehensive learning platform.
+          </p>
+        </div>
       </div>
 
       {/* Critical Announcements */}

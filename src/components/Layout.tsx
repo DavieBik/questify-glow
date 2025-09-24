@@ -63,7 +63,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </div>
             
-            <div className="flex items-center gap-1 md:gap-4">
+            <div className="flex items-center gap-2 md:gap-3">
               {/* External Link Button - responsive */}
               {branding?.external_link_title && branding?.external_link_url && (
                 <Button
@@ -88,15 +88,17 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Welcome, {user?.email}
               </span>
               
-              {/* Theme toggle - smaller on mobile */}
-              <ThemeToggle />
+              {/* Theme toggle - ensure proper spacing */}
+              <div className="flex-shrink-0">
+                <ThemeToggle />
+              </div>
               
               {/* Sign out button - responsive */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={signOut}
-                className="flex items-center gap-1 md:gap-2"
+                className="flex items-center gap-1 md:gap-2 flex-shrink-0"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Sign Out</span>
@@ -113,8 +115,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile Bottom Navigation */}
         <BottomTabs />
         
-        {/* Role Switcher - Always visible for easy role switching */}
-        <RoleSwitcher />
+        {/* Role Switcher - Fixed positioning to avoid overlap */}
+        <div className="fixed top-16 right-4 z-50">
+          <RoleSwitcher />
+        </div>
       </div>
     </SidebarProvider>
   );
