@@ -249,9 +249,9 @@ const CertificateDetail = () => {
                   {/* Content */}
                   <div className="space-y-3">
                     <p className="text-gray-600 text-lg">This is to certify that</p>
-                    <h3 className="text-2xl font-bold text-gray-800">
-                      {userProfile?.first_name} {userProfile?.last_name}
-                    </h3>
+                     <h3 className="text-2xl font-bold text-gray-800">
+                       {user?.email || 'Certificate Holder'}
+                     </h3>
                     <p className="text-gray-600">has successfully completed</p>
                     <h4 className="text-xl font-semibold text-gray-800 px-4">
                       {certificate.courses.title}
