@@ -44,7 +44,30 @@ const CertificateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [certificate, setCertificate] = useState<Certificate | null>(null);
+  const [userProfile, setUserProfile] = useState<{ first_name: string; last_name: string } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id && user) {
+      fetchCertificateDetails();
+      fetchUserProfile();
+    }
+  }, [id, user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('first_name, last_name')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -207,22 +230,48 @@ const CertificateDetail = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {certificate.pdf_url ? (
-                <div className="aspect-[4/3] border rounded-lg overflow-hidden">
-                  <iframe
-                    src={certificate.pdf_url}
-                    className="w-full h-full"
-                    title="Certificate Preview"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-[4/3] border rounded-lg flex items-center justify-center bg-muted">
-                  <div className="text-center">
-                    <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">Certificate preview not available</p>
+              {/* Beautiful Certificate Design */}
+              <div className="aspect-[4/3] border-2 border-accent rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 p-8 relative">
+                {/* Decorative corners */}
+                <div className="absolute top-4 left-4 w-12 h-12 border-l-4 border-t-4 border-accent rounded-tl-lg"></div>
+                <div className="absolute top-4 right-4 w-12 h-12 border-r-4 border-t-4 border-accent rounded-tr-lg"></div>
+                <div className="absolute bottom-4 left-4 w-12 h-12 border-l-4 border-b-4 border-accent rounded-bl-lg"></div>
+                <div className="absolute bottom-4 right-4 w-12 h-12 border-r-4 border-b-4 border-accent rounded-br-lg"></div>
+                
+                <div className="text-center h-full flex flex-col justify-center space-y-4">
+                  {/* Header */}
+                  <div>
+                    <Award className="h-16 w-16 mx-auto text-accent mb-4" />
+                    <h2 className="text-3xl font-bold text-accent mb-2">Certificate of Completion</h2>
+                    <div className="w-32 h-1 bg-accent mx-auto rounded"></div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="space-y-3">
+                    <p className="text-gray-600 text-lg">This is to certify that</p>
+                    <h3 className="text-2xl font-bold text-gray-800">
+                      {userProfile?.first_name} {userProfile?.last_name}
+                    </h3>
+                    <p className="text-gray-600">has successfully completed</p>
+                    <h4 className="text-xl font-semibold text-gray-800 px-4">
+                      {certificate.courses.title}
+                    </h4>
+                    <p className="text-gray-600">
+                      with a score of <span className="font-bold text-accent">{certificate.final_score_percentage}%</span>
+                    </p>
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="pt-6 space-y-2">
+                    <p className="text-sm text-gray-500">
+                      Issued on {new Date(certificate.issue_date).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-gray-400 font-mono">
+                      Certificate #{certificate.certificate_number}
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
 
