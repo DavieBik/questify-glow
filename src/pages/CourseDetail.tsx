@@ -297,9 +297,12 @@ const CourseDetail = () => {
                           )}
                         </div>
                         {module.body && (
-                          <p className="text-sm text-muted-foreground">{module.body}</p>
+                          <div 
+                            className="text-sm text-muted-foreground prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: module.body }}
+                          />
                         )}
-                        {module.description && (
+                        {module.description && !module.body && (
                           <p className="text-sm text-muted-foreground">{module.description}</p>
                         )}
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">

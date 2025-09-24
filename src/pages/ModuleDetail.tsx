@@ -224,10 +224,19 @@ const ModuleDetail = () => {
     }
 
     if (module.content_type === 'quiz') {
+      // Process HTML content to make YouTube links clickable
+      const processedContent = (module.body || '').replace(
+        /YouTube – ([^(]+)\(([^)]+)\)/g,
+        '<a href="https://www.youtube.com/results?search_query=$1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">🎥 $1</a>'
+      ).replace(
+        /https:\/\/www\.vdwc\.vic\.gov\.au\/notifications/g,
+        '<a href="https://www.vdwc.vic.gov.au/notifications" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">🔗 VDWC Notification page</a>'
+      );
+
       return (
         <div className="space-y-6">
           <div className="prose prose-sm max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: module.body || '' }} />
+            <div dangerouslySetInnerHTML={{ __html: processedContent }} />
           </div>
         </div>
       );
