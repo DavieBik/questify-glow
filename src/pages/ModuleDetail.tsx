@@ -21,6 +21,7 @@ interface Module {
   id: string;
   title: string;
   description: string;
+  body?: string;
   content_type: string;
   content_url: string;
   provider: 'storage' | 'youtube' | 'vimeo' | 'mux' | 'cloudflare';
@@ -127,22 +128,37 @@ const ModuleDetail = () => {
     }
   };
 
-  const renderContent = () => {
-    if (!module?.content_url) {
-      return (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No content available for this module.</p>
-        </div>
-      );
-    }
+  const markModuleComplete = async () => {
+    try {
+      const { error } = await supabase
+        .from('completions')
+        .update({
+          status: 'completed',
+          score_percentage: 100,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('user_id', user?.id)
+        .eq('module_id', id)
+        .eq('status', 'in_progress');
 
+      if (error) throw error;
+
+      toast.success('Module completed!');
+      fetchModuleDetails(); // Refresh completion status
+    } catch (error) {
+      console.error('Error completing module:', error);
+      toast.error('Failed to complete module');
+    }
+  };
+
+  const renderContent = () => {
     const handleVideoProgress = (position: number, watchedPct: number) => {
       console.log(`Video progress: ${position}s (${Math.round(watchedPct * 100)}%)`);
     };
 
-    const handleVideoComplete = () => {
-      toast.success('Video completed! You can now take the quiz.');
-      fetchModuleDetails(); // Refresh to update completion status
+    const handleVideoComplete = async () => {
+      toast.success('Video completed!');
+      await markModuleComplete();
     };
 
     // Use VideoPlayer for video content
@@ -164,12 +180,45 @@ const ModuleDetail = () => {
     
     if (module.content_type === 'scorm') {
       return (
-        <div className="aspect-video">
-          <iframe
-            src={module.content_url}
-            className="w-full h-full rounded-lg border"
-            title={module.title}
-          />
+        <div className="space-y-4">
+          <div className="aspect-video">
+            <iframe
+              src={module.content_url}
+              className="w-full h-full rounded-lg border"
+              title={module.title}
+            />
+          </div>
+          {completion?.status === 'in_progress' && (
+            <div className="text-center">
+              <Button onClick={markModuleComplete}>
+                Mark as Complete
+              </Button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (module.content_type === 'survey') {
+      return (
+        <div className="space-y-6">
+          <div className="bg-muted/50 p-6 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Assessment Survey</h3>
+            <div className="prose prose-sm max-w-none">
+              {module.description && <p>{module.description}</p>}
+              <div dangerouslySetInnerHTML={{ __html: module.body || '' }} />
+            </div>
+          </div>
+          {completion?.status === 'in_progress' && (
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                Complete this assessment to finish the module
+              </p>
+              <Button onClick={markModuleComplete}>
+                Complete Assessment
+              </Button>
+            </div>
+          )}
         </div>
       );
     }
@@ -181,11 +230,17 @@ const ModuleDetail = () => {
         <p className="text-muted-foreground mb-4">
           This module contains {module.content_type} content.
         </p>
-        <Button asChild>
-          <a href={module.content_url} target="_blank" rel="noopener noreferrer">
-            Open Content
-          </a>
-        </Button>
+        {module.content_url ? (
+          <Button asChild>
+            <a href={module.content_url} target="_blank" rel="noopener noreferrer">
+              Open Content
+            </a>
+          </Button>
+        ) : (
+          <div className="prose prose-sm max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: module.body || 'No content available.' }} />
+          </div>
+        )}
       </div>
     );
   };
@@ -262,23 +317,43 @@ const ModuleDetail = () => {
 
               {completion && completion.status === 'in_progress' && (
                 <div className="space-y-4">
-                  <Button asChild className="w-full">
-                    <Link to={`/modules/${module.id}/quiz`}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Take Quiz
-                    </Link>
-                  </Button>
+                  {module.content_type === 'quiz' && (
+                    <Button asChild className="w-full">
+                      <Link to={`/modules/${module.id}/quiz`}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Take Quiz
+                      </Link>
+                    </Button>
+                  )}
+                  
+                  {module.content_type !== 'quiz' && (
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {module.content_type === 'video' && 'Watch the video above to complete this module'}
+                        {module.content_type === 'scorm' && 'Interact with the SCORM package above to complete this module'}
+                        {module.content_type === 'survey' && 'Complete the assessment form above to finish this module'}
+                        {!['video', 'scorm', 'survey'].includes(module.content_type) && 'Complete the content above to finish this module'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
               {isCompleted && (
                 <div className="space-y-4">
-                  <Button asChild className="w-full">
-                    <Link to={`/modules/${module.id}/quiz`}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Review Quiz
-                    </Link>
-                  </Button>
+                  <div className="text-center">
+                    <CheckCircle className="h-8 w-8 mx-auto text-green-600 mb-2" />
+                    <p className="text-sm font-medium text-green-600">Module Completed!</p>
+                  </div>
+                  
+                  {module.content_type === 'quiz' && (
+                    <Button asChild className="w-full">
+                      <Link to={`/modules/${module.id}/quiz`}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Review Quiz
+                      </Link>
+                    </Button>
+                  )}
                   
                   {canRetake && (
                     <Button variant="outline" onClick={startModule} className="w-full">
