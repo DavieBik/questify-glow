@@ -234,10 +234,10 @@ const ModuleDetail = () => {
     }
 
     if (module.content_type === 'quiz') {
-      // Process HTML content to make YouTube references clickable with alternative search
+      // Process HTML content with embedded video player
       const processedContent = (module.body || '').replace(
         /YouTube – ([^(]+)\(([^)]+)\)/g,
-        '<div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400"><p class="text-blue-800">🎥 <strong>Video Resource:</strong> $1</p><a href="https://duckduckgo.com/?q=$1+VDWC+video" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium underline">🔍 Search for this video</a></div>'
+        '<div class="bg-blue-50 p-4 rounded-lg border border-blue-200 my-4"><div class="flex flex-col gap-3"><div class="flex items-center gap-3"><div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center text-white font-bold">▶</div><div><h4 class="font-semibold text-blue-900">📹 Video Resource: $1</h4><p class="text-sm text-blue-700">$2</p></div></div><div class="aspect-video"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen class="rounded"></iframe></div></div></div>'
       ).replace(
         /https:\/\/www\.vdwc\.vic\.gov\.au\/notifications/g,
         '<a href="https://www.vdwc.vic.gov.au/notifications" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium underline">🔗 VDWC Notification page</a>'
