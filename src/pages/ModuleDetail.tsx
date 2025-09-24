@@ -100,6 +100,10 @@ const ModuleDetail = () => {
   };
 
   const startModule = async () => {
+    console.log('startModule called for module:', id);
+    console.log('Current user:', user?.id);
+    console.log('Current completion:', completion);
+    
     try {
       const attemptNumber = completion ? completion.attempt_number + 1 : 1;
       
@@ -108,7 +112,8 @@ const ModuleDetail = () => {
         return;
       }
 
-      const { error } = await supabase
+      console.log('Inserting completion record...');
+      const { data, error } = await supabase
         .from('completions')
         .insert({
           user_id: user?.id,
@@ -116,10 +121,15 @@ const ModuleDetail = () => {
           course_id: module?.course_id,
           attempt_number: attemptNumber,
           status: 'in_progress',
-        });
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Completion record created:', data);
       toast.success('Module started!');
       fetchModuleDetails(); // Refresh completion status
     } catch (error) {
@@ -224,10 +234,10 @@ const ModuleDetail = () => {
     }
 
     if (module.content_type === 'quiz') {
-      // Process HTML content to make YouTube links clickable
+      // Process HTML content to replace YouTube references with descriptive text
       const processedContent = (module.body || '').replace(
         /YouTube – ([^(]+)\(([^)]+)\)/g,
-        '<a href="https://www.youtube.com/results?search_query=$1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">🎥 $1</a>'
+        '<div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400"><p class="text-blue-800">🎥 <strong>Video Resource:</strong> $1</p><p class="text-sm text-blue-600">Search for "$1" on your preferred video platform</p></div>'
       ).replace(
         /https:\/\/www\.vdwc\.vic\.gov\.au\/notifications/g,
         '<a href="https://www.vdwc.vic.gov.au/notifications" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">🔗 VDWC Notification page</a>'
