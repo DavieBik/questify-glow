@@ -115,8 +115,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile Bottom Navigation */}
         <BottomTabs />
         
-        {/* Role Switcher - Positioned on left side to avoid blocking buttons */}
-        <div className="fixed top-16 left-4 z-40">
+        {/* Role Switcher - Positioned at bottom left to avoid blocking anything */}
+        <div className="fixed bottom-24 left-4 z-40 md:bottom-8">
           <RoleSwitcher />
         </div>
       </div>
