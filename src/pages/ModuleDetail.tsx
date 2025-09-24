@@ -234,13 +234,13 @@ const ModuleDetail = () => {
     }
 
     if (module.content_type === 'quiz') {
-      // Process HTML content to replace YouTube references with descriptive text
+      // Process HTML content to make YouTube references clickable with alternative search
       const processedContent = (module.body || '').replace(
         /YouTube – ([^(]+)\(([^)]+)\)/g,
-        '<div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400"><p class="text-blue-800">🎥 <strong>Video Resource:</strong> $1</p><p class="text-sm text-blue-600">Search for "$1" on your preferred video platform</p></div>'
+        '<div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400"><p class="text-blue-800">🎥 <strong>Video Resource:</strong> $1</p><a href="https://duckduckgo.com/?q=$1+VDWC+video" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium underline">🔍 Search for this video</a></div>'
       ).replace(
         /https:\/\/www\.vdwc\.vic\.gov\.au\/notifications/g,
-        '<a href="https://www.vdwc.vic.gov.au/notifications" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">🔗 VDWC Notification page</a>'
+        '<a href="https://www.vdwc.vic.gov.au/notifications" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium underline">🔗 VDWC Notification page</a>'
       );
 
       return (
