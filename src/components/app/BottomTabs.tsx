@@ -1,7 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Award, MessageCircle, User } from 'lucide-react';
+import { Home, BookOpen, Award, MessageCircle, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotificationCount } from '@/hooks/useNotificationCount';
+import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 
 const tabs = [
@@ -9,19 +10,37 @@ const tabs = [
   { path: '/courses', label: 'Courses', icon: BookOpen },
   { path: '/certificates', label: 'Certificates', icon: Award },
   { path: '/messages', label: 'Messages', icon: MessageCircle },
-  { path: '/profile', label: 'Profile', icon: User },
+  { path: 'signout', label: 'Sign Out', icon: LogOut, isAction: true },
 ];
 
 export function BottomTabs() {
   const location = useLocation();
   const { unreadCount } = useNotificationCount();
+  const { signOut } = useAuth();
   
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border md:hidden z-50">
       <div className="flex items-center safe-area-inset-bottom">
-        {tabs.map(({ path, label, icon: Icon }) => {
+        {tabs.map(({ path, label, icon: Icon, isAction }) => {
           const isActive = location.pathname === path || 
             (path === '/' && (location.pathname === '/' || location.pathname === '/dashboard'));
+          
+          // Handle sign out action
+          if (isAction && path === 'signout') {
+            return (
+              <button
+                key={path}
+                onClick={signOut}
+                className={cn(
+                  "flex-1 flex flex-col items-center py-2 px-1 text-xs transition-colors relative",
+                  "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className="h-5 w-5 mb-1" />
+                <span className="truncate">{label}</span>
+              </button>
+            );
+          }
           
           return (
             <NavLink

@@ -92,17 +92,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex-shrink-0">
                 <ThemeToggle />
               </div>
-              
-              {/* Sign out button - responsive */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={signOut}
-                className="flex items-center gap-1 md:gap-2 flex-shrink-0"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
             </div>
           </header>
           

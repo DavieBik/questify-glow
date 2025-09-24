@@ -14,6 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +35,8 @@ import {
   Clock,
   Bell,
   GraduationCap,
-  Upload
+  Upload,
+  LogOut
 } from 'lucide-react';
 
 const navigationItems = [
@@ -75,7 +77,7 @@ const organizationItems = [
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
-  const { isAdmin: realIsAdmin, isManager: realIsManager, userRole } = useAuth();
+  const { isAdmin: realIsAdmin, isManager: realIsManager, userRole, signOut } = useAuth();
   const { unreadCount } = useNotificationCount();
   const currentPath = location.pathname;
   const { toast } = useToast();
@@ -313,6 +315,19 @@ export function AppSidebar() {
           </>
         )}
       </SidebarContent>
+      
+      {/* Sign out button at bottom of sidebar */}
+      <SidebarFooter className="p-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={signOut}
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Sign Out</span>
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
