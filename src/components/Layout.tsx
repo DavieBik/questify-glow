@@ -63,6 +63,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </div>
             
+            {/* Center - Role Switcher */}
+            <div className="flex-1 flex justify-center">
+              <RoleSwitcher />
+            </div>
+            
             <div className="flex items-center gap-2 md:gap-3">
               {/* External Link Button - responsive */}
               {branding?.external_link_title && branding?.external_link_url && (
@@ -114,11 +119,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Bottom Navigation */}
         <BottomTabs />
-        
-        {/* Role Switcher - Positioned well below header to avoid any overlap */}
-        <div className="fixed top-28 right-4 z-40">
-          <RoleSwitcher />
-        </div>
       </div>
     </SidebarProvider>
   );
