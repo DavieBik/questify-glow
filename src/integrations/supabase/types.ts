@@ -2935,7 +2935,7 @@ export type Database = {
         }[]
       }
       rpc_approvals_queue: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { allow_preview?: boolean }
         Returns: {
           course_title: string
           id: string
@@ -2978,7 +2978,9 @@ export type Database = {
         }[]
       }
       rpc_manager_dashboard_metrics: {
-        Args: { date_from?: string; date_to?: string }
+        Args:
+          | { allow_preview?: boolean; date_from?: string; date_to?: string }
+          | { date_from?: string; date_to?: string }
         Returns: {
           active_learners_7d: number
           completion_rate_30d: number
@@ -3033,11 +3035,14 @@ export type Database = {
         }[]
       }
       rpc_team_compliance: {
-        Args: {
-          date_from?: string
-          date_to?: string
-          department_filter?: string
-        }
+        Args:
+          | {
+              allow_preview?: boolean
+              date_from?: string
+              date_to?: string
+              department_filter?: string
+            }
+          | { date_from?: string; date_to?: string; department_filter?: string }
         Returns: {
           assigned_courses: number
           completed_courses: number

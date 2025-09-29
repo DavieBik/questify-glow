@@ -100,16 +100,6 @@ export default function ManagerDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Set role preview flag if preview is active
-      if (hasManagerAccess && !isAdmin && !isManager) {
-        // This means we have access through role preview
-        try {
-          await supabase.rpc('enable_role_preview');
-        } catch (error) {
-          console.warn('Could not set role preview flag:', error);
-        }
-      }
-
       await Promise.all([
         fetchMetrics(),
         fetchTeamCompliance(),
@@ -128,9 +118,12 @@ export default function ManagerDashboard() {
   };
 
   const fetchMetrics = async () => {
+    const isPreview = hasManagerAccess && !isAdmin && !isManager;
+    
     const { data, error } = await supabase.rpc('rpc_manager_dashboard_metrics', {
       date_from: format(dateRange.from, 'yyyy-MM-dd'),
-      date_to: format(dateRange.to, 'yyyy-MM-dd')
+      date_to: format(dateRange.to, 'yyyy-MM-dd'),
+      allow_preview: isPreview
     });
 
     if (error) throw error;
@@ -138,10 +131,13 @@ export default function ManagerDashboard() {
   };
 
   const fetchTeamCompliance = async () => {
+    const isPreview = hasManagerAccess && !isAdmin && !isManager;
+    
     const { data, error } = await supabase.rpc('rpc_team_compliance', {
       date_from: format(dateRange.from, 'yyyy-MM-dd'),
       date_to: format(dateRange.to, 'yyyy-MM-dd'),
-      department_filter: departmentFilter || null
+      department_filter: departmentFilter || null,
+      allow_preview: isPreview
     });
 
     if (error) throw error;
@@ -149,7 +145,11 @@ export default function ManagerDashboard() {
   };
 
   const fetchApprovals = async () => {
-    const { data, error } = await supabase.rpc('rpc_approvals_queue');
+    const isPreview = hasManagerAccess && !isAdmin && !isManager;
+    
+    const { data, error } = await supabase.rpc('rpc_approvals_queue', {
+      allow_preview: isPreview
+    });
 
     if (error) throw error;
     setApprovals(data || []);
