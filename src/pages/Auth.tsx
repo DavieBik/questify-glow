@@ -14,7 +14,8 @@ import {
   ArrowRight,
   CheckCircle,
   Shield,
-  Users
+  Users,
+  Building2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,10 +117,12 @@ const Auth = () => {
       <div className="min-h-screen bg-background">
         <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:py-10">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+              <Building2 className="h-6 w-6 text-primary-foreground" />
+            </div>
             <div>
-              <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">SkillBridge</p>
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">Learning Portal</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Diamond Care Victoria</h1>
+              <p className="text-sm text-muted-foreground">Staff Portal – Secure Access for Diamond Care Victoria Employees</p>
             </div>
           </div>
           <ThemeToggle />
@@ -191,10 +194,12 @@ const Auth = () => {
       {/* Header */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:py-10">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+            <Building2 className="h-6 w-6 text-primary-foreground" />
+          </div>
           <div>
-            <p className="text-[13px] uppercase tracking-[0.18em] text-muted-foreground">SkillBridge</p>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">Learning Portal</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Diamond Care Victoria</h1>
+            <p className="text-sm text-muted-foreground">Staff Portal – Secure Access for Diamond Care Victoria Employees</p>
           </div>
         </div>
         <ThemeToggle />
@@ -205,10 +210,10 @@ const Auth = () => {
         {/* Left column: statement */}
         <section className="md:col-span-7 lg:col-span-7 xl:col-span-8">
           <h2 className="mb-4 text-4xl font-semibold leading-tight tracking-tight text-foreground md:text-5xl">
-            Professional learning, delivered with clarity
+            Professional care training, delivered with excellence
           </h2>
           <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl mb-12">
-            Built for modern teams. Clean design, strong privacy, and evidence‑based learning pathways that drive real results.
+            Empowering Diamond Care Victoria staff with comprehensive disability care training, compliance education, and professional development pathways.
           </p>
 
           {/* Features */}
@@ -218,8 +223,8 @@ const Auth = () => {
                 <Shield className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium text-foreground">Enterprise Security</h3>
-                <p className="text-sm text-muted-foreground">SOC 2 compliant platform</p>
+                <h3 className="font-medium text-foreground">NDIS Compliant</h3>
+                <p className="text-sm text-muted-foreground">Fully aligned with NDIS standards</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -227,8 +232,8 @@ const Auth = () => {
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium text-foreground">Team Collaboration</h3>
-                <p className="text-sm text-muted-foreground">Built for team learning</p>
+                <h3 className="font-medium text-foreground">Person-Centered Care</h3>
+                <p className="text-sm text-muted-foreground">Focused on individual needs</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -236,8 +241,8 @@ const Auth = () => {
                 <CheckCircle className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium text-foreground">Proven Results</h3>
-                <p className="text-sm text-muted-foreground">95% completion rates</p>
+                <h3 className="font-medium text-foreground">Quality Assurance</h3>
+                <p className="text-sm text-muted-foreground">Continuous improvement focus</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -245,8 +250,8 @@ const Auth = () => {
                 <GraduationCap className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium text-foreground">Certification Ready</h3>
-                <p className="text-sm text-muted-foreground">Industry recognized certs</p>
+                <h3 className="font-medium text-foreground">Professional Development</h3>
+                <p className="text-sm text-muted-foreground">Career advancement pathways</p>
               </div>
             </div>
           </div>
@@ -344,6 +349,10 @@ const Auth = () => {
                     {isLoading ? 'Signing in...' : 'Sign in'}
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Button>
+                  
+                  <p className="text-center text-xs text-muted-foreground">
+                    For authorised Diamond Care Victoria staff only
+                  </p>
                 </form>
               ) : (
                 <form onSubmit={handleSignUp} className="space-y-5">
