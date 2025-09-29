@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePreviewRole } from '@/lib/rolePreview';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +57,17 @@ interface ApprovalRequest {
 
 export default function ManagerDashboard() {
   const { isAdmin, isManager } = useAuth();
+  
+  // Check for role preview
+  let hasManagerAccess = isAdmin || isManager;
+  try {
+    const { effectiveRole, isPreviewActive } = usePreviewRole();
+    if (isPreviewActive && (effectiveRole === 'admin' || effectiveRole === 'manager')) {
+      hasManagerAccess = true;
+    }
+  } catch (error) {
+    // Preview context not available, use regular roles
+  }
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [teamCompliance, setTeamCompliance] = useState<TeamComplianceUser[]>([]);
@@ -79,11 +91,11 @@ export default function ManagerDashboard() {
   const [departments, setDepartments] = useState<string[]>([]);
 
   useEffect(() => {
-    if (isAdmin || isManager) {
+    if (hasManagerAccess) {
       fetchData();
       fetchDepartments();
     }
-  }, [isAdmin, isManager, dateRange, departmentFilter]);
+  }, [hasManagerAccess, dateRange, departmentFilter]);
 
   const fetchData = async () => {
     setLoading(true);

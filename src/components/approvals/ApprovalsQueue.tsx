@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePreviewRole } from '@/lib/rolePreview';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,18 +28,29 @@ interface ApprovalRequest {
 
 export const ApprovalsQueue = () => {
   const { user, isManager, isAdmin } = useAuth();
+  
+  // Check for role preview
+  let hasManagerAccess = isAdmin || isManager;
+  try {
+    const { effectiveRole, isPreviewActive } = usePreviewRole();
+    if (isPreviewActive && (effectiveRole === 'admin' || effectiveRole === 'manager')) {
+      hasManagerAccess = true;
+    }
+  } catch (error) {
+    // Preview context not available, use regular roles
+  }
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (user && (isManager || isAdmin)) {
+    if (user && hasManagerAccess) {
       fetchApprovals();
     } else {
       setLoading(false);
     }
-  }, [user, isManager, isAdmin]);
+  }, [user, hasManagerAccess]);
 
   const fetchApprovals = async () => {
     if (!user) return;
@@ -180,7 +192,7 @@ export const ApprovalsQueue = () => {
     }
   };
 
-  if (!isManager && !isAdmin) {
+  if (!hasManagerAccess) {
     return (
       <Card>
         <CardContent className="p-6">
