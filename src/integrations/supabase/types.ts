@@ -2806,6 +2806,10 @@ export type Database = {
         Args: { uid: string }
         Returns: boolean
       }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_manager_of: {
         Args: { employee_uid: string; manager_uid: string }
         Returns: boolean
