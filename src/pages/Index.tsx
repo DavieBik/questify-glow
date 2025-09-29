@@ -1,7 +1,7 @@
-import Dashboard from './Dashboard';
+import DashboardRouter from './DashboardRouter';
 
 const Index = () => {
-  return <Dashboard />;
+  return <DashboardRouter />;
 };
 
 export default Index;
