@@ -104,7 +104,7 @@ export default function ManagerDashboard() {
       if (hasManagerAccess && !isAdmin && !isManager) {
         // This means we have access through role preview
         try {
-          await supabase.rpc('exec', { sql: "SET LOCAL app.enable_role_preview = true;" });
+          await supabase.rpc('enable_role_preview');
         } catch (error) {
           console.warn('Could not set role preview flag:', error);
         }
@@ -128,13 +128,6 @@ export default function ManagerDashboard() {
   };
 
   const fetchMetrics = async () => {
-    // Enable preview mode for RPC calls if needed
-    if (hasManagerAccess && !isAdmin && !isManager) {
-      await supabase.rpc('exec', { query: "SET app.enable_role_preview = 'true'" }).catch(() => {
-        // Ignore errors - this is just for preview mode
-      });
-    }
-
     const { data, error } = await supabase.rpc('rpc_manager_dashboard_metrics', {
       date_from: format(dateRange.from, 'yyyy-MM-dd'),
       date_to: format(dateRange.to, 'yyyy-MM-dd')
@@ -145,13 +138,6 @@ export default function ManagerDashboard() {
   };
 
   const fetchTeamCompliance = async () => {
-    // Enable preview mode for RPC calls if needed
-    if (hasManagerAccess && !isAdmin && !isManager) {
-      await supabase.rpc('exec', { query: "SET app.enable_role_preview = 'true'" }).catch(() => {
-        // Ignore errors - this is just for preview mode
-      });
-    }
-
     const { data, error } = await supabase.rpc('rpc_team_compliance', {
       date_from: format(dateRange.from, 'yyyy-MM-dd'),
       date_to: format(dateRange.to, 'yyyy-MM-dd'),
@@ -163,13 +149,6 @@ export default function ManagerDashboard() {
   };
 
   const fetchApprovals = async () => {
-    // Enable preview mode for RPC calls if needed
-    if (hasManagerAccess && !isAdmin && !isManager) {
-      await supabase.rpc('exec', { query: "SET app.enable_role_preview = 'true'" }).catch(() => {
-        // Ignore errors - this is just for preview mode
-      });
-    }
-
     const { data, error } = await supabase.rpc('rpc_approvals_queue');
 
     if (error) throw error;

@@ -2758,6 +2758,10 @@ export type Database = {
           updated_at: string | null
         }
       }
+      enable_role_preview: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       get_announcement_stats: {
         Args: { announcement_id_param: string }
         Returns: {
