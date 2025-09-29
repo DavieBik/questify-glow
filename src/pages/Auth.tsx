@@ -356,14 +356,9 @@ const Auth = () => {
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Button>
                   
-                  <div className="space-y-2 text-center">
-                    <p className="text-xs text-muted-foreground">
-                      For authorised Diamond Care Victoria staff only
-                    </p>
-                    <p className="text-xs text-muted-foreground/70">
-                      Powered by <span className="font-semibold text-primary">Skillbridge App</span>
-                    </p>
-                  </div>
+                  <p className="text-center text-xs text-muted-foreground">
+                    For authorised Diamond Care Victoria staff only
+                  </p>
                 </form>
               ) : (
                 <form onSubmit={handleSignUp} className="space-y-5">
@@ -452,12 +447,12 @@ const Auth = () => {
                 </form>
               )}
 
-              <div className="pt-2 space-y-2 text-center">
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  By continuing you agree to our Terms and Privacy Policy.
-                </p>
-                <p className="text-xs text-muted-foreground/70">
+              <div className="pt-2 space-y-1 text-center">
+                <p className="text-xs text-muted-foreground">
                   Powered by <span className="font-semibold text-primary">Skillbridge App</span>
+                </p>
+                <p className="text-xs leading-relaxed text-muted-foreground/70">
+                  By continuing you agree to our Terms and Privacy Policy.
                 </p>
               </div>
             </CardContent>
