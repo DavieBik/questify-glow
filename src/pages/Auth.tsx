@@ -116,15 +116,18 @@ const Auth = () => {
     return (
       <div className="min-h-screen bg-background">
         <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:py-10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Diamond Care Victoria</h1>
-              <p className="text-sm text-muted-foreground">Staff Portal – Secure Access for Diamond Care Victoria Employees</p>
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary shadow-lg relative">
+            <Building2 className="h-8 w-8 text-primary-foreground" />
+            <div className="absolute -bottom-1 -right-1 rounded-full bg-background px-1.5 py-0.5 text-xs font-medium text-muted-foreground border">
+              LOGO
             </div>
           </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Diamond Care Victoria</h1>
+            <p className="text-sm text-muted-foreground font-medium">Staff Portal – Secure Access for Diamond Care Victoria Employees</p>
+          </div>
+        </div>
           <ThemeToggle />
         </header>
 
@@ -193,13 +196,16 @@ const Auth = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:py-10">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-            <Building2 className="h-6 w-6 text-primary-foreground" />
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary shadow-lg">
+            <Building2 className="h-8 w-8 text-primary-foreground" />
+            <div className="absolute -bottom-1 -right-1 rounded-full bg-background px-1.5 py-0.5 text-xs font-medium text-muted-foreground border">
+              LOGO
+            </div>
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Diamond Care Victoria</h1>
-            <p className="text-sm text-muted-foreground">Staff Portal – Secure Access for Diamond Care Victoria Employees</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Diamond Care Victoria</h1>
+            <p className="text-sm text-muted-foreground font-medium">Staff Portal – Secure Access for Diamond Care Victoria Employees</p>
           </div>
         </div>
         <ThemeToggle />
@@ -350,9 +356,14 @@ const Auth = () => {
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </Button>
                   
-                  <p className="text-center text-xs text-muted-foreground">
-                    For authorised Diamond Care Victoria staff only
-                  </p>
+                  <div className="space-y-2 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      For authorised Diamond Care Victoria staff only
+                    </p>
+                    <p className="text-xs text-muted-foreground/70">
+                      Powered by <span className="font-semibold text-primary">Skillbridge App</span>
+                    </p>
+                  </div>
                 </form>
               ) : (
                 <form onSubmit={handleSignUp} className="space-y-5">
@@ -441,9 +452,14 @@ const Auth = () => {
                 </form>
               )}
 
-              <p className="pt-2 text-center text-xs leading-relaxed text-muted-foreground">
-                By continuing you agree to our Terms and Privacy Policy.
-              </p>
+              <div className="pt-2 space-y-2 text-center">
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  By continuing you agree to our Terms and Privacy Policy.
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  Powered by <span className="font-semibold text-primary">Skillbridge App</span>
+                </p>
+              </div>
             </CardContent>
           </Card>
         </section>
