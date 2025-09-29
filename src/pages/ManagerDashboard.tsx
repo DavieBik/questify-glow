@@ -100,6 +100,16 @@ export default function ManagerDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Set role preview flag if preview is active
+      if (hasManagerAccess && !isAdmin && !isManager) {
+        // This means we have access through role preview
+        try {
+          await supabase.rpc('exec', { sql: "SET LOCAL app.enable_role_preview = true;" });
+        } catch (error) {
+          console.warn('Could not set role preview flag:', error);
+        }
+      }
+
       await Promise.all([
         fetchMetrics(),
         fetchTeamCompliance(),
