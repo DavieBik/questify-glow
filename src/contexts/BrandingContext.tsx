@@ -5,6 +5,8 @@ interface BrandingData {
   id?: string;
   logo_url?: string;
   primary_color?: string;
+  secondary_color?: string;
+  favicon_url?: string;
   banner_image_url?: string;
   external_link_title?: string;
   external_link_url?: string;
@@ -51,6 +53,8 @@ export const BrandingProvider: React.FC<BrandingProviderProps> = ({ children }) 
       const fallbackBranding = {
         logo_url: data?.logo_url || null,
         primary_color: data?.primary_color || '#059669',
+        secondary_color: data?.secondary_color || '#10b981',
+        favicon_url: data?.favicon_url || null,
         banner_image_url: data?.banner_image_url || null,
         external_link_title: data?.external_link_title || null,
         external_link_url: data?.external_link_url || null,
@@ -60,41 +64,70 @@ export const BrandingProvider: React.FC<BrandingProviderProps> = ({ children }) 
 
       setBranding(fallbackBranding);
       
-      // Apply the primary color to CSS custom properties
-      applyThemeColor(fallbackBranding.primary_color);
+      // Apply the theme colors to CSS custom properties
+      applyThemeColor(fallbackBranding.primary_color, fallbackBranding.secondary_color);
+      
+      // Update favicon if provided
+      if (fallbackBranding.favicon_url) {
+        updateFavicon(fallbackBranding.favicon_url);
+      }
     } catch (error) {
       console.error('Error fetching branding:', error);
       // Use complete fallback if fetch fails
       const fallbackBranding = {
         logo_url: null,
         primary_color: '#059669',
+        secondary_color: '#10b981',
+        favicon_url: null,
         banner_image_url: null,
         external_link_title: null,
         external_link_url: null
       };
       setBranding(fallbackBranding);
-      applyThemeColor(fallbackBranding.primary_color);
+      applyThemeColor(fallbackBranding.primary_color, fallbackBranding.secondary_color);
     } finally {
       setLoading(false);
     }
   };
 
-  const applyThemeColor = (color?: string) => {
-    if (!color) return;
+  const applyThemeColor = (primaryColor?: string, secondaryColor?: string) => {
+    if (!primaryColor) return;
 
     // Convert hex to HSL for CSS custom properties
-    const hsl = hexToHsl(color);
-    if (hsl) {
+    const primaryHsl = hexToHsl(primaryColor);
+    if (primaryHsl) {
       const root = document.documentElement;
-      root.style.setProperty('--primary', `${hsl.h} ${hsl.s}% ${hsl.l}%`);
+      root.style.setProperty('--primary', `${primaryHsl.h} ${primaryHsl.s}% ${primaryHsl.l}%`);
       
-      // Also set complementary colors
-      const lighterHsl = { ...hsl, l: Math.min(95, hsl.l + 20) };
-      const darkerHsl = { ...hsl, l: Math.max(5, hsl.l - 20) };
+      // Set foreground color based on lightness
+      root.style.setProperty('--primary-foreground', primaryHsl.l > 50 ? '0 0% 0%' : '0 0% 100%');
       
-      root.style.setProperty('--primary-foreground', hsl.l > 50 ? '0 0% 0%' : '0 0% 100%');
+      // Set muted variant
+      const lighterHsl = { ...primaryHsl, l: Math.min(95, primaryHsl.l + 20) };
       root.style.setProperty('--muted', `${lighterHsl.h} ${lighterHsl.s}% ${lighterHsl.l}%`);
     }
+
+    // Apply secondary color if provided
+    if (secondaryColor) {
+      const secondaryHsl = hexToHsl(secondaryColor);
+      if (secondaryHsl) {
+        const root = document.documentElement;
+        root.style.setProperty('--secondary', `${secondaryHsl.h} ${secondaryHsl.s}% ${secondaryHsl.l}%`);
+        root.style.setProperty('--secondary-foreground', secondaryHsl.l > 50 ? '0 0% 0%' : '0 0% 100%');
+      }
+    }
+  };
+
+  const updateFavicon = (faviconUrl: string) => {
+    // Remove existing favicon links
+    const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+    existingLinks.forEach(link => link.remove());
+
+    // Add new favicon link
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.href = faviconUrl;
+    document.head.appendChild(link);
   };
 
   const hexToHsl = (hex: string) => {
@@ -162,9 +195,17 @@ export const BrandingProvider: React.FC<BrandingProviderProps> = ({ children }) 
       // Update local state
       setBranding(prev => ({ ...prev, ...result.data }));
       
-      // Apply new theme color if provided
-      if (data.primary_color) {
-        applyThemeColor(data.primary_color);
+      // Apply new theme colors if provided
+      if (data.primary_color || data.secondary_color) {
+        applyThemeColor(
+          data.primary_color || branding?.primary_color,
+          data.secondary_color || branding?.secondary_color
+        );
+      }
+
+      // Update favicon if provided
+      if (data.favicon_url) {
+        updateFavicon(data.favicon_url);
       }
     } catch (error) {
       console.error('Error updating branding:', error);

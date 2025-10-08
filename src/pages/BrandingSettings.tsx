@@ -6,27 +6,33 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Palette, Image, Link as LinkIcon, Save } from 'lucide-react';
+import { Palette, Image, Link as LinkIcon, Save, Upload } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function BrandingSettings() {
   const { isAdmin } = useAuth();
   const { branding, updateBranding, loading } = useBranding();
   const [formData, setFormData] = useState({
     logo_url: branding?.logo_url || '',
+    favicon_url: branding?.favicon_url || '',
     primary_color: branding?.primary_color || '#059669',
+    secondary_color: branding?.secondary_color || '#10b981',
     banner_image_url: branding?.banner_image_url || '',
     external_link_title: branding?.external_link_title || '',
     external_link_url: branding?.external_link_url || '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
 
   // Update form data when branding changes
   React.useEffect(() => {
     if (branding) {
       setFormData({
         logo_url: branding.logo_url || '',
+        favicon_url: branding.favicon_url || '',
         primary_color: branding.primary_color || '#059669',
+        secondary_color: branding.secondary_color || '#10b981',
         banner_image_url: branding.banner_image_url || '',
         external_link_title: branding.external_link_title || '',
         external_link_url: branding.external_link_url || '',
@@ -38,13 +44,72 @@ export default function BrandingSettings() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'favicon' | 'banner') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(type);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${type}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('branding')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('branding')
+        .getPublicUrl(filePath);
+
+      const fieldName = type === 'logo' ? 'logo_url' : type === 'favicon' ? 'favicon_url' : 'banner_image_url';
+      handleInputChange(fieldName, publicUrl);
+
+      toast({
+        title: "Upload Successful",
+        description: `${type} uploaded successfully`,
+      });
+    } catch (error: any) {
+      console.error(`Error uploading ${type}:`, error);
+      toast({
+        title: "Upload Failed",
+        description: `Failed to upload ${type}`,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(null);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       await updateBranding(formData);
       toast({
         title: "Success",
-        description: "Branding settings updated successfully",
+        description: "Branding settings updated successfully. Changes will apply immediately.",
       });
     } catch (error: any) {
       console.error('Error saving branding:', error);
@@ -102,45 +167,108 @@ export default function BrandingSettings() {
               Logo & Images
             </CardTitle>
             <CardDescription>
-              Set your organization's logo and banner images
+              Upload your organization's logo and images
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="logo_url">Logo URL</Label>
-              <Input
-                id="logo_url"
-                type="url"
-                placeholder="https://example.com/logo.png"
-                value={formData.logo_url}
-                onChange={(e) => handleInputChange('logo_url', e.target.value)}
-              />
+              <Label htmlFor="logo">Logo</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="logo-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'logo')}
+                  className="flex-1"
+                  disabled={uploading === 'logo'}
+                />
+                <Button
+                  variant="outline"
+                  disabled={uploading === 'logo'}
+                  onClick={() => document.getElementById('logo-file')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading === 'logo' ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
               {formData.logo_url && (
                 <div className="mt-2">
                   <img 
                     src={formData.logo_url} 
                     alt="Logo preview" 
-                    className="h-12 w-auto object-contain"
+                    className="h-16 w-auto object-contain border rounded p-2"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
                 </div>
               )}
+              <p className="text-xs text-muted-foreground">
+                Used in header and certificates (PNG recommended, max 2MB)
+              </p>
             </div>
 
+            <Separator />
+
             <div className="space-y-2">
-              <Label htmlFor="banner_image_url">Banner Image URL</Label>
-              <Input
-                id="banner_image_url"
-                type="url"
-                placeholder="https://example.com/banner.jpg"
-                value={formData.banner_image_url}
-                onChange={(e) => handleInputChange('banner_image_url', e.target.value)}
-              />
+              <Label htmlFor="favicon">Favicon</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="favicon-file"
+                  type="file"
+                  accept="image/x-icon,image/png,image/svg+xml"
+                  onChange={(e) => handleFileUpload(e, 'favicon')}
+                  className="flex-1"
+                  disabled={uploading === 'favicon'}
+                />
+                <Button
+                  variant="outline"
+                  disabled={uploading === 'favicon'}
+                  onClick={() => document.getElementById('favicon-file')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading === 'favicon' ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
+              {formData.favicon_url && (
+                <div className="mt-2">
+                  <img 
+                    src={formData.favicon_url} 
+                    alt="Favicon preview" 
+                    className="h-8 w-8 object-contain border rounded"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
-                Optional banner image for the dashboard
+                Browser tab icon (ICO, PNG, or SVG, 32x32px recommended)
               </p>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="banner_image_url">Banner Image (Optional)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="banner-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'banner')}
+                  className="flex-1"
+                  disabled={uploading === 'banner'}
+                />
+                <Button
+                  variant="outline"
+                  disabled={uploading === 'banner'}
+                  onClick={() => document.getElementById('banner-file')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading === 'banner' ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
               {formData.banner_image_url && (
                 <div className="mt-2">
                   <img 
@@ -153,6 +281,9 @@ export default function BrandingSettings() {
                   />
                 </div>
               )}
+              <p className="text-xs text-muted-foreground">
+                Optional banner image for dashboard
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -188,20 +319,64 @@ export default function BrandingSettings() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                This color will be applied to buttons, links, and other interactive elements
+                Main brand color for buttons, links, and interactive elements
               </p>
             </div>
 
-            <div className="p-4 border rounded-lg">
-              <p className="text-sm font-medium mb-2">Preview</p>
+            <div className="space-y-2">
+              <Label htmlFor="secondary_color">Secondary Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="secondary_color"
+                  type="color"
+                  value={formData.secondary_color}
+                  onChange={(e) => handleInputChange('secondary_color', e.target.value)}
+                  className="w-16 h-10 p-1 border rounded"
+                />
+                <Input
+                  type="text"
+                  placeholder="#10b981"
+                  value={formData.secondary_color}
+                  onChange={(e) => handleInputChange('secondary_color', e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Accent color for highlights and secondary actions
+              </p>
+            </div>
+
+            <Separator />
+
+            <div className="p-4 border rounded-lg space-y-3">
+              <p className="text-sm font-medium">Color Preview</p>
               <div className="space-y-2">
-                <Button style={{ backgroundColor: formData.primary_color }}>
-                  Sample Button
-                </Button>
-                <div 
-                  className="h-4 w-full rounded"
-                  style={{ backgroundColor: formData.primary_color }}
-                ></div>
+                <div className="flex gap-2">
+                  <Button style={{ backgroundColor: formData.primary_color }} className="flex-1">
+                    Primary Button
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    style={{ backgroundColor: formData.secondary_color }}
+                    className="flex-1"
+                  >
+                    Secondary Button
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div 
+                    className="h-12 rounded border flex items-center justify-center text-xs font-medium"
+                    style={{ backgroundColor: formData.primary_color, color: 'white' }}
+                  >
+                    Primary
+                  </div>
+                  <div 
+                    className="h-12 rounded border flex items-center justify-center text-xs font-medium"
+                    style={{ backgroundColor: formData.secondary_color, color: 'white' }}
+                  >
+                    Secondary
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>

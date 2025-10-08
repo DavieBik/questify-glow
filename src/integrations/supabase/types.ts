@@ -1518,10 +1518,12 @@ export type Database = {
           created_at: string
           external_link_title: string | null
           external_link_url: string | null
+          favicon_url: string | null
           id: string
           logo_url: string | null
           organization_id: string
           primary_color: string | null
+          secondary_color: string | null
           updated_at: string
         }
         Insert: {
@@ -1529,10 +1531,12 @@ export type Database = {
           created_at?: string
           external_link_title?: string | null
           external_link_url?: string | null
+          favicon_url?: string | null
           id?: string
           logo_url?: string | null
           organization_id?: string
           primary_color?: string | null
+          secondary_color?: string | null
           updated_at?: string
         }
         Update: {
@@ -1540,10 +1544,12 @@ export type Database = {
           created_at?: string
           external_link_title?: string | null
           external_link_url?: string | null
+          favicon_url?: string | null
           id?: string
           logo_url?: string | null
           organization_id?: string
           primary_color?: string | null
+          secondary_color?: string | null
           updated_at?: string
         }
         Relationships: []
