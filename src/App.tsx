@@ -15,6 +15,7 @@ import DashboardRouter from "./pages/DashboardRouter";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import PasswordReset from "./pages/PasswordReset";
+import CourseCatalog from "./pages/CourseCatalog";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import CourseForums from "./pages/CourseForums";
@@ -102,6 +103,13 @@ const App = () => {
                         <ProtectedRoute>
                           <Layout>
                             <DashboardRouter />
+                          </Layout>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/catalog" element={
+                        <ProtectedRoute>
+                          <Layout>
+                            <CourseCatalog />
                           </Layout>
                         </ProtectedRoute>
                       } />
@@ -406,6 +414,13 @@ const App = () => {
                       <ProtectedRoute>
                         <Layout>
                           <DashboardRouter />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/catalog" element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <CourseCatalog />
                         </Layout>
                       </ProtectedRoute>
                     } />

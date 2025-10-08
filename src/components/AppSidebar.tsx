@@ -41,7 +41,8 @@ import {
 
 const navigationItems = [
   { title: 'Dashboard', url: '/', icon: Home },
-  { title: 'Courses', url: '/courses', icon: BookOpen },
+  { title: 'Course Catalog', url: '/catalog', icon: BookOpen },
+  { title: 'My Courses', url: '/courses', icon: GraduationCap },
   { title: 'Curricula', url: '/curricula', icon: GraduationCap },
   { title: 'Messages', url: '/messages', icon: MessageCircle },
   { title: 'Announcements', url: '/announcements', icon: Megaphone },
