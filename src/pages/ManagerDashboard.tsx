@@ -42,6 +42,18 @@ interface TeamComplianceUser {
   overdue_courses: number;
   completion_percentage: number;
   last_activity: string;
+  hours_trained: number;
+  certificates_earned: number;
+}
+
+interface ExpiringCertificate {
+  user_id: string;
+  user_name: string;
+  course_title: string;
+  certificate_id: string;
+  completion_date: string;
+  expiry_date: string;
+  days_until_expiry: number;
 }
 
 interface ApprovalRequest {
@@ -71,6 +83,7 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [teamCompliance, setTeamCompliance] = useState<TeamComplianceUser[]>([]);
+  const [expiringCerts, setExpiringCerts] = useState<ExpiringCertificate[]>([]);
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
   const [processingApproval, setProcessingApproval] = useState<string | null>(null);
   const [reviewerNotes, setReviewerNotes] = useState<Record<string, string>>({});
@@ -103,6 +116,7 @@ export default function ManagerDashboard() {
       await Promise.all([
         fetchMetrics(),
         fetchTeamCompliance(),
+        fetchExpiringCertificates(),
         fetchApprovals()
       ]);
     } catch (error) {
@@ -133,7 +147,7 @@ export default function ManagerDashboard() {
   const fetchTeamCompliance = async () => {
     const isPreview = hasManagerAccess && !isAdmin && !isManager;
     
-    const { data, error } = await supabase.rpc('rpc_team_compliance', {
+    const { data: complianceData, error } = await supabase.rpc('rpc_team_compliance', {
       date_from: format(dateRange.from, 'yyyy-MM-dd'),
       date_to: format(dateRange.to, 'yyyy-MM-dd'),
       department_filter: departmentFilter || null,
@@ -141,7 +155,77 @@ export default function ManagerDashboard() {
     });
 
     if (error) throw error;
-    setTeamCompliance(data || []);
+
+    // Enrich with hours and certificates data
+    const enrichedData = await Promise.all(
+      (complianceData || []).map(async (user) => {
+        // Get total hours trained
+        const { data: completions } = await supabase
+          .from('completions')
+          .select('time_spent_minutes')
+          .eq('user_id', user.user_id)
+          .eq('status', 'completed');
+
+        const totalMinutes = completions?.reduce((sum, c) => sum + (c.time_spent_minutes || 0), 0) || 0;
+        const hours_trained = Math.round(totalMinutes / 60 * 10) / 10;
+
+        // Get certificates earned
+        const { data: certificates } = await supabase
+          .from('certificates')
+          .select('id')
+          .eq('user_id', user.user_id);
+
+        return {
+          ...user,
+          hours_trained,
+          certificates_earned: certificates?.length || 0
+        };
+      })
+    );
+
+    setTeamCompliance(enrichedData);
+  };
+
+  const fetchExpiringCertificates = async () => {
+    try {
+      // Get all certificates with expiry dates
+      const { data: certificates, error } = await supabase
+        .from('certificates')
+        .select(`
+          id,
+          user_id,
+          course_id,
+          issue_date,
+          expiry_date,
+          users!inner(first_name, last_name, email),
+          courses!inner(title)
+        `)
+        .not('expiry_date', 'is', null)
+        .gte('expiry_date', format(new Date(), 'yyyy-MM-dd'))
+        .lte('expiry_date', format(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'))
+        .order('expiry_date', { ascending: true });
+
+      if (error) throw error;
+
+      const formatted = certificates?.map((cert: any) => {
+        const expiryDate = new Date(cert.expiry_date);
+        const daysUntilExpiry = Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        
+        return {
+          user_id: cert.user_id,
+          user_name: `${cert.users.first_name} ${cert.users.last_name}`,
+          course_title: cert.courses.title,
+          certificate_id: cert.id,
+          completion_date: cert.issue_date,
+          expiry_date: cert.expiry_date,
+          days_until_expiry: daysUntilExpiry
+        };
+      }) || [];
+
+      setExpiringCerts(formatted);
+    } catch (error) {
+      console.error('Error fetching expiring certificates:', error);
+    }
   };
 
   const fetchApprovals = async () => {
@@ -386,6 +470,8 @@ export default function ManagerDashboard() {
                 <TableHead>Completed</TableHead>
                 <TableHead>Overdue</TableHead>
                 <TableHead>Completion %</TableHead>
+                <TableHead>Hours</TableHead>
+                <TableHead>Certificates</TableHead>
                 <TableHead>Last Activity</TableHead>
               </TableRow>
             </TableHeader>
@@ -422,12 +508,73 @@ export default function ManagerDashboard() {
                     </Badge>
                   </TableCell>
                   <TableCell>
+                    <span className="font-medium">{user.hours_trained}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="font-medium">
+                      {user.certificates_earned}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     {user.last_activity ? format(new Date(user.last_activity), 'MMM dd, yyyy') : 'Never'}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      {/* Expiring Certificates */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-warning" />
+                Expiring Soon (Next 90 Days)
+              </CardTitle>
+              <CardDescription>
+                Certificates that will expire soon requiring renewal
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {expiringCerts.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              No certificates expiring in the next 90 days
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Completion Date</TableHead>
+                  <TableHead>Expiry Date</TableHead>
+                  <TableHead>Days Until Expiry</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {expiringCerts.map((cert) => (
+                  <TableRow key={cert.certificate_id}>
+                    <TableCell className="font-medium">{cert.user_name}</TableCell>
+                    <TableCell>{cert.course_title}</TableCell>
+                    <TableCell>{format(new Date(cert.completion_date), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{format(new Date(cert.expiry_date), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={cert.days_until_expiry <= 30 ? "destructive" : cert.days_until_expiry <= 60 ? "default" : "secondary"}
+                      >
+                        {cert.days_until_expiry} days
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
