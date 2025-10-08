@@ -680,6 +680,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_mandatory: boolean
+          level: Database["public"]["Enums"]["course_level"] | null
           ndis_compliant: boolean
           organization_id: string | null
           owner_type: string | null
@@ -710,6 +711,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_mandatory?: boolean
+          level?: Database["public"]["Enums"]["course_level"] | null
           ndis_compliant?: boolean
           organization_id?: string | null
           owner_type?: string | null
@@ -740,6 +742,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_mandatory?: boolean
+          level?: Database["public"]["Enums"]["course_level"] | null
           ndis_compliant?: boolean
           organization_id?: string | null
           owner_type?: string | null
@@ -3072,6 +3075,7 @@ export type Database = {
       }
     }
     Enums: {
+      course_level: "Beginner" | "Intermediate" | "Advanced"
       curriculum_assignment_status:
         | "assigned"
         | "in_progress"
@@ -3206,6 +3210,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      course_level: ["Beginner", "Intermediate", "Advanced"],
       curriculum_assignment_status: [
         "assigned",
         "in_progress",

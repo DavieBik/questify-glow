@@ -17,6 +17,9 @@ interface Course {
   short_description: string | null;
   category: string | null;
   difficulty: string;
+  level: string | null;
+  compliance_standard: string | null;
+  training_type: string | null;
   estimated_duration_minutes: number | null;
   thumbnail_url: string | null;
   is_mandatory: boolean;
@@ -256,6 +259,11 @@ export default function CourseCatalog() {
                             {course.category}
                           </Badge>
                         )}
+                        {course.level && (
+                          <Badge variant="outline" className="text-xs">
+                            Level: {course.level}
+                          </Badge>
+                        )}
                         <Badge 
                           variant="outline" 
                           className={`text-xs ${getDifficultyColor(course.difficulty)}`}
@@ -267,6 +275,23 @@ export default function CourseCatalog() {
                       <CardDescription className="line-clamp-3 text-sm">
                         {truncateDescription(course.short_description)}
                       </CardDescription>
+
+                      {/* Additional Info */}
+                      {(course.compliance_standard || course.training_type) && (
+                        <div className="space-y-1 mt-3 pt-3 border-t text-xs">
+                          {course.compliance_standard && (
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Award className="h-3 w-3" />
+                              <span>{course.compliance_standard}</span>
+                            </div>
+                          )}
+                          {course.training_type && (
+                            <div className="text-muted-foreground">
+                              <span className="font-medium">Type:</span> {course.training_type}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </CardHeader>
 
                     {/* Footer */}

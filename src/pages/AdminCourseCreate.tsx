@@ -20,7 +20,11 @@ const courseSchema = z.object({
   description: z.string().optional(),
   category: z.string().max(255, 'Category must be less than 255 characters').optional(),
   difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
+  level: z.enum(['Beginner', 'Intermediate', 'Advanced']).default('Beginner'),
   estimated_duration_minutes: z.number().min(1, 'Duration must be at least 1 minute').optional(),
+  compliance_standard: z.string().max(255).optional(),
+  training_type: z.string().max(255).optional(),
+  expiry_period_months: z.number().min(1).max(120).optional(),
   is_mandatory: z.boolean().default(false),
   ndis_compliant: z.boolean().default(true),
   video_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
@@ -40,7 +44,11 @@ const AdminCourseCreate: React.FC = () => {
       description: '',
       category: '',
       difficulty: 'beginner',
+      level: 'Beginner',
       estimated_duration_minutes: 60,
+      compliance_standard: '',
+      training_type: '',
+      expiry_period_months: undefined,
       is_mandatory: false,
       ndis_compliant: true,
       video_url: '',
@@ -65,7 +73,11 @@ const AdminCourseCreate: React.FC = () => {
         description: data.description || null,
         category: data.category || null,
         difficulty: data.difficulty,
+        level: data.level,
         estimated_duration_minutes: data.estimated_duration_minutes || null,
+        compliance_standard: data.compliance_standard || null,
+        training_type: data.training_type || null,
+        expiry_period_months: data.expiry_period_months || null,
         is_mandatory: data.is_mandatory,
         ndis_compliant: data.ndis_compliant,
         video_url: data.video_url || null,
@@ -219,6 +231,34 @@ const AdminCourseCreate: React.FC = () => {
 
                 <FormField
                   control={form.control}
+                  name="level"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course Level *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select course level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">Intermediate</SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The expected skill level for learners
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
                   name="estimated_duration_minutes"
                   render={({ field }) => (
                     <FormItem>
@@ -233,6 +273,64 @@ const AdminCourseCreate: React.FC = () => {
                       </FormControl>
                       <FormDescription>
                         Estimated time to complete the course
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="expiry_period_months"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Certificate Validity (months)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="12"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        How long the certificate remains valid after completion
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="compliance_standard"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Compliance Standard</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., NDIS, ISO, OSHA" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The compliance or regulatory standard this course adheres to
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="training_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Training Type</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Online, Blended, Practical" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The delivery method or format of the training
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
