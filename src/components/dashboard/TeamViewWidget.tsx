@@ -37,10 +37,22 @@ export const TeamViewWidget = () => {
 
     try {
       // Fetch team members from the same organization
+      // First get the current user's org_id
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (!currentUser?.organization_id) {
+        console.error('[TeamView] User has no organization');
+        return;
+      }
+
       const { data: users, error } = await supabase
         .from('users')
         .select('id, first_name, last_name, email, role')
-        .eq('organization_id', 'get_default_org_id()')
+        .eq('organization_id', currentUser.organization_id)
         .neq('id', user.id)
         .eq('is_active', true)
         .limit(5);
