@@ -17,6 +17,7 @@ interface Certificate {
   final_score_percentage: number;
   is_valid: boolean;
   pdf_url: string;
+  pdf_storage_path: string;
   verification_url: string;
   courses: {
     title: string;
@@ -59,22 +60,17 @@ const Certificates = () => {
   };
 
   const downloadCertificate = async (certificate: Certificate) => {
-    if (!certificate.pdf_url) {
+    if (!certificate.pdf_storage_path) {
       toast.error('Certificate PDF not available');
       return;
     }
 
     try {
-      // Phase 1: Use signed URL helper (currently returns public URL)
-      // Phase 2: Will automatically use signed URL when bucket is private
-      // Note: This uses pdf_url for now, but will switch to storage path in Phase 2
-      const link = document.createElement('a');
-      link.href = certificate.pdf_url;
-      link.download = `certificate-${certificate.certificate_number}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+      const { downloadCertificate: downloadFn } = await import('@/lib/certificates/signedUrls');
+      await downloadFn(
+        certificate.pdf_storage_path,
+        `certificate-${certificate.certificate_number}.pdf`
+      );
       toast.success('Certificate download started');
     } catch (error) {
       console.error('Error downloading certificate:', error);

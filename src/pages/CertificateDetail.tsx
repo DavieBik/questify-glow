@@ -27,6 +27,7 @@ interface Certificate {
   completion_time_minutes: number;
   is_valid: boolean;
   pdf_url: string;
+  pdf_storage_path: string;
   verification_url: string;
   qr_code_data: string;
   courses: {
@@ -106,19 +107,17 @@ const CertificateDetail = () => {
   };
 
   const downloadCertificate = async () => {
-    if (!certificate?.pdf_url) {
+    if (!certificate?.pdf_storage_path) {
       toast.error('Certificate PDF not available');
       return;
     }
 
     try {
-      const link = document.createElement('a');
-      link.href = certificate.pdf_url;
-      link.download = `certificate-${certificate.certificate_number}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+      const { downloadCertificate: downloadFn } = await import('@/lib/certificates/signedUrls');
+      await downloadFn(
+        certificate.pdf_storage_path,
+        `certificate-${certificate.certificate_number}.pdf`
+      );
       toast.success('Certificate download started');
     } catch (error) {
       console.error('Error downloading certificate:', error);

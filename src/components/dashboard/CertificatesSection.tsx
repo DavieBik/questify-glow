@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Award, Download, ExternalLink, Calendar } from 'lucide-react';
 import { withErrorHandling } from '@/utils/error-handling';
 import { EmptyState } from '@/components/ui/empty-state';
+import { toast } from 'sonner';
 
 interface Certificate {
   id: string;
@@ -15,6 +16,7 @@ interface Certificate {
   expiry_date: string | null;
   final_score_percentage: number;
   pdf_url: string | null;
+  pdf_storage_path: string;
   verification_url: string | null;
   course_title: string;
   is_valid: boolean;
@@ -42,6 +44,7 @@ export function CertificatesSection() {
           expiry_date,
           final_score_percentage,
           pdf_url,
+          pdf_storage_path,
           verification_url,
           is_valid,
           courses!inner (
@@ -61,6 +64,7 @@ export function CertificatesSection() {
         expiry_date: cert.expiry_date,
         final_score_percentage: cert.final_score_percentage,
         pdf_url: cert.pdf_url,
+        pdf_storage_path: cert.pdf_storage_path,
         verification_url: cert.verification_url,
         course_title: cert.courses.title,
         is_valid: cert.is_valid,
@@ -71,24 +75,22 @@ export function CertificatesSection() {
     setLoading(false);
   };
 
-  const handleDownload = async (certificateId: string, courseName: string) => {
+  const handleDownload = async (cert: Certificate) => {
+    if (!cert.pdf_storage_path) {
+      toast.error('Certificate PDF not available');
+      return;
+    }
+
     try {
-      // This would typically call a Supabase function to generate/serve the PDF
-      const { data, error } = await supabase.functions.invoke('generate-certificate-pdf', {
-        body: { certificateId }
-      });
-
-      if (error) throw error;
-
-      // Create download link
-      const link = document.createElement('a');
-      link.href = data.pdf_url;
-      link.download = `certificate-${courseName.replace(/\s+/g, '-').toLowerCase()}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const { downloadCertificate } = await import('@/lib/certificates/signedUrls');
+      await downloadCertificate(
+        cert.pdf_storage_path,
+        `certificate-${cert.course_title.replace(/\s+/g, '-').toLowerCase()}.pdf`
+      );
+      toast.success('Certificate downloaded');
     } catch (error) {
       console.error('Download failed:', error);
+      toast.error('Failed to download certificate');
     }
   };
 
@@ -177,11 +179,11 @@ export function CertificatesSection() {
                 </div>
                 
                 <div className="flex gap-2">
-                  {cert.pdf_url && (
+                  {cert.pdf_storage_path && (
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => handleDownload(cert.id, cert.course_title)}
+                      onClick={() => handleDownload(cert)}
                       className="flex items-center gap-2"
                     >
                       <Download className="h-3 w-3" />

@@ -119,17 +119,25 @@ export function CertificatesManagement() {
     }
   };
 
-  const handleView = (cert: Certificate) => {
+  const handleView = async (cert: Certificate) => {
     if (!cert.pdf_storage_path) {
       toast.error('Certificate file not found');
       return;
     }
 
-    const { data } = supabase.storage
-      .from('certificates')
-      .getPublicUrl(cert.pdf_storage_path);
-
-    window.open(data.publicUrl, '_blank');
+    try {
+      const { getCertificateDownloadUrl } = await import('@/lib/certificates/signedUrls');
+      const result = await getCertificateDownloadUrl(cert.pdf_storage_path);
+      
+      if (result.success && result.url) {
+        window.open(result.url, '_blank');
+      } else {
+        throw new Error(result.error || 'Failed to get certificate URL');
+      }
+    } catch (error) {
+      console.error('Error viewing certificate:', error);
+      toast.error('Failed to view certificate');
+    }
   };
 
   const filteredCertificates = certificates.filter(cert =>
