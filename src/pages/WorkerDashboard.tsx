@@ -98,17 +98,26 @@ export default function WorkerDashboard() {
         })
       );
 
-      // Sort enrollments: prioritize "Getting Started" course if incomplete
+      // Sort enrollments to show "Getting Started with Skillbridge" first if no other active courses
       const sortedEnrollments = enrichedEnrollments.sort((a, b) => {
-        const isAOnboarding = a.course.title === 'Getting Started with Skillbridge';
-        const isBOnboarding = b.course.title === 'Getting Started with Skillbridge';
+        const aIsOnboarding = a.course.title === 'Getting Started with Skillbridge';
+        const bIsOnboarding = b.course.title === 'Getting Started with Skillbridge';
+        const aIsIncomplete = a.status !== 'completed';
+        const bIsIncomplete = b.status !== 'completed';
         
-        // Show onboarding course first if it's incomplete
-        if (isAOnboarding && a.status !== 'completed') return -1;
-        if (isBOnboarding && b.status !== 'completed') return 1;
+        // If only one course is enrolled and it's incomplete, show onboarding first
+        if (enrichedEnrollments.length === 1 && aIsOnboarding && aIsIncomplete) return -1;
         
-        // Otherwise maintain enrollment date order
-        return 0;
+        // If onboarding is incomplete and there are no other incomplete courses, show it first
+        const otherIncompleteCourses = enrichedEnrollments.filter(e => 
+          e.course.title !== 'Getting Started with Skillbridge' && e.status !== 'completed'
+        );
+        
+        if (aIsOnboarding && aIsIncomplete && otherIncompleteCourses.length === 0) return -1;
+        if (bIsOnboarding && bIsIncomplete && otherIncompleteCourses.length === 0) return 1;
+        
+        // Otherwise sort by enrollment date (newest first)
+        return new Date(b.enrollment_date).getTime() - new Date(a.enrollment_date).getTime();
       });
 
       setEnrollments(sortedEnrollments);
