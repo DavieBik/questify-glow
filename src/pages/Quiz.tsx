@@ -52,6 +52,14 @@ const Quiz = () => {
     }
   }, [moduleId]);
 
+  // Load answer for current question when index changes
+  useEffect(() => {
+    if (questions.length > 0 && currentQuestionIndex < questions.length) {
+      const currentAnswer = answers.find(a => a.question_id === questions[currentQuestionIndex].id);
+      setSelectedOption(currentAnswer?.selected_option_id || '');
+    }
+  }, [currentQuestionIndex, questions]);
+
   // Timer effect
   useEffect(() => {
     if (timeRemaining !== null && timeRemaining > 0 && !isComplete) {
