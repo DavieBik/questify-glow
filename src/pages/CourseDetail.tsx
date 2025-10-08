@@ -114,7 +114,7 @@ const CourseDetail = () => {
   };
 
   const handleContinue = () => {
-    navigate(`/courses/${id}`);
+    navigate(`/courses/${id}/enroll`);
   };
 
   if (loading) {
