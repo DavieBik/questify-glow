@@ -47,6 +47,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        // Phase 1: Accessibility - ensure button type is explicit
+        type={props.type || "button"}
         {...props}
       />
     )
