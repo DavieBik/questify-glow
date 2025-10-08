@@ -65,7 +65,9 @@ const Certificates = () => {
     }
 
     try {
-      // Create a temporary link to download the file
+      // Phase 1: Use signed URL helper (currently returns public URL)
+      // Phase 2: Will automatically use signed URL when bucket is private
+      // Note: This uses pdf_url for now, but will switch to storage path in Phase 2
       const link = document.createElement('a');
       link.href = certificate.pdf_url;
       link.download = `certificate-${certificate.certificate_number}.pdf`;

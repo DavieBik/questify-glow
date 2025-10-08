@@ -12,6 +12,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
+        // Phase 1: Accessibility - add smart autocomplete hints
+        autoComplete={props.autoComplete || (type === 'email' ? 'email' : type === 'password' ? 'current-password' : undefined)}
         {...props}
       />
     )

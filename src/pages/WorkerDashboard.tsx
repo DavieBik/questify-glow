@@ -57,6 +57,7 @@ export default function WorkerDashboard() {
   const fetchWorkerData = async () => {
     setLoading(true);
     try {
+      // PHASE 1 FIX: Optimized query - fetch all data in batches to avoid N+1
       // Fetch enrollments with course details
       const { data: enrollmentsData } = await supabase
         .from('user_course_enrollments')
@@ -70,33 +71,67 @@ export default function WorkerDashboard() {
         .eq('user_id', user?.id)
         .order('enrollment_date', { ascending: false });
 
-      // Fetch all completions for user
+      if (!enrollmentsData || enrollmentsData.length === 0) {
+        setEnrollments([]);
+        setStats({
+          enrolledCourses: 0,
+          completedCourses: 0,
+          certificates: 0,
+          totalHours: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const courseIds = enrollmentsData.map(e => e.course_id);
+
+      // Fetch ALL modules for ALL courses in ONE query
+      const { data: allModules } = await supabase
+        .from('modules')
+        .select('id, course_id')
+        .in('course_id', courseIds);
+
+      // Fetch ALL completions for this user across ALL courses in ONE query
       const { data: allCompletions } = await supabase
         .from('completions')
         .select('course_id, module_id, completed_at, time_spent_minutes, status')
-        .eq('user_id', user?.id);
+        .eq('user_id', user?.id)
+        .in('course_id', courseIds);
 
-      // Enrich enrollments with progress data
-      const enrichedEnrollments = await Promise.all(
-        (enrollmentsData || []).map(async (enrollment) => {
-          const { data: modules } = await supabase
-            .from('modules')
-            .select('id')
-            .eq('course_id', enrollment.course_id);
+      // Build lookup maps for O(1) access
+      const moduleCountByCourse = new Map<string, number>();
+      const completionsByCourse = new Map<string, Array<{ completed_at: string | null, time_spent_minutes: number | null }>>();
 
-          const courseCompletions = allCompletions?.filter(c => c.course_id === enrollment.course_id && c.status === 'completed') || [];
+      // Group modules by course
+      allModules?.forEach(m => {
+        moduleCountByCourse.set(m.course_id, (moduleCountByCourse.get(m.course_id) || 0) + 1);
+      });
 
-          return {
-            ...enrollment,
-            total_modules: modules?.length || 0,
-            modules_completed: courseCompletions.length,
-            completions: courseCompletions.map(c => ({
-              completed_at: c.completed_at,
-              time_spent_minutes: c.time_spent_minutes,
-            })),
-          };
-        })
-      );
+      // Group completions by course
+      allCompletions?.forEach(c => {
+        if (c.status === 'completed') {
+          if (!completionsByCourse.has(c.course_id)) {
+            completionsByCourse.set(c.course_id, []);
+          }
+          completionsByCourse.get(c.course_id)?.push({
+            completed_at: c.completed_at,
+            time_spent_minutes: c.time_spent_minutes,
+          });
+        }
+      });
+
+      // Enrich enrollments with progress data (no more queries!)
+      const enrichedEnrollments = enrollmentsData.map(enrollment => {
+        const totalModules = moduleCountByCourse.get(enrollment.course_id) || 0;
+        const courseCompletions = completionsByCourse.get(enrollment.course_id) || [];
+
+        return {
+          ...enrollment,
+          total_modules: totalModules,
+          modules_completed: courseCompletions.length,
+          completions: courseCompletions,
+        };
+      });
 
       // Sort enrollments to show "Getting Started with Skillbridge" first if no other active courses
       const sortedEnrollments = enrichedEnrollments.sort((a, b) => {

@@ -134,6 +134,13 @@ export type Database = {
             foreignKeyName: "announcements_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "announcements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -370,6 +377,13 @@ export type Database = {
             foreignKeyName: "certificates_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -464,6 +478,13 @@ export type Database = {
             foreignKeyName: "completions_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "completions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -548,6 +569,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_imports_source_course_id_fkey"
+            columns: ["source_course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "content_imports_source_course_id_fkey"
@@ -648,6 +676,13 @@ export type Database = {
             foreignKeyName: "course_prerequisites_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_prerequisites_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -657,6 +692,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_prerequisites_prerequisite_course_id_fkey"
+            columns: ["prerequisite_course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "course_prerequisites_prerequisite_course_id_fkey"
@@ -905,6 +947,13 @@ export type Database = {
             foreignKeyName: "curriculum_items_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "curriculum_items_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -999,6 +1048,13 @@ export type Database = {
             foreignKeyName: "enrollments_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -1077,6 +1133,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forums_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "forums_course_id_fkey"
@@ -1161,6 +1224,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "groups_course_id_fkey"
@@ -1420,6 +1490,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "modules_course_id_fkey"
@@ -1932,6 +2009,13 @@ export type Database = {
             foreignKeyName: "projects_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "projects_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -2271,6 +2355,13 @@ export type Database = {
             foreignKeyName: "sessions_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -2385,6 +2476,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "user_course_enrollments_course_id_fkey"
@@ -2598,6 +2696,22 @@ export type Database = {
       }
     }
     Views: {
+      mv_course_metrics: {
+        Row: {
+          avg_score: number | null
+          avg_time_minutes: number | null
+          category: string | null
+          completed_users: number | null
+          completion_rate: number | null
+          course_id: string | null
+          course_title: string | null
+          difficulty: string | null
+          enrolled_users: number | null
+          passed_attempts: number | null
+          total_attempts: number | null
+        }
+        Relationships: []
+      }
       mv_course_performance_analytics: {
         Row: {
           avg_score: number | null
@@ -2646,6 +2760,13 @@ export type Database = {
             foreignKeyName: "modules_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
             referencedRelation: "mv_course_performance_analytics"
             referencedColumns: ["course_id"]
           },
@@ -2673,6 +2794,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "mv_course_metrics"
+            referencedColumns: ["course_id"]
           },
           {
             foreignKeyName: "user_course_enrollments_course_id_fkey"

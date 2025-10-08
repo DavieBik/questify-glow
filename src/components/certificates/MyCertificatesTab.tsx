@@ -69,20 +69,10 @@ export function MyCertificatesTab() {
     }
 
     try {
-      const { data, error } = await supabase.storage
-        .from('certificates')
-        .download(cert.pdf_storage_path);
-
-      if (error) throw error;
-
-      // Create download link
-      const url = URL.createObjectURL(data);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `certificate-${cert.certificate_number}.html`;
-      link.click();
-      URL.revokeObjectURL(url);
-
+      // Phase 1: Use signed URL helper (currently returns public URL)
+      // Phase 2: Will automatically use signed URL when bucket is private
+      const { downloadCertificate } = await import('@/lib/certificates/signedUrls');
+      await downloadCertificate(cert.pdf_storage_path, cert.certificate_number);
       toast.success('Certificate downloaded');
     } catch (error) {
       console.error('Error downloading certificate:', error);
@@ -97,11 +87,16 @@ export function MyCertificatesTab() {
     }
 
     try {
-      const { data } = supabase.storage
-        .from('certificates')
-        .getPublicUrl(cert.pdf_storage_path);
-
-      window.open(data.publicUrl, '_blank');
+      // Phase 1: Use signed URL helper (currently returns public URL)
+      // Phase 2: Will automatically use signed URL when bucket is private
+      const { getCertificateDownloadUrl } = await import('@/lib/certificates/signedUrls');
+      const result = await getCertificateDownloadUrl(cert.pdf_storage_path);
+      
+      if (result.success && result.url) {
+        window.open(result.url, '_blank');
+      } else {
+        throw new Error(result.error || 'Failed to get certificate URL');
+      }
     } catch (error) {
       console.error('Error viewing certificate:', error);
       toast.error('Failed to view certificate');
