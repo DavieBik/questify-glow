@@ -13,7 +13,8 @@ import {
   FileText,
   CheckCircle,
   Award,
-  BookOpen
+  BookOpen,
+  ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -54,6 +55,7 @@ const ModuleDetail = () => {
   const [module, setModule] = useState<Module | null>(null);
   const [completion, setCompletion] = useState<Completion | null>(null);
   const [loading, setLoading] = useState(true);
+  const [nextModuleId, setNextModuleId] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -77,6 +79,20 @@ const ModuleDetail = () => {
 
       if (moduleError) throw moduleError;
       setModule(moduleData as Module);
+
+      // Fetch next module in sequence
+      const { data: nextModule } = await supabase
+        .from('modules')
+        .select('id')
+        .eq('course_id', moduleData.course_id)
+        .gt('order_index', moduleData.order_index)
+        .order('order_index', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      
+      if (nextModule) {
+        setNextModuleId(nextModule.id);
+      }
 
       // Fetch completion status
       if (user) {
@@ -355,13 +371,20 @@ const ModuleDetail = () => {
                     </Button>
                   )}
                   
-                  {module.content_type !== 'quiz' && (
+                  {module.content_type === 'text' && (
+                    <Button onClick={markModuleComplete} className="w-full">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Mark as Complete
+                    </Button>
+                  )}
+                  
+                  {module.content_type !== 'quiz' && module.content_type !== 'text' && (
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">
                         {module.content_type === 'video' && 'Watch the video above to complete this module'}
                         {module.content_type === 'scorm' && 'Interact with the SCORM package above to complete this module'}
                         {module.content_type === 'survey' && 'Complete the assessment form above to finish this module'}
-                        {!['video', 'scorm', 'survey'].includes(module.content_type) && 'Complete the content above to finish this module'}
+                        {!['video', 'scorm', 'survey', 'text'].includes(module.content_type) && 'Complete the content above to finish this module'}
                       </p>
                     </div>
                   )}
@@ -375,8 +398,24 @@ const ModuleDetail = () => {
                     <p className="text-sm font-medium text-green-600">Module Completed!</p>
                   </div>
                   
-                  {module.content_type === 'quiz' && (
+                  {nextModuleId ? (
                     <Button asChild className="w-full">
+                      <Link to={`/modules/${nextModuleId}`}>
+                        <ArrowRight className="h-4 w-4 mr-2" />
+                        Next Module
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button asChild className="w-full">
+                      <Link to={`/courses/${module.course_id}`}>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Back to Course
+                      </Link>
+                    </Button>
+                  )}
+                  
+                  {module.content_type === 'quiz' && (
+                    <Button asChild variant="outline" className="w-full">
                       <Link to={`/modules/${module.id}/quiz`}>
                         <FileText className="h-4 w-4 mr-2" />
                         Review Quiz

@@ -113,8 +113,20 @@ const CourseDetail = () => {
     }
   };
 
-  const handleContinue = () => {
-    navigate(`/courses/${id}/enroll`);
+  const handleContinue = async () => {
+    // Fetch first module and navigate to it
+    const { data: modules } = await supabase
+      .from('modules')
+      .select('id')
+      .eq('course_id', id)
+      .order('order_index', { ascending: true })
+      .limit(1);
+    
+    if (modules && modules.length > 0) {
+      navigate(`/modules/${modules[0].id}`);
+    } else {
+      toast.error('No modules found for this course');
+    }
   };
 
   if (loading) {
