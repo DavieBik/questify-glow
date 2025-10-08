@@ -667,12 +667,14 @@ export type Database = {
       courses: {
         Row: {
           category: string | null
+          compliance_standard: string | null
           created_at: string
           created_by: string | null
           description: string | null
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes: number | null
           estimated_duration_minutes: number | null
+          expiry_period_months: number | null
           external_id: string | null
           format: string | null
           id: string
@@ -687,6 +689,7 @@ export type Database = {
           short_description: string | null
           thumbnail_url: string | null
           title: string
+          training_type: string | null
           updated_at: string
           video_url: string | null
           visibility: string | null
@@ -694,12 +697,14 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          compliance_standard?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number | null
           estimated_duration_minutes?: number | null
+          expiry_period_months?: number | null
           external_id?: string | null
           format?: string | null
           id?: string
@@ -714,6 +719,7 @@ export type Database = {
           short_description?: string | null
           thumbnail_url?: string | null
           title: string
+          training_type?: string | null
           updated_at?: string
           video_url?: string | null
           visibility?: string | null
@@ -721,12 +727,14 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          compliance_standard?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number | null
           estimated_duration_minutes?: number | null
+          expiry_period_months?: number | null
           external_id?: string | null
           format?: string | null
           id?: string
@@ -741,6 +749,7 @@ export type Database = {
           short_description?: string | null
           thumbnail_url?: string | null
           title?: string
+          training_type?: string | null
           updated_at?: string
           video_url?: string | null
           visibility?: string | null
