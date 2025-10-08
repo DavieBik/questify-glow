@@ -3,13 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Users, BookOpen, Award, Clock } from "lucide-react";
-import { format, subDays } from "date-fns";
+import { CalendarIcon, Users, BookOpen, Award, Clock, Download } from "lucide-react";
+import { format, subDays, startOfMonth, endOfMonth, eachMonthOfInterval, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { DateRange } from "react-day-picker";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { useToast } from "@/hooks/use-toast";
 
 interface OverviewMetrics {
   totalLearners: number;
@@ -21,9 +22,21 @@ interface OverviewMetrics {
   avgTimePerCompletion: number;
 }
 
+interface MonthlyData {
+  month: string;
+  completions: number;
+  avgHours: number;
+}
+
+interface TopCourse {
+  course_title: string;
+  completions: number;
+  avgScore: number;
+}
+
 export function AnalyticsOverview() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: subDays(new Date(), 90),
+    from: subDays(new Date(), 180), // 6 months
     to: new Date(),
   });
   const [metrics, setMetrics] = useState<OverviewMetrics>({
@@ -35,11 +48,11 @@ export function AnalyticsOverview() {
     avgScore: 0,
     avgTimePerCompletion: 0,
   });
-  const [completionTrends, setCompletionTrends] = useState([]);
-  const [coursePerformance, setCoursePerformance] = useState([]);
-  const [learningPatterns, setLearningPatterns] = useState([]);
+  const [monthlyCompletions, setMonthlyCompletions] = useState<MonthlyData[]>([]);
+  const [topCourses, setTopCourses] = useState<TopCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAdmin, isManager } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
@@ -47,69 +60,168 @@ export function AnalyticsOverview() {
     }
   }, [dateRange]);
 
+  const exportToCSV = (data: any[], filename: string, headers: string[]) => {
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => headers.map(h => {
+        const key = h.toLowerCase().replace(/ /g, '_');
+        return `"${row[key] || ''}"`;
+      }).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export Successful",
+      description: `${filename} has been downloaded`,
+    });
+  };
+
   const fetchOverviewData = async () => {
     if (!dateRange?.from || !dateRange?.to) return;
     
     setLoading(true);
     try {
-      // Fetch KPI metrics
-      const { data: progressData } = await (supabase as any).rpc('rpc_admin_team_user_progress', {
-        date_from: format(dateRange.from, 'yyyy-MM-dd'),
-        date_to: format(dateRange.to, 'yyyy-MM-dd'),
-        manager_scope: isManager && !isAdmin
+      // Fetch all completions in date range
+      const { data: completionsData, error: completionsError } = await supabase
+        .from('completions')
+        .select(`
+          completed_at,
+          time_spent_minutes,
+          score_percentage,
+          status,
+          user_id,
+          course_id,
+          courses!inner(title)
+        `)
+        .eq('status', 'completed')
+        .gte('completed_at', format(dateRange.from, 'yyyy-MM-dd'))
+        .lte('completed_at', format(dateRange.to, 'yyyy-MM-dd'))
+        .not('completed_at', 'is', null);
+
+      if (completionsError) throw completionsError;
+
+      // Process monthly completions and engagement
+      const monthsInRange = eachMonthOfInterval({
+        start: dateRange.from,
+        end: dateRange.to
       });
 
-      const { data: courseData } = await (supabase as any).rpc('rpc_course_metrics', {
-        date_from: format(dateRange.from, 'yyyy-MM-dd'),
-        date_to: format(dateRange.to, 'yyyy-MM-dd')
+      const monthlyData: MonthlyData[] = monthsInRange.map(month => {
+        const monthStr = format(month, 'yyyy-MM');
+        const monthCompletions = (completionsData || []).filter(c => 
+          c.completed_at && format(parseISO(c.completed_at), 'yyyy-MM') === monthStr
+        );
+
+        const totalMinutes = monthCompletions.reduce((sum, c) => sum + (c.time_spent_minutes || 0), 0);
+        const avgHours = monthCompletions.length > 0 ? totalMinutes / 60 / monthCompletions.length : 0;
+
+        return {
+          month: format(month, 'MMM yyyy'),
+          completions: monthCompletions.length,
+          avgHours: Math.round(avgHours * 10) / 10
+        };
       });
 
-      const { data: patternsData } = await (supabase as any).rpc('rpc_learning_patterns', {
-        date_from: format(dateRange.from, 'yyyy-MM-dd'),
-        date_to: format(dateRange.to, 'yyyy-MM-dd')
+      setMonthlyCompletions(monthlyData);
+
+      // Calculate top courses by completions
+      const courseCounts = new Map<string, { count: number; scores: number[] }>();
+      (completionsData || []).forEach(c => {
+        const title = c.courses?.title || 'Unknown Course';
+        const existing = courseCounts.get(title) || { count: 0, scores: [] };
+        existing.count++;
+        if (c.score_percentage) existing.scores.push(c.score_percentage);
+        courseCounts.set(title, existing);
       });
 
-      // Calculate metrics
-      const totalLearners = new Set((progressData || []).map(p => p.user_id)).size;
-      const activeLast7d = (progressData || []).filter(p => 
-        new Date(p.last_activity_at) >= subDays(new Date(), 7)
+      const topCoursesData: TopCourse[] = Array.from(courseCounts.entries())
+        .map(([title, data]) => ({
+          course_title: title,
+          completions: data.count,
+          avgScore: data.scores.length > 0 
+            ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length) 
+            : 0
+        }))
+        .sort((a, b) => b.completions - a.completions)
+        .slice(0, 10);
+
+      setTopCourses(topCoursesData);
+
+      // Calculate KPI metrics
+      const uniqueLearners = new Set((completionsData || []).map(c => c.user_id)).size;
+      const last7Days = subDays(new Date(), 7);
+      const last30Days = subDays(new Date(), 30);
+      
+      const completions7d = (completionsData || []).filter(c => 
+        c.completed_at && parseISO(c.completed_at) >= last7Days
       ).length;
       
-      const avgScore = (progressData || []).reduce((acc, p) => acc + (p.avg_score || 0), 0) / ((progressData || []).length || 1);
-      const avgTime = (progressData || []).reduce((acc, p) => acc + (p.time_spent_minutes || 0), 0) / ((progressData || []).length || 1);
+      const completions30d = (completionsData || []).filter(c => 
+        c.completed_at && parseISO(c.completed_at) >= last30Days
+      ).length;
+
+      const avgScore = completionsData && completionsData.length > 0
+        ? completionsData.reduce((sum, c) => sum + (c.score_percentage || 0), 0) / completionsData.length
+        : 0;
+
+      const avgTime = completionsData && completionsData.length > 0
+        ? completionsData.reduce((sum, c) => sum + (c.time_spent_minutes || 0), 0) / completionsData.length
+        : 0;
+
+      // Get total active courses
+      const { data: coursesData } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('is_active', true);
 
       setMetrics({
-        totalLearners,
-        activeLast7d,
-        totalCourses: (courseData || []).length,
-        completions7d: (progressData || []).filter(p => 
-          p.first_completed_at && new Date(p.first_completed_at) >= subDays(new Date(), 7)
-        ).length,
-        completions30d: (progressData || []).filter(p => 
-          p.first_completed_at && new Date(p.first_completed_at) >= subDays(new Date(), 30)
-        ).length,
+        totalLearners: uniqueLearners,
+        activeLast7d: new Set((completionsData || [])
+          .filter(c => c.completed_at && parseISO(c.completed_at) >= last7Days)
+          .map(c => c.user_id)
+        ).size,
+        totalCourses: coursesData?.length || 0,
+        completions7d,
+        completions30d,
         avgScore: Math.round(avgScore * 10) / 10,
         avgTimePerCompletion: Math.round(avgTime),
       });
 
-      // Process chart data
-      setCoursePerformance((courseData || []).slice(0, 10).map(course => ({
-        name: course.course_title || `Course ${course.course_id}`,
-        avgTime: course.avg_time_minutes || 0,
-        passRate: course.completion_rate || 0
-      })));
-
-      setLearningPatterns((patternsData || []).filter(p => p.bucket_type === 'hour').map(p => ({
-        hour: `${p.bucket}:00`,
-        completions: p.completions || 0
-      })));
-
     } catch (error) {
       console.error("Error fetching overview data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load analytics data",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-64 mb-4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-32 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -210,39 +322,126 @@ export function AnalyticsOverview() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        {/* Monthly Completions Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Course Performance</CardTitle>
-            <CardDescription>Average completion time by course</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Monthly Completions</CardTitle>
+                <CardDescription>Course completions by month</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => exportToCSV(
+                  monthlyCompletions,
+                  'monthly_completions',
+                  ['Month', 'Completions']
+                )}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                CSV
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={coursePerformance}>
+              <LineChart data={monthlyCompletions}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="avgTime" fill="hsl(var(--primary))" />
-              </BarChart>
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="completions" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  name="Completions"
+                />
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
+        {/* Engagement Trend Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Learning Patterns</CardTitle>
-            <CardDescription>Completions by hour of day</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Engagement Trend (Average Hours)</CardTitle>
+                <CardDescription>Average learning hours per completion by month</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => exportToCSV(
+                  monthlyCompletions,
+                  'engagement_trend',
+                  ['Month', 'Avg Hours']
+                )}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                CSV
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={learningPatterns}>
+              <LineChart data={monthlyCompletions}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hour" />
+                <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="completions" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="avgHours" 
+                  stroke="hsl(var(--chart-2))" 
+                  strokeWidth={2}
+                  name="Avg Hours"
+                />
               </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Top Courses Chart */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Top Courses by Completions</CardTitle>
+                <CardDescription>Most completed courses in selected period</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => exportToCSV(
+                  topCourses,
+                  'top_courses',
+                  ['Course Title', 'Completions', 'Avg Score']
+                )}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                CSV
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={topCourses} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="course_title" type="category" width={200} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="completions" fill="hsl(var(--primary))" name="Completions" />
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
