@@ -31,6 +31,7 @@ interface Course {
   compliance_standard: string;
   training_type: string;
   expiry_period_months: number;
+  level: string;
 }
 
 interface Enrollment {
@@ -58,9 +59,9 @@ const CourseDetail = () => {
       // Fetch course details
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
-        .select('id, title, description, category, estimated_duration_minutes, compliance_standard, training_type, expiry_period_months')
+        .select('id, title, description, category, estimated_duration_minutes, compliance_standard, training_type, expiry_period_months, level')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (courseError) throw courseError;
       setCourse(courseData);
@@ -171,6 +172,11 @@ const CourseDetail = () => {
           {course.category && (
             <Badge variant="secondary" className="text-sm">
               {course.category}
+            </Badge>
+          )}
+          {course.level && (
+            <Badge variant="outline" className="text-sm">
+              Level: {course.level}
             </Badge>
           )}
         </div>

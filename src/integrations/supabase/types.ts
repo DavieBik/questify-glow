@@ -318,6 +318,7 @@ export type Database = {
           is_valid: boolean
           issue_date: string
           issued_by: string | null
+          pdf_storage_path: string | null
           pdf_url: string | null
           qr_code_data: string | null
           user_id: string
@@ -334,6 +335,7 @@ export type Database = {
           is_valid?: boolean
           issue_date: string
           issued_by?: string | null
+          pdf_storage_path?: string | null
           pdf_url?: string | null
           qr_code_data?: string | null
           user_id: string
@@ -350,6 +352,7 @@ export type Database = {
           is_valid?: boolean
           issue_date?: string
           issued_by?: string | null
+          pdf_storage_path?: string | null
           pdf_url?: string | null
           qr_code_data?: string | null
           user_id?: string

@@ -44,6 +44,7 @@ import AdminModuleCreate from "./pages/AdminModuleCreate";
 import AdminModuleEdit from "./pages/AdminModuleEdit";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminApprovals from "./pages/AdminApprovals";
+import AdminCertificates from "./pages/admin/AdminCertificates";
 import SegmentedDemo from "./pages/dev/SegmentedDemo";
 import SetupTestUsers from "./pages/dev/SetupTestUsers";
 import CreateTestAccounts from "./pages/dev/CreateTestAccounts";
@@ -327,6 +328,13 @@ const App = () => {
                         <ProtectedRoute requireRole={['admin', 'manager']}>
                           <Layout>
                             <AdminCurricula />
+                          </Layout>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/certificates" element={
+                        <ProtectedRoute requireRole={['admin', 'manager']}>
+                          <Layout>
+                            <AdminCertificates />
                           </Layout>
                         </ProtectedRoute>
                       } />

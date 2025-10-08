@@ -61,11 +61,10 @@ const handler = async (req: Request): Promise<Response> => {
         certificateNumber,
         userName: `${user.first_name} ${user.last_name}`,
         courseTitle: course.title,
-        issueDate,
-        expiryDate,
-        finalScore,
-        completionTime,
-        qrCodeData
+        completionDate: issueDate,
+        trainerSignature: 'Training Administrator',
+        userId,
+        courseId
       }
     });
 
@@ -75,6 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const pdfUrl = pdfResponse.data?.pdfUrl;
+    const storagePath = pdfResponse.data?.storagePath;
 
     // Insert certificate record
     const { data: certificate, error: certError } = await supabase
@@ -88,6 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
         final_score_percentage: finalScore,
         completion_time_minutes: completionTime,
         pdf_url: pdfUrl,
+        pdf_storage_path: storagePath,
         verification_url: qrCodeData,
         qr_code_data: qrCodeData,
         is_valid: true

@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL") ?? "",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-);
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -15,11 +10,10 @@ interface CertificatePDFRequest {
   certificateNumber: string;
   userName: string;
   courseTitle: string;
-  issueDate: string;
-  expiryDate: string;
-  finalScore: number;
-  completionTime: number;
-  qrCodeData: string;
+  completionDate: string;
+  trainerSignature?: string;
+  userId: string;
+  courseId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -28,229 +22,207 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
     const { 
       certificateNumber, 
       userName, 
       courseTitle, 
-      issueDate, 
-      expiryDate, 
-      finalScore, 
-      completionTime, 
-      qrCodeData 
+      completionDate,
+      trainerSignature,
+      userId,
+      courseId
     }: CertificatePDFRequest = await req.json();
 
-    console.log("Generating PDF certificate:", certificateNumber);
+    console.log("Generating certificate PDF:", { certificateNumber, userName, courseTitle });
 
-    // Generate HTML template for PDF
-    const htmlTemplate = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          @page { 
-            size: A4 landscape; 
-            margin: 20mm; 
-          }
-          body { 
-            font-family: 'Georgia', serif; 
-            margin: 0; 
-            padding: 20px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-          }
-          .certificate {
-            border: 8px solid #2563eb;
-            border-radius: 20px;
-            padding: 40px;
-            background: white;
-            text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-          }
-          .certificate::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
-            z-index: -1;
-          }
-          .header {
-            color: #1e40af;
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-          }
-          .subtitle {
-            color: #64748b;
-            font-size: 24px;
-            margin-bottom: 40px;
-            font-style: italic;
-          }
-          .name {
-            color: #1e293b;
-            font-size: 42px;
-            font-weight: bold;
-            margin: 30px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 3px solid #2563eb;
-            padding-bottom: 10px;
-            display: inline-block;
-          }
-          .course {
-            color: #374151;
-            font-size: 28px;
-            margin: 30px 0;
-            font-weight: 600;
-          }
-          .details {
-            display: flex;
-            justify-content: space-around;
-            margin: 40px 0;
-            font-size: 16px;
-            color: #64748b;
-          }
-          .detail-item {
-            text-align: center;
-          }
-          .detail-label {
-            font-weight: bold;
-            color: #374151;
-            display: block;
-            margin-bottom: 5px;
-          }
-          .cert-number {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            font-size: 12px;
-            color: #9ca3af;
-          }
-          .qr-placeholder {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            border: 2px dashed #cbd5e1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #9ca3af;
-            text-align: center;
-          }
-          .signature-line {
-            margin-top: 60px;
-            border-top: 2px solid #374151;
-            width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-            padding-top: 10px;
-            color: #64748b;
-            font-size: 14px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="certificate">
-          <div class="header">CERTIFICATE</div>
-          <div class="subtitle">of Completion</div>
-          
-          <div style="margin: 40px 0; color: #64748b; font-size: 20px;">
-            This certifies that
-          </div>
-          
-          <div class="name">${userName}</div>
-          
-          <div style="margin: 30px 0; color: #64748b; font-size: 20px;">
-            has successfully completed the course
-          </div>
-          
-          <div class="course">${courseTitle}</div>
-          
-          <div class="details">
-            <div class="detail-item">
-              <span class="detail-label">Score Achieved</span>
-              ${finalScore}%
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Completion Time</span>
-              ${completionTime} minutes
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Issue Date</span>
-              ${new Date(issueDate).toLocaleDateString()}
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Valid Until</span>
-              ${new Date(expiryDate).toLocaleDateString()}
-            </div>
-          </div>
-          
-          <div class="signature-line">
-            Training Administrator
-          </div>
-          
-          <div class="cert-number">
-            Certificate No: ${certificateNumber}
-          </div>
-          
-          <div class="qr-placeholder">
-            QR Code<br>
-            Verification
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+    // Fetch branding settings
+    const { data: branding } = await supabase
+      .from('org_branding')
+      .select('logo_url, primary_color')
+      .maybeSingle();
 
-    // In a real implementation, you would use a PDF generation service like:
-    // - Puppeteer
-    // - wkhtmltopdf
-    // - jsPDF
-    // - A third-party service like PDFShift, Bannerbear, etc.
-    
-    // For this demo, we'll simulate PDF generation and return a mock URL
-    // You should replace this with actual PDF generation logic
-    
-    const mockPdfUrl = `https://example.com/certificates/${certificateNumber}.pdf`;
-    
-    // In a real implementation, you might:
-    // 1. Generate the PDF using a service
-    // 2. Upload it to Supabase Storage or another cloud storage
-    // 3. Return the public URL
-    
-    console.log("PDF generation completed for:", certificateNumber);
-    console.log("Mock PDF URL:", mockPdfUrl);
+    const logoUrl = branding?.logo_url || '';
+    const primaryColor = branding?.primary_color || '#059669';
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      pdfUrl: mockPdfUrl,
-      certificateNumber,
-      htmlTemplate // Return template for debugging
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    // Generate HTML certificate with branding
+    const certificateHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4 landscape; margin: 0; }
+    body {
+      margin: 0;
+      padding: 60px;
+      font-family: 'Georgia', serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .certificate {
+      background: white;
+      width: 100%;
+      max-width: 800px;
+      padding: 60px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid ${primaryColor};
+      position: relative;
+    }
+    .certificate::before {
+      content: '';
+      position: absolute;
+      top: 20px; left: 20px; right: 20px; bottom: 20px;
+      border: 1px solid #ddd;
+    }
+    .logo { text-align: center; margin-bottom: 30px; }
+    .logo img { max-height: 80px; max-width: 200px; }
+    h1 {
+      text-align: center;
+      color: ${primaryColor};
+      font-size: 48px;
+      margin: 20px 0;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+    .subtitle { text-align: center; font-size: 18px; color: #666; margin-bottom: 40px; }
+    .recipient { text-align: center; margin: 30px 0; }
+    .recipient-name {
+      font-size: 36px;
+      color: #333;
+      font-weight: bold;
+      margin: 10px 0;
+      border-bottom: 2px solid ${primaryColor};
+      display: inline-block;
+      padding: 0 30px 10px;
+    }
+    .course-title {
+      text-align: center;
+      font-size: 24px;
+      color: #444;
+      margin: 30px 0;
+      font-style: italic;
+    }
+    .details {
+      display: flex;
+      justify-content: space-around;
+      margin: 40px 0;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+    }
+    .detail-item { text-align: center; }
+    .detail-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .detail-value { font-size: 16px; color: #333; font-weight: bold; }
+    .signature {
+      margin-top: 50px;
+      text-align: center;
+    }
+    .signature-line {
+      border-top: 2px solid #333;
+      width: 300px;
+      margin: 0 auto 10px;
+    }
+    .signature-text { font-size: 14px; color: #666; }
+    .certificate-number {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    ${logoUrl ? `<div class="logo"><img src="${logoUrl}" alt="Logo"></div>` : ''}
+    
+    <h1>Certificate of Completion</h1>
+    <div class="subtitle">This is to certify that</div>
+    
+    <div class="recipient">
+      <div class="recipient-name">${userName}</div>
+    </div>
+    
+    <div class="subtitle">has successfully completed the course</div>
+    
+    <div class="course-title">${courseTitle}</div>
+    
+    <div class="details">
+      <div class="detail-item">
+        <div class="detail-label">Completion Date</div>
+        <div class="detail-value">${new Date(completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Certificate Number</div>
+        <div class="detail-value">${certificateNumber}</div>
+      </div>
+    </div>
+    
+    ${trainerSignature ? `
+    <div class="signature">
+      <div class="signature-line"></div>
+      <div class="signature-text">${trainerSignature}</div>
+    </div>
+    ` : ''}
+    
+    <div class="certificate-number">Certificate ID: ${certificateNumber}</div>
+  </div>
+</body>
+</html>`;
 
+    // Store HTML (in production, use PDF conversion service)
+    const storagePath = `${userId}/${courseId}/${certificateNumber}.html`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('certificates')
+      .upload(storagePath, new Blob([certificateHTML], { type: 'text/html' }), {
+        contentType: 'text/html',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      throw new Error(`Failed to upload certificate: ${uploadError.message}`);
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('certificates')
+      .getPublicUrl(storagePath);
+
+    console.log("Certificate saved to storage:", storagePath);
+
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        storagePath,
+        pdfUrl: urlData.publicUrl,
+        html: certificateHTML 
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    );
   } catch (error: any) {
-    console.error("Error in generate-certificate-pdf function:", error);
+    console.error('Error in generate-certificate-pdf function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      },
     );
   }
 };

@@ -4,8 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Award, Clock, TrendingUp, User, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MyCertificatesTab } from '@/components/certificates/MyCertificatesTab';
 
 interface WorkerStats {
   enrolledCourses: number;
@@ -33,7 +35,6 @@ export default function WorkerDashboard() {
   const fetchWorkerStats = async () => {
     setLoading(true);
     try {
-      // Fetch basic stats for worker
       const [enrollmentsResult, certificatesResult] = await Promise.all([
         supabase
           .from('user_course_enrollments')
@@ -52,7 +53,7 @@ export default function WorkerDashboard() {
         enrolledCourses: enrollments.length,
         completedCourses: enrollments.filter(e => e.status === 'completed').length,
         certificates: certificates.length,
-        totalHours: 0 // We could calculate this from completions
+        totalHours: 0
       });
     } catch (error) {
       console.error('Error fetching worker stats:', error);
@@ -102,9 +103,7 @@ export default function WorkerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.enrolledCourses}</div>
-            <p className="text-xs text-muted-foreground">
-              Active learning paths
-            </p>
+            <p className="text-xs text-muted-foreground">Active learning paths</p>
           </CardContent>
         </Card>
 
@@ -115,9 +114,7 @@ export default function WorkerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completedCourses}</div>
-            <p className="text-xs text-muted-foreground">
-              Courses finished
-            </p>
+            <p className="text-xs text-muted-foreground">Courses finished</p>
           </CardContent>
         </Card>
 
@@ -128,9 +125,7 @@ export default function WorkerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.certificates}</div>
-            <p className="text-xs text-muted-foreground">
-              Earned credentials
-            </p>
+            <p className="text-xs text-muted-foreground">Earned credentials</p>
           </CardContent>
         </Card>
 
@@ -141,67 +136,75 @@ export default function WorkerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats.totalHours}</div>
-            <p className="text-xs text-muted-foreground">
-              Time invested
-            </p>
+            <p className="text-xs text-muted-foreground">Time invested</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Jump into your learning journey
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button asChild className="h-auto p-4 flex flex-col items-start gap-2 bg-blue-600 hover:bg-blue-700">
-            <Link to="/courses">
-              <BookOpen className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">Browse Courses</div>
-                <div className="text-xs opacity-90">Explore available training</div>
-              </div>
-            </Link>
-          </Button>
+      {/* Tabs for different sections */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="certificates">My Certificates</TabsTrigger>
+        </TabsList>
 
-          <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
-            <Link to="/certificates">
-              <Award className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">My Certificates</div>
-                <div className="text-xs text-muted-foreground">View achievements</div>
-              </div>
-            </Link>
-          </Button>
+        <TabsContent value="overview" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Jump into your learning journey</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button asChild className="h-auto p-4 flex flex-col items-start gap-2 bg-blue-600 hover:bg-blue-700">
+                <Link to="/courses">
+                  <BookOpen className="h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Browse Courses</div>
+                    <div className="text-xs opacity-90">Explore available training</div>
+                  </div>
+                </Link>
+              </Button>
 
-          <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
-            <Link to="/profile">
-              <User className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">Update Profile</div>
-                <div className="text-xs text-muted-foreground">Manage account</div>
-              </div>
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
+              <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
+                <Link to="/catalog">
+                  <BookOpen className="h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Course Catalog</div>
+                    <div className="text-xs text-muted-foreground">Discover new courses</div>
+                  </div>
+                </Link>
+              </Button>
 
-      {/* Learning Progress Note */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-blue-800">
-            <TrendingUp className="h-5 w-5" />
-            <p className="font-medium">Keep Learning!</p>
-          </div>
-          <p className="text-blue-700 mt-1">
-            Complete your assigned courses to advance your skills and earn certificates. 
-            Your progress is being tracked for compliance and professional development.
-          </p>
-        </CardContent>
-      </Card>
+              <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
+                <Link to="/profile">
+                  <User className="h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Update Profile</div>
+                    <div className="text-xs text-muted-foreground">Manage account</div>
+                  </div>
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-blue-800">
+                <TrendingUp className="h-5 w-5" />
+                <p className="font-medium">Keep Learning!</p>
+              </div>
+              <p className="text-blue-700 mt-1">
+                Complete your assigned courses to advance your skills and earn certificates. 
+                Your progress is being tracked for compliance and professional development.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="certificates">
+          <MyCertificatesTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

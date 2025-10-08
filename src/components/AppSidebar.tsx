@@ -63,6 +63,7 @@ const adminItems = [
   { title: 'Users', url: '/admin/users', icon: Users },
   { title: 'Courses', url: '/admin/courses', icon: BookOpen },
   { title: 'Curricula', url: '/admin/curricula', icon: GraduationCap },
+  { title: 'Certificates', url: '/admin/certificates', icon: Award },
   { title: 'Import Courses', url: '/admin/imports/courses-modules', icon: Upload },
   { title: 'Import Users & Enrollments', url: '/admin/imports/users-enrollments', icon: Upload },
   { title: 'Approvals', url: '/admin/approvals', icon: Clock },
