@@ -10,6 +10,7 @@ import { BookOpen, Award, Clock, TrendingUp, User, Target, CheckCircle, PlayCirc
 import { Link } from 'react-router-dom';
 import { MyCertificatesTab } from '@/components/certificates/MyCertificatesTab';
 import { format, addMonths } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface WorkerStats {
   enrolledCourses: number;
@@ -47,6 +48,58 @@ export default function WorkerDashboard() {
   });
   const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined) ??
+    user?.email?.split('@')[0] ??
+    'Learner';
+
+  const statHighlights = [
+    {
+      id: 'enrolled',
+      label: 'Enrolled Courses',
+      description: 'Active learning paths',
+      value: stats.enrolledCourses,
+      icon: BookOpen,
+      cardClass: 'from-blue-50 via-white to-sky-50 border-blue-100 text-brand-navy',
+      iconClass: 'bg-blue-100 text-blue-600',
+      valueClass: 'text-blue-700',
+      accentClass: 'bg-blue-400/60',
+    },
+    {
+      id: 'completed',
+      label: 'Completed',
+      description: 'Courses finished',
+      value: stats.completedCourses,
+      icon: Target,
+      cardClass: 'from-emerald-50 via-white to-emerald-100 border-emerald-100 text-brand-navy',
+      iconClass: 'bg-emerald-100 text-emerald-600',
+      valueClass: 'text-emerald-600',
+      accentClass: 'bg-emerald-400/60',
+    },
+    {
+      id: 'certificates',
+      label: 'Certificates',
+      description: 'Earned credentials',
+      value: stats.certificates,
+      icon: Award,
+      cardClass: 'from-amber-50 via-white to-yellow-100 border-amber-100 text-brand-navy',
+      iconClass: 'bg-amber-100 text-amber-600',
+      valueClass: 'text-amber-600',
+      accentClass: 'bg-amber-400/70',
+    },
+    {
+      id: 'hours',
+      label: 'Learning Hours',
+      description: 'Time invested',
+      value: stats.totalHours,
+      icon: Clock,
+      cardClass: 'from-violet-50 via-white to-purple-100 border-purple-100 text-brand-navy',
+      iconClass: 'bg-purple-100 text-purple-600',
+      valueClass: 'text-purple-600',
+      accentClass: 'bg-purple-400/70',
+    },
+  ];
 
   useEffect(() => {
     if (user) {
@@ -208,78 +261,100 @@ export default function WorkerDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <User className="h-8 w-8 text-blue-600" />
-            Worker Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Welcome back! Track your learning progress and complete your assigned courses.
-          </p>
+      <div className="overflow-hidden rounded-3xl bg-gradient-hero p-6 text-white shadow-card md:p-8">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
+              <User className="h-4 w-4" />
+              Worker Dashboard
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold md:text-4xl">Welcome back, {displayName}!</h1>
+              <p className="max-w-2xl text-sm text-white/80 md:text-base">
+                Track your learning progress and complete your assigned courses.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 rounded-2xl bg-white/10 p-4 text-sm text-white/80 backdrop-blur-sm md:text-base">
+            <Badge variant="outline" className="w-fit border-white/50 bg-white/20 px-3 py-1 text-white">
+              Worker Role
+            </Badge>
+            <div className="grid gap-1 text-white/80">
+              <span>
+                <span className="font-semibold text-white">{stats.enrolledCourses}</span> enrolled
+              </span>
+              <span>
+                <span className="font-semibold text-white">{stats.completedCourses}</span> completed
+              </span>
+              <span>
+                <span className="font-semibold text-white">{stats.totalHours}</span> hours logged
+              </span>
+            </div>
+          </div>
         </div>
-        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-          Worker Role
-        </Badge>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-blue-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Enrolled Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.enrolledCourses}</div>
-            <p className="text-xs text-muted-foreground">Active learning paths</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <Target className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completedCourses}</div>
-            <p className="text-xs text-muted-foreground">Courses finished</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Certificates</CardTitle>
-            <Award className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.certificates}</div>
-            <p className="text-xs text-muted-foreground">Earned credentials</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-purple-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Learning Hours</CardTitle>
-            <Clock className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.totalHours}</div>
-            <p className="text-xs text-muted-foreground">Time invested</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        {statHighlights.map((highlight) => {
+          const Icon = highlight.icon;
+          return (
+            <Card
+              key={highlight.id}
+              className={cn(
+                "relative overflow-hidden bg-gradient-to-br shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg",
+                "border border-transparent",
+                highlight.cardClass
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn("absolute inset-x-0 top-0 h-1", highlight.accentClass)}
+              />
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-sm font-semibold tracking-tight text-brand-navy/80">
+                    {highlight.label}
+                  </CardTitle>
+                  <p className="text-xs text-brand-navy/60">{highlight.description}</p>
+                </div>
+                <div
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full bg-white/70",
+                    highlight.iconClass
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className={cn("text-3xl font-bold", highlight.valueClass)}>{highlight.value}</div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="certificates">My Certificates</TabsTrigger>
+        <TabsList className="mb-2 flex-wrap gap-2 rounded-full border border-muted/60 bg-white/80 p-1 text-sm shadow-inner backdrop-blur">
+          <TabsTrigger
+            value="overview"
+            className="rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-card"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="certificates"
+            className="rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-card"
+          >
+            My Certificates
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           {/* Active Courses Section */}
-          <Card>
+          <Card className="border border-muted/60 bg-white shadow-card">
             <CardHeader>
               <CardTitle>My Learning</CardTitle>
               <CardDescription>Continue where you left off</CardDescription>
@@ -296,52 +371,73 @@ export default function WorkerDashboard() {
                   const isCompleted = enrollment.status === 'completed';
 
                   return (
-                    <Card key={enrollment.id} className="relative overflow-hidden">
-                      <CardContent className="pt-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="space-y-1">
-                                <h3 className="font-semibold text-lg">{enrollment.course.title}</h3>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <Badge variant="outline" className="text-xs">
-                                    {enrollment.course.category}
-                                  </Badge>
-                                  <Badge variant="outline" className="text-xs capitalize">
-                                    {enrollment.course.difficulty}
-                                  </Badge>
-                                  {isCompleted && (
-                                    <Badge className="bg-green-100 text-green-800 border-green-200">
-                                      <CheckCircle className="h-3 w-3 mr-1" />
-                                      Completed
+                    <Card
+                      key={enrollment.id}
+                      className={cn(
+                        'relative overflow-hidden border border-muted/60 bg-white shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg',
+                        isCompleted
+                          ? 'bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border-emerald-100'
+                          : 'bg-gradient-to-br from-white via-white to-sky-100 border-blue-100'
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          'absolute inset-x-0 top-0 h-1',
+                          isCompleted ? 'bg-emerald-400/70' : 'bg-blue-400/70'
+                        )}
+                      />
+                      <CardContent className="space-y-4 pt-6">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="flex-1 space-y-4">
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="space-y-1">
+                                  <h3 className="text-lg font-semibold text-brand-navy">{enrollment.course.title}</h3>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline" className="bg-white/80 text-xs text-brand-navy">
+                                      {enrollment.course.category}
                                     </Badge>
-                                  )}
+                                    <Badge variant="outline" className="bg-white/80 text-xs capitalize text-brand-navy">
+                                      {enrollment.course.difficulty}
+                                    </Badge>
+                                    {isCompleted && (
+                                      <Badge className="border-emerald-200 bg-emerald-100 text-emerald-700">
+                                        <CheckCircle className="mr-1 h-3 w-3" />
+                                        Completed
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                  {enrollment.modules_completed} of {enrollment.total_modules} modules
-                                </span>
-                                <span className="font-medium">{progress}%</span>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm text-brand-navy/70">
+                                  <span>
+                                    {enrollment.modules_completed} of {enrollment.total_modules} modules
+                                  </span>
+                                  <span className="font-semibold text-brand-navy">{progress}%</span>
+                                </div>
+                                <Progress value={progress} className="h-3 bg-white/60" />
                               </div>
-                              <Progress value={progress} className="h-2" />
                             </div>
 
                             {validUntil && isCompleted && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1 text-xs text-brand-navy/70">
                                 <Calendar className="h-3 w-3" />
                                 <span>Valid until: {format(validUntil, 'MMM dd, yyyy')}</span>
                               </div>
                             )}
                           </div>
 
-                          <div className="flex flex-col gap-2">
-                            <Button asChild size="sm">
+                          <div className="flex flex-col items-stretch gap-2">
+                            <Button
+                              asChild
+                              size="sm"
+                              className="rounded-full bg-primary text-primary-foreground shadow-card hover:bg-primary/90"
+                            >
                               <Link to={`/courses/${enrollment.course_id}`}>
-                                <PlayCircle className="h-4 w-4 mr-1" />
+                                <PlayCircle className="mr-1 h-4 w-4" />
                                 {isCompleted ? 'Review' : 'Continue'}
                               </Link>
                             </Button>
@@ -355,13 +451,16 @@ export default function WorkerDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border border-muted/60 bg-white shadow-card">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>Jump into your learning journey</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button asChild className="h-auto p-4 flex flex-col items-start gap-2 bg-blue-600 hover:bg-blue-700">
+            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <Button
+                asChild
+                className="flex h-auto flex-col items-start gap-2 rounded-2xl bg-primary p-4 text-left text-primary-foreground shadow-card transition hover:-translate-y-0.5 hover:bg-primary/90"
+              >
                 <Link to="/courses">
                   <BookOpen className="h-5 w-5" />
                   <div className="text-left">
@@ -371,7 +470,11 @@ export default function WorkerDashboard() {
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
+              <Button
+                asChild
+                variant="outline"
+                className="flex h-auto flex-col items-start gap-2 rounded-2xl border border-muted/70 bg-white p-4 text-left text-brand-navy shadow-card transition hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary"
+              >
                 <Link to="/catalog">
                   <BookOpen className="h-5 w-5" />
                   <div className="text-left">
@@ -381,7 +484,11 @@ export default function WorkerDashboard() {
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
+              <Button
+                asChild
+                variant="outline"
+                className="flex h-auto flex-col items-start gap-2 rounded-2xl border border-muted/70 bg-white p-4 text-left text-brand-navy shadow-card transition hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary"
+              >
                 <Link to="/profile">
                   <User className="h-5 w-5" />
                   <div className="text-left">
@@ -393,13 +500,13 @@ export default function WorkerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="border border-blue-200 bg-gradient-to-r from-blue-50 via-white to-sky-100 shadow-card">
             <CardContent className="pt-6">
-              <div className="flex items-center gap-2 text-blue-800">
+              <div className="flex items-center gap-2 text-blue-900">
                 <TrendingUp className="h-5 w-5" />
                 <p className="font-medium">Keep Learning!</p>
               </div>
-              <p className="text-blue-700 mt-1">
+              <p className="mt-1 text-sm text-blue-800">
                 Complete your assigned courses to advance your skills and earn certificates. 
                 Your progress is being tracked for compliance and professional development.
               </p>
