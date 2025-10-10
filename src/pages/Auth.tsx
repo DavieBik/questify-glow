@@ -113,9 +113,14 @@ const Auth = () => {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
+    const resetConfig: { redirectTo?: string } = {};
+
+    const redirectUrl = import.meta.env.VITE_SUPABASE_RESET_REDIRECT ?? `${window.location.origin}/auth/reset-password`;
+    if (redirectUrl && redirectUrl !== 'DISABLE') {
+      resetConfig.redirectTo = redirectUrl;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, resetConfig);
 
       if (error) {
         // Handle specific error cases
