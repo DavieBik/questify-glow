@@ -112,17 +112,36 @@ const Auth = () => {
     setIsLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
 
-    if (error) {
-      setError(error.message);
-      toast.error('Reset failed: ' + error.message);
-    } else {
-      toast.success('Password reset email sent! Check your inbox.');
-      setCurrentView('auth');
-      setResetEmail('');
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('rate limit')) {
+          const message = 'Too many reset attempts. Please try again in a few minutes.';
+          setError(message);
+          toast.error(message);
+        } else if (error.message.includes('User not found')) {
+          const message = 'No account found with this email address.';
+          setError(message);
+          toast.error(message);
+        } else {
+          setError(error.message || 'Failed to send reset email');
+          toast.error(error.message || 'Failed to send reset email');
+        }
+      } else {
+        toast.success('Password reset email sent! Check your inbox.');
+        setCurrentView('auth');
+        setResetEmail('');
+      }
+    } catch (err) {
+      // Handle network errors
+      const message = 'Network error. Please check your connection and try again.';
+      setError(message);
+      toast.error(message);
+      console.error('Password reset error:', err);
     }
 
     setIsLoading(false);
