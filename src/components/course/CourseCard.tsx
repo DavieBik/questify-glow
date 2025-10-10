@@ -139,10 +139,10 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
             asChild
             size="sm"
             className={cn(
-              'ml-auto rounded-full px-4 text-sm font-semibold shadow-sm transition-all',
+              'ml-auto rounded-full px-5 py-2 text-sm font-semibold shadow-[0_6px_18px_rgba(16,185,129,0.3)] transition-all focus-visible:ring-2 focus-visible:ring-offset-2',
               enrollment
-                ? 'bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-200'
-                : 'bg-amber-500 text-white hover:bg-amber-600 focus-visible:ring-amber-200'
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-200'
+                : 'bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-200'
             )}
           >
             <Link to={`/courses/${course.id}`}>
