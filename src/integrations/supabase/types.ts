@@ -2619,15 +2619,15 @@ export type Database = {
           department: string | null
           email: string
           employee_id: string | null
-          first_name: string
+          first_name: string | null
           id: string
           is_active: boolean
           last_completion_date: string | null
           last_login: string | null
-          last_name: string
+          last_name: string | null
           manager_id: string | null
           organization_id: string | null
-          password_hash: string
+          password_hash: string | null
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -2638,15 +2638,15 @@ export type Database = {
           department?: string | null
           email: string
           employee_id?: string | null
-          first_name: string
+          first_name?: string | null
           id?: string
           is_active?: boolean
           last_completion_date?: string | null
           last_login?: string | null
-          last_name: string
+          last_name?: string | null
           manager_id?: string | null
           organization_id?: string | null
-          password_hash: string
+          password_hash?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -2657,15 +2657,15 @@ export type Database = {
           department?: string | null
           email?: string
           employee_id?: string | null
-          first_name?: string
+          first_name?: string | null
           id?: string
           is_active?: boolean
           last_completion_date?: string | null
           last_login?: string | null
-          last_name?: string
+          last_name?: string | null
           manager_id?: string | null
           organization_id?: string | null
-          password_hash?: string
+          password_hash?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
