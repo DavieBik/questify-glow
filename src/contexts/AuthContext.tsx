@@ -57,12 +57,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Single-tenant: organization is now static from config
   const organization = getOrganizationConfig();
 
+  const ensureUserProfile = async (authUser: User) => {
+    try {
+      const { data: existingUser, error: existingError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      if (existingError) {
+        console.error('AuthContext: Failed to check existing user profile', existingError);
+        return;
+      }
+
+      if (!existingUser) {
+        const profilePayload = {
+          id: authUser.id,
+          email: authUser.email,
+          first_name: authUser.user_metadata?.first_name ?? null,
+          last_name: authUser.user_metadata?.last_name ?? null,
+          role: 'worker',
+          organization_id: organization.id,
+          is_active: true,
+        };
+
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert(profilePayload);
+
+        if (insertError) {
+          console.error('AuthContext: Failed to create user profile', insertError, profilePayload);
+        } else {
+          console.log('AuthContext: Created user profile for', authUser.id);
+        }
+      }
+    } catch (error) {
+      console.error('AuthContext: Unexpected error ensuring user profile', error);
+    }
+  };
+
   const fetchUserAndOrganization = async (currentUser?: User | null) => {
     const userToUse = currentUser || user;
     if (!userToUse) {
       console.log('AuthContext: No user, cannot fetch role');
       return;
     }
+
+    await ensureUserProfile(userToUse);
 
     console.log('AuthContext: Fetching user data for user:', userToUse.id);
     try {
