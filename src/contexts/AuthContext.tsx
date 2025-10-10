@@ -76,14 +76,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: authUser.email,
           first_name: authUser.user_metadata?.first_name ?? null,
           last_name: authUser.user_metadata?.last_name ?? null,
-          role: 'worker',
+          role: 'worker' as const,
           organization_id: organization.id,
           is_active: true,
+          password_hash: null,
         };
 
         const { error: insertError } = await supabase
           .from('users')
-          .insert(profilePayload);
+          .insert([profilePayload]);
 
         if (insertError) {
           console.error('AuthContext: Failed to create user profile', insertError, profilePayload);

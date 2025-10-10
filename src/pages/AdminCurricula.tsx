@@ -170,49 +170,46 @@ const AdminCurricula = () => {
       {/* Curricula Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCurricula.map((curriculum) => (
-          <Card key={curriculum.id} className="group hover:shadow-lg transition-all duration-200">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={curriculum.is_active ? "default" : "secondary"}>
-                      {curriculum.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
-                    {curriculum.name}
-                  </CardTitle>
-                  {curriculum.description && (
-                    <CardDescription className="line-clamp-2">
-                      {curriculum.description}
-                    </CardDescription>
-                  )}
-                </div>
+          <Card key={curriculum.id} className="group hover:shadow-lg transition-all duration-200 flex flex-col">
+            <CardHeader className="space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <Badge variant={curriculum.is_active ? "default" : "secondary"} className="shrink-0">
+                  {curriculum.is_active ? 'Active' : 'Inactive'}
+                </Badge>
               </div>
+              <CardTitle className="text-xl font-semibold leading-tight group-hover:text-primary transition-colors">
+                {curriculum.name}
+              </CardTitle>
+              {curriculum.description && (
+                <CardDescription className="line-clamp-2 text-sm">
+                  {curriculum.description}
+                </CardDescription>
+              )}
             </CardHeader>
 
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <BookOpen className="h-4 w-4" />
+            <CardContent className="space-y-4 flex-1 flex flex-col">
+              <div className="grid grid-cols-1 gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 shrink-0" />
                   <span>{curriculum.item_count} courses</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 shrink-0" />
                   <span>{curriculum.assignment_count} assigned</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 shrink-0" />
                   <span>{new Date(curriculum.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex gap-2">
-                  <ManagerOrAdmin>
+              <div className="flex flex-col gap-2 mt-auto pt-4">
+                <ManagerOrAdmin>
+                  <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="flex-1"
                       onClick={() => toggleCurriculumStatus(curriculum.id, curriculum.is_active)}
                     >
                       {curriculum.is_active ? 'Deactivate' : 'Activate'}
@@ -220,23 +217,24 @@ const AdminCurricula = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="flex-1"
                       onClick={() => handleAssignCurriculum(curriculum)}
                     >
                       <Users className="h-4 w-4 mr-1" />
                       Assign
                     </Button>
-                  </ManagerOrAdmin>
-                </div>
+                  </div>
+                </ManagerOrAdmin>
                 <div className="flex gap-2">
                   <ManagerOrAdmin>
-                    <Button asChild size="sm" variant="outline">
+                    <Button asChild size="sm" variant="outline" className="flex-1">
                       <Link to={`/admin/curricula/${curriculum.id}/edit`}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
                       </Link>
                     </Button>
                   </ManagerOrAdmin>
-                  <Button asChild size="sm">
+                  <Button asChild size="sm" className="flex-1">
                     <Link to={`/admin/curricula/${curriculum.id}`}>
                       View
                     </Link>
