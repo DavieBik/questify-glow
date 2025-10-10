@@ -88,16 +88,22 @@ const Auth = () => {
       return;
     }
 
-    const identities = data.user?.identities ?? [];
-    if (identities.length === 0) {
+    const user = data.user;
+    const identities = user?.identities ?? [];
+    const isExistingAccount =
+      identities.length === 0 ||
+      Boolean(user?.email_confirmed_at);
+
+    if (isExistingAccount) {
       const message = 'An account with this email already exists. Please sign in instead.';
       setError(message);
       toast.error(message);
       setMode('signin');
-    } else {
-      toast.success('Check your email for verification link!');
+      setIsLoading(false);
+      return;
     }
-    
+
+    toast.success('Check your email for a verification link to activate your account.');
     setIsLoading(false);
   };
 
@@ -479,3 +485,4 @@ const Auth = () => {
 };
 
 export default Auth;
+
