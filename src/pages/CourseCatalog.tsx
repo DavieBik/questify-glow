@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, BookOpen, Clock, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 interface Course {
   id: string;
@@ -82,14 +83,15 @@ export default function CourseCatalog() {
     );
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case 'beginner': return 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20';
-      case 'intermediate': return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20';
-      case 'advanced': return 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20';
-      default: return 'bg-muted text-muted-foreground border-border';
-    }
+  const difficultyBadgeStyles: Record<string, string> = {
+    beginner: 'bg-emerald-100 text-emerald-700 border-emerald-200 shadow-[0_1px_0_rgba(16,185,129,0.25)]',
+    intermediate: 'bg-sky-100 text-sky-700 border-sky-200 shadow-[0_1px_0_rgba(14,116,144,0.25)]',
+    advanced: 'bg-rose-100 text-rose-700 border-rose-200 shadow-[0_1px_0_rgba(225,29,72,0.25)]',
+    default: 'bg-slate-100 text-slate-700 border-slate-200 shadow-[0_1px_0_rgba(148,163,184,0.25)]',
   };
+
+  const badgeText = (value?: string | null) =>
+    value ? value.toUpperCase() : '';
 
   const truncateDescription = (text: string | null) => {
     if (!text) return 'No description available';
@@ -129,31 +131,41 @@ export default function CourseCatalog() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Sidebar - Filters (Desktop) / Top (Mobile) */}
         <aside className="lg:col-span-1 space-y-6">
-          <Card>
+          <Card className="border border-slate-200/80 bg-white/95 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">Filters</CardTitle>
+              <CardTitle className="text-lg font-semibold tracking-tight">Filters</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               {/* Category Filters */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">Categories</Label>
+                <Label className="text-sm font-semibold text-slate-600 uppercase tracking-[0.12em]">Categories</Label>
                 {categories.length > 0 ? (
-                  <div className="space-y-2">
-                    {categories.map(category => (
-                      <div key={category} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`category-${category}`}
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={() => toggleCategory(category)}
-                        />
-                        <label
-                          htmlFor={`category-${category}`}
-                          className="text-sm font-normal cursor-pointer"
+                  <div className="space-y-2.5">
+                    {categories.map(category => {
+                      const isSelected = selectedCategories.includes(category);
+                      return (
+                        <button
+                          type="button"
+                          key={category}
+                          onClick={() => toggleCategory(category)}
+                          className={cn(
+                            'w-full rounded-xl border px-3 py-2 text-left text-sm font-medium transition-all',
+                            'flex items-center justify-between gap-3 shadow-[0_1px_0_rgba(15,23,42,0.04)]',
+                            isSelected
+                              ? 'border-emerald-400 bg-emerald-50 text-emerald-700 shadow-[0_4px_12px_rgba(16,185,129,0.15)]'
+                              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                          )}
                         >
-                          {category}
-                        </label>
-                      </div>
-                    ))}
+                          <span className="truncate">{category}</span>
+                          <span
+                            className={cn(
+                              'h-2 w-2 rounded-full transition',
+                              isSelected ? 'bg-emerald-500' : 'bg-slate-300'
+                            )}
+                          />
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No categories available</p>
@@ -166,7 +178,7 @@ export default function CourseCatalog() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedCategories([])}
-                  className="w-full"
+                  className="w-full rounded-full border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                 >
                   Clear Filters
                 </Button>
@@ -217,77 +229,89 @@ export default function CourseCatalog() {
               {/* Course Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredCourses.map(course => (
-                  <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+                  <Card
+                    key={course.id}
+                    className="group flex flex-col overflow-hidden border border-slate-200/80 bg-white/95 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
+                  >
                     {/* Thumbnail */}
-                    <div className="relative h-48 bg-muted overflow-hidden">
+                    <div className="relative h-44 overflow-hidden">
                       {course.thumbnail_url ? (
                         <img
                           src={course.thumbnail_url}
                           alt={course.title}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                          <BookOpen className="h-16 w-16 text-muted-foreground/30" />
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-200/50 via-brand-sky/20 to-white">
+                          <BookOpen className="h-16 w-16 text-emerald-600/50" />
                         </div>
                       )}
                       
                       {/* Mandatory Badge */}
                       {course.is_mandatory && (
-                        <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground">
-                          <Award className="h-3 w-3 mr-1" />
+                        <Badge className="absolute top-3 right-3 bg-rose-500 text-white shadow-[0_4px_12px_rgba(225,29,72,0.2)]">
+                          <Award className="mr-1 h-3 w-3" />
                           Required
                         </Badge>
                       )}
                     </div>
 
                     {/* Content */}
-                    <CardHeader className="flex-grow">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <CardTitle className="text-lg line-clamp-2">
+                    <CardHeader className="flex-grow space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="line-clamp-2 text-lg font-semibold tracking-tight text-slate-900 group-hover:text-primary">
                           {course.title}
                         </CardTitle>
                       </div>
                       
                       {/* Badges */}
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-2">
                         {course.category && (
-                          <Badge variant="secondary" className="text-xs">
-                            {course.category}
+                          <Badge
+                            variant="outline"
+                            className="bg-indigo-100 text-indigo-700 border-indigo-200 shadow-[0_1px_0_rgba(129,140,248,0.25)] tracking-[0.06em]"
+                          >
+                            {badgeText(course.category)}
                           </Badge>
                         )}
                         {course.level && (
-                          <Badge variant="outline" className="text-xs">
-                            Level: {course.level}
+                          <Badge
+                            variant="outline"
+                            className="bg-slate-100 text-slate-700 border-slate-200 shadow-[0_1px_0_rgba(148,163,184,0.25)] tracking-[0.08em]"
+                          >
+                            LEVEL: {badgeText(course.level)}
                           </Badge>
                         )}
                         <Badge 
                           variant="outline" 
-                          className={`text-xs ${getDifficultyColor(course.difficulty)}`}
+                          className={cn(
+                            'tracking-[0.08em]',
+                            difficultyBadgeStyles[course.difficulty.toLowerCase()] ?? difficultyBadgeStyles.default
+                          )}
                         >
-                          {course.difficulty}
+                          {badgeText(course.difficulty)}
                         </Badge>
                       </div>
 
-                      <CardDescription className="line-clamp-3 text-sm">
+                      <CardDescription className="line-clamp-3 text-sm text-slate-600">
                         {truncateDescription(course.short_description)}
                       </CardDescription>
 
                       {/* Additional Info */}
                       {(course.compliance_standard || course.training_type) && (
-                        <div className="space-y-1 mt-3 pt-3 border-t text-xs">
+                        <div className="mt-4 space-y-1 border-t pt-3 text-xs text-slate-500">
                           {course.compliance_standard && (
-                            <div className="flex items-center gap-1 text-muted-foreground">
+                            <div className="flex items-center gap-2">
                               <Award className="h-3 w-3" />
                               <span>{course.compliance_standard}</span>
                             </div>
                           )}
                           {course.training_type && (
-                            <div className="text-muted-foreground">
-                              <span className="font-medium">Type:</span> {course.training_type}
+                            <div>
+                              <span className="font-semibold text-slate-600">Type:</span> {course.training_type}
                             </div>
                           )}
                         </div>
@@ -295,17 +319,20 @@ export default function CourseCatalog() {
                     </CardHeader>
 
                     {/* Footer */}
-                    <CardFooter className="flex flex-col gap-3 pt-4 border-t">
+                    <CardFooter className="flex flex-col gap-3 border-t bg-slate-50/60 pt-4">
                       {/* Duration */}
                       {course.estimated_duration_minutes && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground w-full">
-                          <Clock className="h-4 w-4" />
+                        <div className="flex w-full items-center gap-2 text-sm text-slate-600">
+                          <Clock className="h-4 w-4 text-slate-500" />
                           <span>{formatDuration(course.estimated_duration_minutes)}</span>
                         </div>
                       )}
                       
                       {/* View Course Button */}
-                      <Button asChild className="w-full">
+                      <Button
+                        asChild
+                        className="w-full rounded-full bg-emerald-500 text-white shadow-[0_6px_18px_rgba(16,185,129,0.3)] transition hover:bg-emerald-600 focus-visible:ring-emerald-200"
+                      >
                         <Link to={`/courses/${course.id}`}>
                           View Course
                         </Link>
