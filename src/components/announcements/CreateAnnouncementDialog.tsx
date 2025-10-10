@@ -50,7 +50,7 @@ export const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> =
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    course_id: '',
+    course_id: 'global',
     priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
     is_pinned: false,
     expires_at: undefined as Date | undefined,
@@ -93,7 +93,7 @@ export const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> =
       const announcementData = {
         title: formData.title.trim(),
         content: formData.content.trim(),
-        course_id: formData.course_id || null,
+        course_id: formData.course_id === 'global' ? null : formData.course_id,
         priority: formData.priority,
         is_pinned: formData.is_pinned,
         expires_at: formData.expires_at?.toISOString() || null,
@@ -115,7 +115,7 @@ export const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> =
       setFormData({
         title: '',
         content: '',
-        course_id: '',
+        course_id: 'global',
         priority: 'normal',
         is_pinned: false,
         expires_at: undefined,
@@ -180,7 +180,7 @@ export const CreateAnnouncementDialog: React.FC<CreateAnnouncementDialogProps> =
                   <SelectValue placeholder="Select a course (or leave empty for global)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Global Announcement</SelectItem>
+                  <SelectItem value="global">Global Announcement</SelectItem>
                   {courses.map((course) => (
                     <SelectItem key={course.id} value={course.id}>
                       {course.title}

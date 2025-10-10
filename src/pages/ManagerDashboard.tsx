@@ -100,7 +100,7 @@ export default function ManagerDashboard() {
       to: newDateRange?.to || new Date()
     });
   };
-  const [departmentFilter, setDepartmentFilter] = useState<string>('');
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [departments, setDepartments] = useState<string[]>([]);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function ManagerDashboard() {
     const { data: complianceData, error } = await supabase.rpc('rpc_team_compliance', {
       date_from: format(dateRange.from, 'yyyy-MM-dd'),
       date_to: format(dateRange.to, 'yyyy-MM-dd'),
-      department_filter: departmentFilter || null,
+      department_filter: departmentFilter === 'all' ? null : departmentFilter,
       allow_preview: isPreview
     });
 
@@ -292,7 +292,7 @@ export default function ManagerDashboard() {
           export_type: exportType,
           date_from: format(dateRange.from, 'yyyy-MM-dd'),
           date_to: format(dateRange.to, 'yyyy-MM-dd'),
-          department_filter: departmentFilter || null
+          department_filter: departmentFilter === 'all' ? null : departmentFilter
         }
       });
 
@@ -378,7 +378,7 @@ export default function ManagerDashboard() {
               <SelectValue placeholder="All Departments" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Departments</SelectItem>
+              <SelectItem value="all">All Departments</SelectItem>
               {departments.map(dept => (
                 <SelectItem key={dept} value={dept}>{dept}</SelectItem>
               ))}
