@@ -123,9 +123,6 @@ export function AppSidebar() {
     return currentPath.startsWith(path);
   };
 
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"
-
   const handleDevRoleChange = async () => {
     if (!selectedDevRole) return;
     
@@ -161,25 +158,28 @@ export function AppSidebar() {
   const roleStyleMap: Record<string, { active: string; idle: string; badge: string }> = {
     worker: {
       active: 'bg-emerald-500 text-white shadow-md hover:bg-emerald-600 focus-visible:ring-emerald-200',
-      idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+      idle: 'border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
       badge: 'bg-white text-emerald-600',
     },
     manager: {
       active: 'bg-amber-400 text-brand-navy shadow-md hover:bg-amber-500 focus-visible:ring-amber-200',
-      idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+      idle: 'border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
       badge: 'bg-brand-navy text-white',
     },
     admin: {
       active: 'bg-rose-500 text-white shadow-md hover:bg-rose-600 focus-visible:ring-rose-200',
-      idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+      idle: 'border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
       badge: 'bg-white text-rose-600',
     },
   };
   const defaultRoleStyle = {
     active: 'bg-primary text-primary-foreground shadow-md hover:bg-primary/90 focus-visible:ring-primary/30',
-    idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+    idle: 'border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
     badge: 'bg-white text-primary',
   };
+
+  const navButtonClasses =
+    'text-white/80 hover:bg-white/10 hover:text-white data-[active=true]:bg-white/20 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:shadow-[inset_3px_0_0_rgba(16,185,129,0.85)] data-[active=true]:ring-1 data-[active=true]:ring-emerald-300/60';
 
   return (
     <Sidebar
@@ -194,8 +194,12 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    className={navButtonClasses}
+                  >
+                    <NavLink to={item.url} end={item.url === '/'}>
                       <item.icon className="h-4 w-4" />
                       <span className="flex items-center gap-2">
                         {item.title}
@@ -221,8 +225,12 @@ export function AppSidebar() {
               <SidebarMenu>
                 {adminItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavCls}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.url)}
+                      className={navButtonClasses}
+                    >
+                      <NavLink to={item.url}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </NavLink>
@@ -242,8 +250,12 @@ export function AppSidebar() {
               <SidebarMenu>
                 {managementItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavCls}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.url)}
+                      className={navButtonClasses}
+                    >
+                      <NavLink to={item.url}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </NavLink>
@@ -267,7 +279,7 @@ export function AppSidebar() {
                   {/* Role Preview */}
                   {isPreviewEnabled && (
                     <div className="space-y-2">
-                      <div className="text-xs font-semibold text-white/85">
+                      <div className="text-xs font-semibold text-white/80">
                         Role Preview (temp)
                       </div>
                       <div className="flex flex-wrap gap-1">
@@ -306,7 +318,7 @@ export function AppSidebar() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full h-7 rounded-full border-white/30 bg-white/5 text-xs font-medium text-white/85 hover:bg-white/15 hover:text-white"
+                          className="w-full h-7 rounded-full border-white/30 bg-white/5 text-xs font-medium text-white/80 hover:bg-white/15 hover:text-white"
                           onClick={clearPreview}
                         >
                           Reset to real role
@@ -326,7 +338,7 @@ export function AppSidebar() {
                       </div>
                       
                       <Select value={selectedDevRole} onValueChange={setSelectedDevRole}>
-                        <SelectTrigger className="h-8 rounded-full border-white/30 bg-white/10 text-xs text-white/85 hover:bg-white/15 focus:ring-white/40">
+                        <SelectTrigger className="h-8 rounded-full border-white/30 bg-white/10 text-xs text-white/80 hover:bg-white/15 focus:ring-white/40">
                           <SelectValue placeholder="Select role..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -340,7 +352,7 @@ export function AppSidebar() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full h-7 rounded-full border-white/30 bg-white/5 text-xs font-medium text-white/85 hover:bg-white/15 hover:text-white"
+                        className="w-full h-7 rounded-full border-white/30 bg-white/5 text-xs font-medium text-white/80 hover:bg-white/15 hover:text-white"
                         onClick={handleDevRoleChange}
                         disabled={!selectedDevRole || isUpdatingRole}
                       >
