@@ -38,6 +38,7 @@ import {
   Upload,
   LogOut
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navigationItems = [
   { title: 'Dashboard', url: '/', icon: Home },
@@ -157,6 +158,29 @@ export function AppSidebar() {
     }
   };
 
+  const roleStyleMap: Record<string, { active: string; idle: string; badge: string }> = {
+    worker: {
+      active: 'bg-emerald-500 text-white shadow-md hover:bg-emerald-600 focus-visible:ring-emerald-200',
+      idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+      badge: 'bg-white text-emerald-600',
+    },
+    manager: {
+      active: 'bg-amber-400 text-brand-navy shadow-md hover:bg-amber-500 focus-visible:ring-amber-200',
+      idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+      badge: 'bg-brand-navy text-white',
+    },
+    admin: {
+      active: 'bg-rose-500 text-white shadow-md hover:bg-rose-600 focus-visible:ring-rose-200',
+      idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+      badge: 'bg-white text-rose-600',
+    },
+  };
+  const defaultRoleStyle = {
+    active: 'bg-primary text-primary-foreground shadow-md hover:bg-primary/90 focus-visible:ring-primary/30',
+    idle: 'border-white/30 bg-white/10 text-white/85 hover:bg-white/20 hover:text-white focus-visible:ring-white/40',
+    badge: 'bg-white text-primary',
+  };
+
   return (
     <Sidebar
       collapsible="icon"
@@ -243,33 +267,46 @@ export function AppSidebar() {
                   {/* Role Preview */}
                   {isPreviewEnabled && (
                     <div className="space-y-2">
-                      <div className="text-xs font-medium text-muted-foreground">
+                      <div className="text-xs font-semibold text-white/85">
                         Role Preview (temp)
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {['worker', 'manager', 'admin'].map((role) => (
-                          <Button
-                            key={role}
-                            variant={previewRole === role ? "default" : "outline"}
-                            size="sm"
-                            className="h-7 text-xs relative"
-                            onClick={() => setPreviewRole(role as any)}
-                          >
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                            {previewRole === role && (
-                              <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
-                                Active
-                              </Badge>
-                            )}
-                          </Button>
-                        ))}
+                        {['worker', 'manager', 'admin'].map((role) => {
+                          const styles = roleStyleMap[role] || defaultRoleStyle;
+                          const isActiveRole = previewRole === role;
+                          return (
+                            <Button
+                              key={role}
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                'relative h-7 rounded-full px-3 text-xs font-semibold transition-all focus-visible:ring-2',
+                                isActiveRole ? styles.active : styles.idle
+                              )}
+                              onClick={() => setPreviewRole(role as any)}
+                            >
+                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                              {isActiveRole && (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    'ml-2 h-4 rounded-full border-none px-2 text-[10px] font-semibold uppercase tracking-wide',
+                                    styles.badge
+                                  )}
+                                >
+                                  Active
+                                </Badge>
+                              )}
+                            </Button>
+                          );
+                        })}
                       </div>
                       
                       {previewRole && (
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full h-7 text-xs"
+                          className="w-full h-7 rounded-full border-white/30 bg-white/5 text-xs font-medium text-white/85 hover:bg-white/15 hover:text-white"
                           onClick={clearPreview}
                         >
                           Reset to real role
@@ -281,15 +318,15 @@ export function AppSidebar() {
                   {/* Dev Role Elevation */}
                   {isRoleElevationEnabled && (
                     <div className="space-y-2">
-                      <div className="text-xs font-medium text-muted-foreground">
+                      <div className="text-xs font-medium text-white/80">
                         Set Real Role (dev)
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-white/60">
                         Changes actual role in database
                       </div>
                       
                       <Select value={selectedDevRole} onValueChange={setSelectedDevRole}>
-                        <SelectTrigger className="h-8 text-xs">
+                        <SelectTrigger className="h-8 rounded-full border-white/30 bg-white/10 text-xs text-white/85 hover:bg-white/15 focus:ring-white/40">
                           <SelectValue placeholder="Select role..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -303,7 +340,7 @@ export function AppSidebar() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full h-7 text-xs"
+                        className="w-full h-7 rounded-full border-white/30 bg-white/5 text-xs font-medium text-white/85 hover:bg-white/15 hover:text-white"
                         onClick={handleDevRoleChange}
                         disabled={!selectedDevRole || isUpdatingRole}
                       >
