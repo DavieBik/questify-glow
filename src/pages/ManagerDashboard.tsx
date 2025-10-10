@@ -197,7 +197,7 @@ export default function ManagerDashboard() {
           course_id,
           issue_date,
           expiry_date,
-          users!inner(first_name, last_name, email),
+          users!certificates_user_id_fkey(first_name, last_name, email),
           courses!inner(title)
         `)
         .not('expiry_date', 'is', null)
