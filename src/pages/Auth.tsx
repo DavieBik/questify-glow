@@ -69,7 +69,7 @@ const Auth = () => {
 
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: signUpData.email,
       password: signUpData.password,
       options: {
@@ -84,6 +84,16 @@ const Auth = () => {
     if (error) {
       setError(error.message);
       toast.error('Sign up failed: ' + error.message);
+      setIsLoading(false);
+      return;
+    }
+
+    const identities = data.user?.identities ?? [];
+    if (identities.length === 0) {
+      const message = 'An account with this email already exists. Please sign in instead.';
+      setError(message);
+      toast.error(message);
+      setMode('signin');
     } else {
       toast.success('Check your email for verification link!');
     }

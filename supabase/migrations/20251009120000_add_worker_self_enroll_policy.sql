@@ -8,11 +8,11 @@ BEGIN
       AND tablename = 'user_course_enrollments'
       AND policyname = 'enrollments_worker_insert_self'
   ) THEN
-    EXECUTE $$
+    EXECUTE '
       CREATE POLICY "enrollments_worker_insert_self" ON public.user_course_enrollments
         FOR INSERT
         WITH CHECK (auth.uid() = user_id);
-    $$;
+    ';
   END IF;
 END;
 $$;
