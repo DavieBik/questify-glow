@@ -38,6 +38,8 @@ interface PasswordResetRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const requestId = crypto.randomUUID();
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -65,7 +67,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!email || typeof email !== "string") {
       return new Response(
-        JSON.stringify({ error: "A valid email address is required." }),
+        JSON.stringify({
+          success: false,
+          requestId,
+          error: {
+            code: "invalid_email",
+            message: "A valid email address is required.",
+          },
+        }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
@@ -79,21 +88,41 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (linkError) {
-      console.warn("Failed to generate recovery link:", linkError);
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      console.warn(`[${requestId}] Failed to generate recovery link:`, linkError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          requestId,
+          error: {
+            code: "link_generation_failed",
+            message:
+              "Unable to generate a password reset link. This user may not exist or password recovery is disabled.",
+            details: linkError,
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
     }
 
     const actionLink = linkData?.properties?.action_link ?? linkData?.action_link;
 
     if (!actionLink) {
-      console.warn("No recovery action link returned by Supabase. Treating request as success.");
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      console.warn(
+        `[${requestId}] Supabase returned no action link for password recovery. Link payload:`,
+        linkData,
+      );
+      return new Response(
+        JSON.stringify({
+          success: false,
+          requestId,
+          error: {
+            code: "missing_action_link",
+            message:
+              "Supabase did not return a recovery link. The account may not exist or the email template is misconfigured.",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
     }
 
     const emailResponse = await resend.emails.send({
@@ -132,20 +161,58 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Password reset email dispatched:", {
-      emailId: emailResponse.data?.id,
+    if (emailResponse.error) {
+      console.error(
+        `[${requestId}] Resend rejected password reset email send:`,
+        emailResponse.error,
+      );
+      return new Response(
+        JSON.stringify({
+          success: false,
+          requestId,
+          error: {
+            code: "email_send_failed",
+            message: emailResponse.error.message ??
+              "Email provider rejected the password reset email send.",
+            details: emailResponse.error,
+          },
+        }),
+        { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    const emailId = emailResponse.data?.id ?? null;
+
+    console.log(`[${requestId}] Password reset email accepted by Resend:`, {
+      emailId,
       to: normalizedEmail,
     });
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        requestId,
+        data: {
+          emailId,
+        },
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error occurred.";
-    console.error("Error in send-password-reset function:", error);
+    console.error(`[${requestId}] Error in send-password-reset function:`, error);
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({
+        success: false,
+        requestId,
+        error: {
+          code: "unexpected_error",
+          message,
+        },
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

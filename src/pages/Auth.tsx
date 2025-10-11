@@ -160,6 +160,11 @@ const Auth = () => {
           typeof error.message === 'string' &&
           (error.message.includes('timeout') || error.message.includes('deadline'));
 
+        const responseMessage =
+          (data as { error?: { message?: string } } | null | undefined)?.error?.message ??
+          (error as { context?: { body?: { error?: { message?: string } } } })?.context?.body?.error?.message ??
+          (error as { message?: string }).message;
+
         if (isRateLimit) {
           const message = 'Too many reset attempts. Please try again in a few minutes.';
           setError(message);
@@ -169,7 +174,7 @@ const Auth = () => {
           setError(message);
           toast.error(message);
         } else {
-          const message = error.message || 'Failed to send reset email.';
+          const message = responseMessage || 'Failed to send reset email.';
           setError(message);
           toast.error(message);
         }
@@ -177,13 +182,32 @@ const Auth = () => {
       }
 
       if (!data?.success) {
-        const message = 'Unable to send reset email. Please try again later.';
+        const message =
+          data?.error?.message ||
+          'Unable to send reset email. Please verify the email address and try again.';
         setError(message);
         toast.error(message);
+
+        if (data?.requestId) {
+          console.warn('Password reset request failed:', {
+            requestId: data.requestId,
+            code: data?.error?.code,
+            message,
+          });
+        }
+
         return;
       }
 
       toast.success('Password reset email sent! Check your inbox.');
+
+      if (data?.requestId) {
+        console.info('Password reset email accepted by provider:', {
+          requestId: data.requestId,
+          emailId: data?.data?.emailId,
+        });
+      }
+
       setCurrentView('auth');
       setResetEmail('');
     } catch (err) {
