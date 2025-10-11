@@ -67,44 +67,64 @@ const Auth = () => {
     setIsLoading(true);
     setError(null);
 
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email: signUpData.email,
-      password: signUpData.password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: signUpData.firstName,
-          last_name: signUpData.lastName,
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: signUpData.email,
+        password: signUpData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: signUpData.firstName,
+            last_name: signUpData.lastName,
+          }
         }
+      });
+      
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('timeout') || error.message.includes('504')) {
+          const message = 'Signup is taking longer than expected. Please wait a moment and try again.';
+          setError(message);
+          toast.error(message);
+        } else if (error.message.includes('rate limit')) {
+          const message = 'Too many signup attempts. Please try again in a few minutes.';
+          setError(message);
+          toast.error(message);
+        } else {
+          setError(error.message);
+          toast.error('Sign up failed: ' + error.message);
+        }
+        setIsLoading(false);
+        return;
       }
-    });
-    
-    if (error) {
-      setError(error.message);
-      toast.error('Sign up failed: ' + error.message);
+
+      const user = data.user;
+      const identities = user?.identities ?? [];
+      const isExistingAccount =
+        identities.length === 0 ||
+        Boolean(user?.email_confirmed_at);
+
+      if (isExistingAccount) {
+        const message = 'An account with this email already exists. Please sign in instead.';
+        setError(message);
+        toast.error(message);
+        setMode('signin');
+        setIsLoading(false);
+        return;
+      }
+
+      toast.success('Check your email for a verification link to activate your account.');
       setIsLoading(false);
-      return;
-    }
-
-    const user = data.user;
-    const identities = user?.identities ?? [];
-    const isExistingAccount =
-      identities.length === 0 ||
-      Boolean(user?.email_confirmed_at);
-
-    if (isExistingAccount) {
-      const message = 'An account with this email already exists. Please sign in instead.';
+    } catch (err) {
+      // Handle network errors
+      const message = 'Network error. Please check your connection and try again.';
       setError(message);
       toast.error(message);
-      setMode('signin');
+      console.error('Signup error:', err);
       setIsLoading(false);
-      return;
     }
-
-    toast.success('Check your email for a verification link to activate your account.');
-    setIsLoading(false);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
