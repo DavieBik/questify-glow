@@ -71,10 +71,17 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const actionLink = linkData?.action_link;
+    console.log("Link data received:", JSON.stringify(linkData, null, 2));
+
+    const actionLink = linkData?.properties?.action_link || linkData?.action_link;
 
     if (!actionLink) {
-      throw new Error("Recovery link was not returned by Supabase.");
+      console.error("No action link in response. Link data:", linkData);
+      // Still return success to prevent account enumeration
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
     const emailResponse = await resend.emails.send({
