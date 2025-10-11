@@ -81,6 +81,36 @@ const handler = async (req: Request): Promise<Response> => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
+    const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(
+      normalizedEmail,
+    );
+
+    const user = userData?.user ?? null;
+    const userMissing =
+      !!userError ||
+      !user ||
+      (typeof user.email !== "string" ? false : user.email.toLowerCase() !== normalizedEmail);
+
+    if (userMissing) {
+      const reason = userError?.message ?? "User not found";
+      console.warn(`[${requestId}] Password reset requested for non-existent user:`, {
+        email: normalizedEmail,
+        reason,
+      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          requestId,
+          error: {
+            code: "user_not_found",
+            message: "We couldn't find an account with that email address. Please sign up first.",
+            details: userError ?? undefined,
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email: normalizedEmail,
