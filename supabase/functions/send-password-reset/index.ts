@@ -89,14 +89,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (linkError) {
       console.warn(`[${requestId}] Failed to generate recovery link:`, linkError);
+      const isUserMissing =
+        typeof linkError.message === "string" &&
+        linkError.message.toLowerCase().includes("user");
       return new Response(
         JSON.stringify({
           success: false,
           requestId,
           error: {
-            code: "link_generation_failed",
-            message:
-              "Unable to generate a password reset link. This user may not exist or password recovery is disabled.",
+            code: isUserMissing ? "user_not_found" : "link_generation_failed",
+            message: isUserMissing
+              ? "We couldn't find an account with that email address. Please sign up first."
+              : "Unable to generate a password reset link. This user may not exist or password recovery is disabled.",
             details: linkError,
           },
         }),
@@ -116,9 +120,8 @@ const handler = async (req: Request): Promise<Response> => {
           success: false,
           requestId,
           error: {
-            code: "missing_action_link",
-            message:
-              "Supabase did not return a recovery link. The account may not exist or the email template is misconfigured.",
+            code: "user_not_found",
+            message: "We couldn't find an account with that email address. Please sign up first.",
           },
         }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },

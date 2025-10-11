@@ -182,6 +182,7 @@ const Auth = () => {
       }
 
       if (!data?.success) {
+        const errorCode = data?.error?.code;
         const message =
           data?.error?.message ||
           'Unable to send reset email. Please verify the email address and try again.';
@@ -191,9 +192,15 @@ const Auth = () => {
         if (data?.requestId) {
           console.warn('Password reset request failed:', {
             requestId: data.requestId,
-            code: data?.error?.code,
+            code: errorCode,
             message,
           });
+        }
+
+        if (errorCode === 'user_not_found') {
+          setMode('signup');
+          setCurrentView('auth');
+          setSignUpData((prev) => ({ ...prev, email: trimmedEmail }));
         }
 
         return;
