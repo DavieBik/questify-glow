@@ -12,19 +12,25 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
 
-if (!supabaseUrl || !serviceRoleKey) {
-  console.error("Missing Supabase credentials for send-password-reset function");
+if (!supabaseUrl) {
+  console.error("Missing SUPABASE_URL for send-password-reset function");
+}
+
+if (!serviceRoleKey) {
+  console.error("Missing SUPABASE_SERVICE_ROLE_KEY for send-password-reset function");
 }
 
 if (!resendApiKey) {
-  console.error("Missing Resend API key for send-password-reset function");
+  console.error("Missing RESEND_API_KEY for send-password-reset function");
 }
 
-const supabase = createClient(supabaseUrl, serviceRoleKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const supabase = supabaseUrl && serviceRoleKey
+  ? createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  : null;
 
-const resend = new Resend(resendApiKey);
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 interface PasswordResetRequest {
   email?: string;
@@ -37,6 +43,24 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    if (!supabase || !serviceRoleKey) {
+      return new Response(
+        JSON.stringify({
+          error: "Server configuration error: Supabase credentials are missing.",
+        }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    if (!resend) {
+      return new Response(
+        JSON.stringify({
+          error: "Server configuration error: email service credentials are missing.",
+        }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
     const { email, redirectTo }: PasswordResetRequest = await req.json();
 
     if (!email || typeof email !== "string") {
@@ -48,14 +72,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error("Supabase credentials are not configured.");
-    }
-
-    if (!resendApiKey) {
-      throw new Error("Resend API key is not configured.");
-    }
-
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email: normalizedEmail,
@@ -63,7 +79,6 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (linkError) {
-      // Hide user existence to prevent account enumeration.
       console.warn("Failed to generate recovery link:", linkError);
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
@@ -71,13 +86,10 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log("Link data received:", JSON.stringify(linkData, null, 2));
-
-    const actionLink = linkData?.properties?.action_link || linkData?.action_link;
+    const actionLink = linkData?.properties?.action_link ?? linkData?.action_link;
 
     if (!actionLink) {
-      console.error("No action link in response. Link data:", linkData);
-      // Still return success to prevent account enumeration
+      console.warn("No recovery action link returned by Supabase. Treating request as success.");
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -114,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
           <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-            Training Management System • Automated security notification
+            Training Management System - Automated security notification
           </p>
         </div>
       `,
