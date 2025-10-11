@@ -113,43 +113,69 @@ const Auth = () => {
     setError(null);
 
     try {
-    const resetConfig: { redirectTo?: string } = {};
+      const trimmedEmail = resetEmail.trim();
 
-    const redirectUrl = import.meta.env.VITE_SUPABASE_RESET_REDIRECT ?? `${window.location.origin}/auth/reset-password`;
-    if (redirectUrl && redirectUrl !== 'DISABLE') {
-      resetConfig.redirectTo = redirectUrl;
-    }
+      if (!trimmedEmail) {
+        const message = 'Please enter the email address associated with your account.';
+        setError(message);
+        toast.error(message);
+        return;
+      }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, resetConfig);
+      const payload: { email: string; redirectTo?: string } = { email: trimmedEmail };
+      const redirectUrl =
+        import.meta.env.VITE_SUPABASE_RESET_REDIRECT ?? `${window.location.origin}/auth/reset-password`;
+
+      if (redirectUrl && redirectUrl !== 'DISABLE') {
+        payload.redirectTo = redirectUrl;
+      }
+
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: payload,
+      });
 
       if (error) {
-        // Handle specific error cases
-        if (error.message.includes('rate limit')) {
+        const isRateLimit = typeof error.message === 'string' && error.message.includes('429');
+        const isTimeout =
+          typeof error.message === 'string' &&
+          (error.message.includes('timeout') || error.message.includes('deadline'));
+
+        if (isRateLimit) {
           const message = 'Too many reset attempts. Please try again in a few minutes.';
           setError(message);
           toast.error(message);
-        } else if (error.message.includes('User not found')) {
-          const message = 'No account found with this email address.';
+        } else if (isTimeout) {
+          const message = 'Reset service took too long. Please try again shortly.';
           setError(message);
           toast.error(message);
         } else {
-          setError(error.message || 'Failed to send reset email');
-          toast.error(error.message || 'Failed to send reset email');
+          const message = error.message || 'Failed to send reset email.';
+          setError(message);
+          toast.error(message);
         }
-      } else {
-        toast.success('Password reset email sent! Check your inbox.');
-        setCurrentView('auth');
-        setResetEmail('');
+        return;
       }
+
+      if (!data?.success) {
+        const message = 'Unable to send reset email. Please try again later.';
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      toast.success('Password reset email sent! Check your inbox.');
+      setCurrentView('auth');
+      setResetEmail('');
     } catch (err) {
-      // Handle network errors
-      const message = 'Network error. Please check your connection and try again.';
+      const message =
+        (err instanceof Error && err.message) ||
+        'Network error. Please check your connection and try again.';
       setError(message);
       toast.error(message);
       console.error('Password reset error:', err);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   if (currentView === 'forgot') {
@@ -509,4 +535,5 @@ const Auth = () => {
 };
 
 export default Auth;
+
 
