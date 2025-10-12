@@ -1,3 +1,4 @@
+// Version: 2025-10-12
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { BufReader, BufWriter } from "https://deno.land/std@0.190.0/io/buffer.ts";
 import { TextProtoReader } from "https://deno.land/std@0.190.0/textproto/mod.ts";
