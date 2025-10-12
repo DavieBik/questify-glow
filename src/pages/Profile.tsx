@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Phone, Building2, Calendar, Shield, Key, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Phone, Building2, Calendar, Shield, Key, Eye, EyeOff, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -28,7 +29,8 @@ interface UserProfile {
 }
 
 const Profile = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, userRole } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -183,6 +185,20 @@ const Profile = () => {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="space-y-6">
+        {/* Admin Dashboard Link */}
+        {userRole === 'admin' && (
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => navigate('/admin/dashboard')}
+              variant="default"
+              className="gap-2"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Go to Admin Dashboard
+            </Button>
+          </div>
+        )}
+        
         {/* Header */}
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
