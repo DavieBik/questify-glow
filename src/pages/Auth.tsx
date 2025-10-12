@@ -206,13 +206,22 @@ const Auth = () => {
         return;
       }
 
-      toast.success('Password reset email sent! Check your inbox.');
+      const resetUrl = (data?.data as { resetUrl?: string } | undefined)?.resetUrl;
 
       if (data?.requestId) {
-        console.info('Password reset email accepted by provider:', {
+        console.info('Password reset request succeeded:', {
           requestId: data.requestId,
-          emailId: data?.data?.emailId,
+          resetUrl,
         });
+      }
+
+      if (resetUrl && typeof window !== 'undefined') {
+        toast.success('Password reset link generated. Redirecting you now...');
+        setTimeout(() => {
+          window.location.href = resetUrl;
+        }, 600);
+      } else {
+        toast.success('Password reset link generated successfully.');
       }
 
       setCurrentView('auth');

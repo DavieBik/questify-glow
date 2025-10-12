@@ -63,42 +63,65 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-      redirectTo: redirectTo && redirectTo !== "DISABLE" ? redirectTo : undefined,
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: "recovery",
+      email: normalizedEmail,
+      options:
+        redirectTo && redirectTo !== "DISABLE" ? { redirectTo } : undefined,
     });
 
-    if (resetError) {
-      const message = resetError.message ?? "Unknown error";
-      console.warn(`[${requestId}] Supabase resetPasswordForEmail failed:`, {
-        email: normalizedEmail,
-        error: resetError,
-        message,
-      });
-
+    if (linkError) {
+      const message = linkError.message ?? "Unknown error";
       const normalizedMessage = message.toLowerCase();
       const isUserMissing =
         normalizedMessage.includes("not found") ||
         normalizedMessage.includes("no user") ||
         normalizedMessage.includes("does not exist");
 
+      console.warn(`[${requestId}] Supabase generateLink failed:`, {
+        email: normalizedEmail,
+        error: linkError,
+        message,
+      });
+
       return new Response(
         JSON.stringify({
           success: false,
           requestId,
           error: {
-            code: isUserMissing ? "user_not_found" : "reset_failed",
+            code: isUserMissing ? "user_not_found" : "link_generation_failed",
             message: isUserMissing
               ? "We couldn't find an account with that email address. Please sign up first."
               : message,
-            details: resetError,
+            details: linkError,
           },
         }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
-    console.log(`[${requestId}] Supabase password reset email requested successfully`, {
+    const resetUrl = linkData?.properties?.action_link ?? linkData?.action_link ?? null;
+
+    if (!resetUrl) {
+      console.error(`[${requestId}] Supabase did not return an action link for recovery`, {
+        email: normalizedEmail,
+        linkData,
+      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          requestId,
+          error: {
+            code: "missing_action_link",
+            message:
+              "Unable to generate a password reset link at the moment. Please try again later.",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    console.log(`[${requestId}] Password reset link generated successfully`, {
       email: normalizedEmail,
     });
 
@@ -107,7 +130,8 @@ const handler = async (req: Request): Promise<Response> => {
         success: true,
         requestId,
         data: {
-          provider: "supabase",
+          provider: "supabase-admin",
+          resetUrl,
         },
       }),
       {
