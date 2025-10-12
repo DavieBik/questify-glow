@@ -88,7 +88,12 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (linkError) {
-      console.warn(`[${requestId}] Failed to generate recovery link:`, linkError);
+      const reason = linkError.message ?? "Unknown error";
+      console.warn(`[${requestId}] Failed to generate recovery link:`, {
+        email: normalizedEmail,
+        error: linkError,
+        reason,
+      });
       const isUserMissing =
         typeof linkError.message === "string" &&
         /(user|account).*(not\s+found|does\s+not\s+exist)/i.test(linkError.message);
@@ -100,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
             code: isUserMissing ? "user_not_found" : "link_generation_failed",
             message: isUserMissing
               ? "We couldn't find an account with that email address. Please sign up first."
-              : "Unable to generate a password reset link. This user may not exist or password recovery is disabled.",
+              : "Unable to generate a password reset link. Please try again later.",
             details: linkError,
           },
         }),
@@ -112,8 +117,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!actionLink) {
       console.warn(
-        `[${requestId}] Supabase returned no action link for password recovery. Link payload:`,
-        linkData,
+        `[${requestId}] Supabase returned no action link for password recovery:`,
+        {
+          email: normalizedEmail,
+          linkData: JSON.stringify(linkData, null, 2),
+        },
       );
       return new Response(
         JSON.stringify({
@@ -166,8 +174,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (emailResponse.error) {
       console.error(
-        `[${requestId}] Resend rejected password reset email send:`,
-        emailResponse.error,
+        `[${requestId}] Email provider rejected password reset email:`,
+        {
+          email: normalizedEmail,
+          error: emailResponse.error,
+        },
       );
       return new Response(
         JSON.stringify({
@@ -175,18 +186,17 @@ const handler = async (req: Request): Promise<Response> => {
           requestId,
           error: {
             code: "email_send_failed",
-            message: emailResponse.error.message ??
-              "Email provider rejected the password reset email send.",
+            message: "Failed to send password reset email. Please try again later.",
             details: emailResponse.error,
           },
         }),
-        { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } },
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
     const emailId = emailResponse.data?.id ?? null;
 
-    console.log(`[${requestId}] Password reset email accepted by Resend:`, {
+    console.log(`[${requestId}] Password reset email sent successfully:`, {
       emailId,
       to: normalizedEmail,
     });
