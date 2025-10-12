@@ -108,55 +108,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     console.log('AuthContext: Fetching user data for user:', userToUse.id);
     try {
-      // Fetch user data (simplified for single-tenant)
-      const { data: userData, error: userError } = await supabase
-        .from('users')
+      // Use user_roles table with RPC function to avoid recursion
+      const { data: roleData, error: roleError } = await supabase
+        .rpc('get_current_user_role');
+
+      console.log('AuthContext: Role data query result:', { roleData, roleError });
+
+      if (!roleError && roleData) {
+        console.log('AuthContext: Setting user role to:', roleData);
+        setUserRole(roleData);
+      } else {
+        // Fallback to metadata if RPC fails
+        console.warn('AuthContext: Using metadata role fallback');
+        const metadataRole = (userToUse.user_metadata?.role ||
+          userToUse.app_metadata?.role) as typeof userRole;
+
+        if (metadataRole) {
+          console.log('AuthContext: Setting role from metadata:', metadataRole);
+          setUserRole(metadataRole);
+        }
+      }
+      
+      // Fetch org role from org_members
+      const { data: orgMemberData } = await supabase
+        .from('org_members')
         .select('role')
-        .eq('id', userToUse.id)
+        .eq('user_id', userToUse.id)
+        .eq('organization_id', organization.id)
         .maybeSingle();
 
-      console.log('AuthContext: User data query result:', { userData, userError });
+      console.log('AuthContext: Org member data:', orgMemberData);
 
-      if (!userError && userData) {
-        console.log('AuthContext: Setting user role to:', userData.role);
-        setUserRole(userData.role);
-        
-        // Fetch org role from org_members
-        const { data: orgMemberData } = await supabase
-          .from('org_members')
-          .select('role')
-          .eq('user_id', userToUse.id)
-          .eq('organization_id', organization.id)
-          .maybeSingle();
-
-        console.log('AuthContext: Org member data:', orgMemberData);
-
-        if (orgMemberData) {
-          setOrgRole(orgMemberData.role);
-        }
-      } else if (userError) {
-        const message = userError.message ?? '';
-        if (message.toLowerCase().includes('infinite recursion')) {
-          console.warn('AuthContext: Detected recursion in users policy; falling back to metadata role');
-        } else {
-          console.error('AuthContext: Error fetching user data:', userError);
-        }
-
-        const metadataRole = (userToUse.user_metadata?.role ||
-          userToUse.app_metadata?.role) as typeof userRole;
-
-        if (metadataRole) {
-          console.log('AuthContext: Using metadata role fallback:', metadataRole);
-          setUserRole(metadataRole);
-        }
-      } else {
-        console.warn('AuthContext: No user data returned; attempting metadata fallback');
-        const metadataRole = (userToUse.user_metadata?.role ||
-          userToUse.app_metadata?.role) as typeof userRole;
-
-        if (metadataRole) {
-          setUserRole(metadataRole);
-        }
+      if (orgMemberData) {
+        setOrgRole(orgMemberData.role);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
