@@ -94,7 +94,7 @@ export default function AdminManagement() {
           status,
           due_at,
           enrollment_date,
-          users!inner(
+          users!user_course_enrollments_user_id_fkey(
             id,
             first_name,
             last_name,
