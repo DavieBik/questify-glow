@@ -649,6 +649,13 @@ const App = () => {
                         </Layout>
                       </ProtectedRoute>
                     } />
+                    <Route path="/admin/certificates" element={
+                      <ProtectedRoute requireRole={['admin', 'manager']}>
+                        <Layout>
+                          <AdminCertificates />
+                        </Layout>
+                      </ProtectedRoute>
+                    } />
                     <Route path="/admin/imports/courses-modules" element={
                       <ProtectedRoute requireRole={['admin', 'manager']}>
                         <Layout>
