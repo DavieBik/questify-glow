@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
-import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +9,6 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
 
 if (!supabaseUrl) {
   console.error("Missing SUPABASE_URL for send-password-reset function");
@@ -20,17 +18,11 @@ if (!serviceRoleKey) {
   console.error("Missing SUPABASE_SERVICE_ROLE_KEY for send-password-reset function");
 }
 
-if (!resendApiKey) {
-  console.error("Missing RESEND_API_KEY for send-password-reset function");
-}
-
 const supabase = supabaseUrl && serviceRoleKey
   ? createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
   : null;
-
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 interface PasswordResetRequest {
   email?: string;
@@ -54,15 +46,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    if (!resend) {
-      return new Response(
-        JSON.stringify({
-          error: "Server configuration error: email service credentials are missing.",
-        }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
-
     const { email, redirectTo }: PasswordResetRequest = await req.json();
 
     if (!email || typeof email !== "string") {
@@ -81,124 +64,42 @@ const handler = async (req: Request): Promise<Response> => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-      type: "recovery",
-      email: normalizedEmail,
-      options: redirectTo ? { redirectTo } : undefined,
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: redirectTo && redirectTo !== "DISABLE" ? redirectTo : undefined,
     });
 
-    if (linkError) {
-      const reason = linkError.message ?? "Unknown error";
-      console.warn(`[${requestId}] Failed to generate recovery link:`, {
+    if (resetError) {
+      const message = resetError.message ?? "Unknown error";
+      console.warn(`[${requestId}] Supabase resetPasswordForEmail failed:`, {
         email: normalizedEmail,
-        error: linkError,
-        reason,
+        error: resetError,
+        message,
       });
+
+      const normalizedMessage = message.toLowerCase();
       const isUserMissing =
-        typeof linkError.message === "string" &&
-        /(user|account).*(not\s+found|does\s+not\s+exist)/i.test(linkError.message);
+        normalizedMessage.includes("not found") ||
+        normalizedMessage.includes("no user") ||
+        normalizedMessage.includes("does not exist");
+
       return new Response(
         JSON.stringify({
           success: false,
           requestId,
           error: {
-            code: isUserMissing ? "user_not_found" : "link_generation_failed",
+            code: isUserMissing ? "user_not_found" : "reset_failed",
             message: isUserMissing
               ? "We couldn't find an account with that email address. Please sign up first."
-              : "Unable to generate a password reset link. Please try again later.",
-            details: linkError,
+              : message,
+            details: resetError,
           },
         }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
-    const actionLink = linkData?.properties?.action_link ?? linkData?.action_link;
-
-    if (!actionLink) {
-      console.warn(
-        `[${requestId}] Supabase returned no action link for password recovery:`,
-        {
-          email: normalizedEmail,
-          linkData: JSON.stringify(linkData, null, 2),
-        },
-      );
-      return new Response(
-        JSON.stringify({
-          success: false,
-          requestId,
-          error: {
-            code: "user_not_found",
-            message: "We couldn't find an account with that email address. Please sign up first.",
-          },
-        }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
-
-    const emailResponse = await resend.emails.send({
-      from: "Training System <support@resend.dev>",
-      to: [normalizedEmail],
-      subject: "Password Reset Instructions",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2563eb; text-align: center;">Reset Your Password</h1>
-
-          <p>Hello,</p>
-
-          <p>We received a request to reset the password for your Training Management System account.</p>
-
-          <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0;">
-            <p style="margin: 0;">Click the button below to choose a new password. This link will expire shortly.</p>
-          </div>
-
-          <p style="text-align: center; margin: 32px 0;">
-            <a href="${actionLink}"
-               style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-              Reset Password
-            </a>
-          </p>
-
-          <p>If the button above does not work, copy and paste this URL into your browser:</p>
-          <p style="word-break: break-all; color: #2563eb;">${actionLink}</p>
-
-          <p>If you did not request this change, you can safely ignore this email.</p>
-
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
-          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-            Training Management System - Automated security notification
-          </p>
-        </div>
-      `,
-    });
-
-    if (emailResponse.error) {
-      console.error(
-        `[${requestId}] Email provider rejected password reset email:`,
-        {
-          email: normalizedEmail,
-          error: emailResponse.error,
-        },
-      );
-      return new Response(
-        JSON.stringify({
-          success: false,
-          requestId,
-          error: {
-            code: "email_send_failed",
-            message: "Failed to send password reset email. Please try again later.",
-            details: emailResponse.error,
-          },
-        }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
-
-    const emailId = emailResponse.data?.id ?? null;
-
-    console.log(`[${requestId}] Password reset email sent successfully:`, {
-      emailId,
-      to: normalizedEmail,
+    console.log(`[${requestId}] Supabase password reset email requested successfully`, {
+      email: normalizedEmail,
     });
 
     return new Response(
@@ -206,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
         success: true,
         requestId,
         data: {
-          emailId,
+          provider: "supabase",
         },
       }),
       {
