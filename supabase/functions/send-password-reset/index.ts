@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { BufReader, BufWriter } from "https://deno.land/std@0.190.0/io/buffer.ts";
+import { TextProtoReader } from "https://deno.land/std@0.190.0/textproto/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
 
 const corsHeaders = {
@@ -15,6 +17,17 @@ const sendgridFromEmail = Deno.env.get("SENDGRID_FROM_EMAIL") ?? "";
 const sendgridFromName = Deno.env.get("SENDGRID_FROM_NAME") ?? "Training System";
 const sendgridReplyTo = Deno.env.get("SENDGRID_REPLY_TO") ?? "";
 
+const smtpHost = Deno.env.get("SMTP_HOST") ?? "";
+const smtpPortString = Deno.env.get("SMTP_PORT") ?? "";
+const smtpUsername = Deno.env.get("SMTP_USERNAME") ?? "";
+const smtpPassword = Deno.env.get("SMTP_PASSWORD") ?? "";
+const smtpFromEmail = Deno.env.get("SMTP_FROM_EMAIL") ?? "";
+const smtpFromName = Deno.env.get("SMTP_FROM_NAME") ?? "Training System";
+const smtpSecure =
+  (Deno.env.get("SMTP_SECURE") ?? "true").toLowerCase() !== "false";
+const smtpReplyTo = Deno.env.get("SMTP_REPLY_TO") ?? "";
+const smtpHeloDomain = Deno.env.get("SMTP_HELO_DOMAIN") ?? "localhost";
+
 if (!supabaseUrl) {
   console.error("Missing SUPABASE_URL for send-password-reset function");
 }
@@ -23,12 +36,23 @@ if (!serviceRoleKey) {
   console.error("Missing SUPABASE_SERVICE_ROLE_KEY for send-password-reset function");
 }
 
-if (!sendgridApiKey || !sendgridFromEmail) {
+if (!canUseSendGrid && (sendgridApiKey || sendgridFromEmail || sendgridFromName !== "Training System" || sendgridReplyTo)) {
   console.error("SendGrid configuration incomplete for send-password-reset function", {
     apiKeyProvided: Boolean(sendgridApiKey),
     fromEmail: sendgridFromEmail,
   });
 }
+
+if (!canUseSmtp && (smtpHost || smtpUsername || smtpPassword || smtpFromEmail)) {
+  console.error("SMTP configuration incomplete for send-password-reset function", {
+    smtpHost,
+    smtpUsernameProvided: Boolean(smtpUsername),
+    smtpFromEmail,
+  });
+}
+
+const canUseSendGrid = Boolean(sendgridApiKey && sendgridFromEmail);
+const canUseSmtp = Boolean(smtpHost && smtpUsername && smtpPassword && smtpFromEmail);
 
 const supabase = supabaseUrl && serviceRoleKey
   ? createClient(supabaseUrl, serviceRoleKey, {
@@ -133,11 +157,16 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    if (!sendgridApiKey || !sendgridFromEmail) {
-      console.error(`[${requestId}] Email provider configuration missing – cannot send password email`, {
-        apiKeyProvided: Boolean(sendgridApiKey),
-        fromEmail: sendgridFromEmail,
-      });
+    const emailProvider = canUseSendGrid ? "sendgrid" : canUseSmtp ? "smtp" : null;
+
+    if (!emailProvider) {
+      console.error(
+        `[${requestId}] Email provider configuration missing – cannot send password email`,
+        {
+          sendgridConfigured: canUseSendGrid,
+          smtpConfigured: canUseSmtp,
+        },
+      );
       return new Response(
         JSON.stringify({
           success: false,
@@ -152,14 +181,23 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     try {
-      await sendPasswordResetEmail({
-        to: normalizedEmail,
-        resetUrl,
-        requestId,
-      });
+      if (emailProvider === "sendgrid") {
+        await sendPasswordResetEmailViaSendGrid({
+          to: normalizedEmail,
+          resetUrl,
+          requestId,
+        });
+      } else {
+        await sendPasswordResetEmailViaSmtp({
+          to: normalizedEmail,
+          resetUrl,
+          requestId,
+        });
+      }
 
-      console.log(`[${requestId}] Password reset email sent via SendGrid`, {
+      console.log(`[${requestId}] Password reset email sent`, {
         to: normalizedEmail,
+        provider: emailProvider,
       });
 
       return new Response(
@@ -167,7 +205,7 @@ const handler = async (req: Request): Promise<Response> => {
           success: true,
           requestId,
           data: {
-            provider: "sendgrid",
+            provider: emailProvider,
           },
         }),
         {
@@ -176,7 +214,10 @@ const handler = async (req: Request): Promise<Response> => {
         },
       );
     } catch (sendError) {
-      console.error(`[${requestId}] Failed to dispatch password reset email via SendGrid`, sendError);
+      console.error(
+        `[${requestId}] Failed to dispatch password reset email via ${emailProvider}`,
+        sendError,
+      );
 
       return new Response(
         JSON.stringify({
@@ -214,13 +255,204 @@ const handler = async (req: Request): Promise<Response> => {
 
 serve(handler);
 
-async function sendPasswordResetEmail(params: {
+async function sendPasswordResetEmailViaSendGrid(params: {
   to: string;
   resetUrl: string;
   requestId: string;
 }) {
   const { to, resetUrl, requestId } = params;
 
+  const { textContent, htmlContent } = buildEmailContent(resetUrl);
+
+  const payload: Record<string, unknown> = {
+    personalizations: [
+      {
+        to: [{ email: to }],
+        subject: "Password Reset Instructions",
+      },
+    ],
+    from: {
+      email: sendgridFromEmail,
+      name: sendgridFromName,
+    },
+    content: [
+      {
+        type: "text/plain",
+        value: textContent,
+      },
+      {
+        type: "text/html",
+        value: htmlContent,
+      },
+    ],
+  };
+
+  if (sendgridReplyTo) {
+    payload.reply_to = { email: sendgridReplyTo };
+  }
+
+  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${sendgridApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const bodyText = await response.text();
+    throw new Error(
+      `SendGrid request failed with status ${response.status}: ${bodyText || response.statusText}`,
+    );
+  }
+
+  console.info(`[${requestId}] Password reset email dispatched via SendGrid`, {
+    to,
+    status: response.status,
+  });
+}
+
+const encoder = new TextEncoder();
+
+async function sendPasswordResetEmailViaSmtp(params: {
+  to: string;
+  resetUrl: string;
+  requestId: string;
+}) {
+  if (!smtpHost || !smtpUsername || !smtpPassword || !smtpFromEmail) {
+    throw new Error("SMTP configuration is incomplete.");
+  }
+
+  const { to, resetUrl, requestId } = params;
+  const port = Number.parseInt(smtpPortString, 10) ||
+    (smtpSecure ? 465 : 587);
+
+  const connection = smtpSecure
+    ? await Deno.connectTls({ hostname: smtpHost, port })
+    : await Deno.connect({ hostname: smtpHost, port });
+
+  const reader = new TextProtoReader(new BufReader(connection));
+  const writer = new BufWriter(connection);
+
+  const sendCommand = async (command: string) => {
+    await writer.write(encoder.encode(`${command}\r\n`));
+    await writer.flush();
+  };
+
+  const readResponse = async () => {
+    const line = await reader.readLine();
+    if (line === null) {
+      throw new Error("SMTP connection closed unexpectedly.");
+    }
+    const code = Number.parseInt(line.slice(0, 3), 10);
+    let message = line.length > 4 ? line.slice(4) : "";
+    let continuation = line[3] === "-";
+
+    while (continuation) {
+      const nextLine = await reader.readLine();
+      if (nextLine === null) {
+        break;
+      }
+      message += `\n${nextLine.length > 4 ? nextLine.slice(4) : ""}`;
+      continuation = nextLine[3] === "-";
+    }
+
+    return { code, message };
+  };
+
+  const expect = async (expectedCodes: number[], context: string) => {
+    const response = await readResponse();
+    if (!expectedCodes.includes(response.code)) {
+      throw new Error(`SMTP ${context} failed (${response.code}): ${response.message}`);
+    }
+  };
+
+  try {
+    await expect([220], "greeting");
+
+    await sendCommand(`EHLO ${smtpHeloDomain}`);
+    await expect([250], "EHLO");
+
+    await sendCommand("AUTH LOGIN");
+    await expect([334], "AUTH LOGIN challenge");
+
+    await sendCommand(btoa(smtpUsername));
+    await expect([334], "AUTH LOGIN username");
+
+    await sendCommand(btoa(smtpPassword));
+    await expect([235], "AUTH LOGIN password");
+
+    const fromAddress = smtpFromName
+      ? `${smtpFromName} <${smtpFromEmail}>`
+      : smtpFromEmail;
+
+    await sendCommand(`MAIL FROM:<${smtpFromEmail}>`);
+    await expect([250], "MAIL FROM");
+
+    await sendCommand(`RCPT TO:<${to}>`);
+    await expect([250, 251], "RCPT TO");
+
+    await sendCommand("DATA");
+    await expect([354], "DATA");
+
+    const { textContent, htmlContent } = buildEmailContent(resetUrl);
+    const boundary = `BOUNDARY_${crypto.randomUUID()}`;
+
+    const headers = [
+      `From: ${fromAddress}`,
+      `To: <${to}>`,
+      `Subject: Password Reset Instructions`,
+      `MIME-Version: 1.0`,
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      `Date: ${new Date().toUTCString()}`,
+    ];
+
+    if (smtpReplyTo) {
+      headers.push(`Reply-To: ${smtpReplyTo}`);
+    }
+
+    const bodyParts = [
+      `--${boundary}`,
+      `Content-Type: text/plain; charset="utf-8"`,
+      ``,
+      textContent,
+      `--${boundary}`,
+      `Content-Type: text/html; charset="utf-8"`,
+      ``,
+      htmlContent,
+      `--${boundary}--`,
+      ``,
+    ];
+
+    const message = `${headers.join("\r\n")}\r\n\r\n${bodyParts.join("\r\n")}`;
+    const safeMessage = message.replace(/\n\./g, "\n..");
+
+    await writer.write(encoder.encode(`${safeMessage}\r\n.\r\n`));
+    await writer.flush();
+    await expect([250], "message body");
+
+    await sendCommand("QUIT");
+    await expect([221], "QUIT");
+
+    console.info(`[${requestId}] Password reset email dispatched via SMTP`, {
+      to,
+      host: smtpHost,
+      port,
+    });
+  } finally {
+    try {
+      connection.close();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function buildEmailContent(resetUrl: string): {
+  textContent: string;
+  htmlContent: string;
+} {
   const textContent = [
     "Reset Your Password",
     "",
@@ -231,7 +463,7 @@ async function sendPasswordResetEmail(params: {
     "If you did not request this change, you can safely ignore this email.",
   ].join("\n");
 
-  const html = `
+  const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h1 style="color: #2563eb; text-align: center;">Reset Your Password</h1>
 
@@ -262,51 +494,5 @@ async function sendPasswordResetEmail(params: {
     </div>
   `;
 
-  const payload: Record<string, unknown> = {
-    personalizations: [
-      {
-        to: [{ email: to }],
-        subject: "Password Reset Instructions",
-      },
-    ],
-    from: {
-      email: sendgridFromEmail,
-      name: sendgridFromName,
-    },
-    content: [
-      {
-        type: "text/plain",
-        value: textContent,
-      },
-      {
-        type: "text/html",
-        value: html,
-      },
-    ],
-  };
-
-  if (sendgridReplyTo) {
-    payload.reply_to = { email: sendgridReplyTo };
-  }
-
-  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${sendgridApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const bodyText = await response.text();
-    throw new Error(
-      `SendGrid request failed with status ${response.status}: ${bodyText || response.statusText}`,
-    );
-  }
-
-  console.info(`[${requestId}] Password reset email dispatched via SendGrid`, {
-    to,
-    status: response.status,
-  });
+  return { textContent, htmlContent };
 }
