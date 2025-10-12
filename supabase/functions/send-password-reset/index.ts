@@ -13,11 +13,6 @@ const corsHeaders = {
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-const sendgridApiKey = Deno.env.get("SENDGRID_API_KEY") ?? "";
-const sendgridFromEmail = Deno.env.get("SENDGRID_FROM_EMAIL") ?? "";
-const sendgridFromName = Deno.env.get("SENDGRID_FROM_NAME") ?? "Training System";
-const sendgridReplyTo = Deno.env.get("SENDGRID_REPLY_TO") ?? "";
-
 const smtpHost = Deno.env.get("SMTP_HOST") ?? "";
 const smtpPortString = Deno.env.get("SMTP_PORT") ?? "";
 const smtpUsername = Deno.env.get("SMTP_USERNAME") ?? "";
@@ -29,6 +24,10 @@ const smtpSecure =
 const smtpReplyTo = Deno.env.get("SMTP_REPLY_TO") ?? "";
 const smtpHeloDomain = Deno.env.get("SMTP_HELO_DOMAIN") ?? "localhost";
 
+const smtpConfigured = Boolean(
+  smtpHost && smtpUsername && smtpPassword && smtpFromEmail,
+);
+
 if (!supabaseUrl) {
   console.error("Missing SUPABASE_URL for send-password-reset function");
 }
@@ -37,23 +36,13 @@ if (!serviceRoleKey) {
   console.error("Missing SUPABASE_SERVICE_ROLE_KEY for send-password-reset function");
 }
 
-if (!canUseSendGrid && (sendgridApiKey || sendgridFromEmail || sendgridFromName !== "Training System" || sendgridReplyTo)) {
-  console.error("SendGrid configuration incomplete for send-password-reset function", {
-    apiKeyProvided: Boolean(sendgridApiKey),
-    fromEmail: sendgridFromEmail,
-  });
-}
-
-if (!canUseSmtp && (smtpHost || smtpUsername || smtpPassword || smtpFromEmail)) {
+if (!smtpConfigured) {
   console.error("SMTP configuration incomplete for send-password-reset function", {
     smtpHost,
     smtpUsernameProvided: Boolean(smtpUsername),
     smtpFromEmail,
   });
 }
-
-const canUseSendGrid = Boolean(sendgridApiKey && sendgridFromEmail);
-const canUseSmtp = Boolean(smtpHost && smtpUsername && smtpPassword && smtpFromEmail);
 
 const supabase = supabaseUrl && serviceRoleKey
   ? createClient(supabaseUrl, serviceRoleKey, {
@@ -158,16 +147,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const emailProvider = canUseSendGrid ? "sendgrid" : canUseSmtp ? "smtp" : null;
-
-    if (!emailProvider) {
-      console.error(
-        `[${requestId}] Email provider configuration missing – cannot send password email`,
-        {
-          sendgridConfigured: canUseSendGrid,
-          smtpConfigured: canUseSmtp,
-        },
-      );
+    if (!smtpConfigured) {
+      console.error(`[${requestId}] SMTP configuration missing – cannot send password email`);
       return new Response(
         JSON.stringify({
           success: false,
@@ -182,23 +163,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     try {
-      if (emailProvider === "sendgrid") {
-        await sendPasswordResetEmailViaSendGrid({
-          to: normalizedEmail,
-          resetUrl,
-          requestId,
-        });
-      } else {
-        await sendPasswordResetEmailViaSmtp({
-          to: normalizedEmail,
-          resetUrl,
-          requestId,
-        });
-      }
+      await sendPasswordResetEmailViaSmtp({
+        to: normalizedEmail,
+        resetUrl,
+        requestId,
+      });
 
       console.log(`[${requestId}] Password reset email sent`, {
         to: normalizedEmail,
-        provider: emailProvider,
+        provider: "smtp",
       });
 
       return new Response(
@@ -206,7 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
           success: true,
           requestId,
           data: {
-            provider: emailProvider,
+            provider: "smtp",
           },
         }),
         {
@@ -216,7 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     } catch (sendError) {
       console.error(
-        `[${requestId}] Failed to dispatch password reset email via ${emailProvider}`,
+        `[${requestId}] Failed to dispatch password reset email via SMTP`,
         sendError,
       );
 
@@ -256,64 +229,6 @@ const handler = async (req: Request): Promise<Response> => {
 
 serve(handler);
 
-async function sendPasswordResetEmailViaSendGrid(params: {
-  to: string;
-  resetUrl: string;
-  requestId: string;
-}) {
-  const { to, resetUrl, requestId } = params;
-
-  const { textContent, htmlContent } = buildEmailContent(resetUrl);
-
-  const payload: Record<string, unknown> = {
-    personalizations: [
-      {
-        to: [{ email: to }],
-        subject: "Password Reset Instructions",
-      },
-    ],
-    from: {
-      email: sendgridFromEmail,
-      name: sendgridFromName,
-    },
-    content: [
-      {
-        type: "text/plain",
-        value: textContent,
-      },
-      {
-        type: "text/html",
-        value: htmlContent,
-      },
-    ],
-  };
-
-  if (sendgridReplyTo) {
-    payload.reply_to = { email: sendgridReplyTo };
-  }
-
-  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${sendgridApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const bodyText = await response.text();
-    throw new Error(
-      `SendGrid request failed with status ${response.status}: ${bodyText || response.statusText}`,
-    );
-  }
-
-  console.info(`[${requestId}] Password reset email dispatched via SendGrid`, {
-    to,
-    status: response.status,
-  });
-}
-
 const encoder = new TextEncoder();
 
 async function sendPasswordResetEmailViaSmtp(params: {
@@ -321,11 +236,8 @@ async function sendPasswordResetEmailViaSmtp(params: {
   resetUrl: string;
   requestId: string;
 }) {
-  if (!smtpHost || !smtpUsername || !smtpPassword || !smtpFromEmail) {
-    throw new Error("SMTP configuration is incomplete.");
-  }
-
   const { to, resetUrl, requestId } = params;
+
   const port = Number.parseInt(smtpPortString, 10) ||
     (smtpSecure ? 465 : 587);
 
