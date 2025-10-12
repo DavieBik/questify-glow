@@ -134,8 +134,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (orgMemberData) {
           setOrgRole(orgMemberData.role);
         }
+      } else if (userError) {
+        const message = userError.message ?? '';
+        if (message.toLowerCase().includes('infinite recursion')) {
+          console.warn('AuthContext: Detected recursion in users policy; falling back to metadata role');
+        } else {
+          console.error('AuthContext: Error fetching user data:', userError);
+        }
+
+        const metadataRole = (userToUse.user_metadata?.role ||
+          userToUse.app_metadata?.role) as typeof userRole;
+
+        if (metadataRole) {
+          console.log('AuthContext: Using metadata role fallback:', metadataRole);
+          setUserRole(metadataRole);
+        }
       } else {
-        console.log('AuthContext: Error or no user data:', userError);
+        console.warn('AuthContext: No user data returned; attempting metadata fallback');
+        const metadataRole = (userToUse.user_metadata?.role ||
+          userToUse.app_metadata?.role) as typeof userRole;
+
+        if (metadataRole) {
+          setUserRole(metadataRole);
+        }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
