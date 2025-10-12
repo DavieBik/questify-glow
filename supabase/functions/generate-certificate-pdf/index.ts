@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +28,28 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // SECURITY: Validate all input parameters
+    const requestSchema = z.object({
+      certificateNumber: z.string().min(1, 'Certificate number is required').max(100, 'Certificate number too long'),
+      userName: z.string().min(1, 'User name is required').max(200, 'User name too long'),
+      courseTitle: z.string().min(1, 'Course title is required').max(500, 'Course title too long'),
+      completionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (expected YYYY-MM-DD)'),
+      trainerSignature: z.string().max(200, 'Trainer signature too long').optional(),
+      userId: z.string().uuid('Invalid user ID format'),
+      courseId: z.string().uuid('Invalid course ID format')
+    });
+
+    const requestBody = await req.json();
+    const validationResult = requestSchema.safeParse(requestBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters', details: validationResult.error.format() }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { 
       certificateNumber, 
       userName, 
@@ -35,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
       trainerSignature,
       userId,
       courseId
-    }: CertificatePDFRequest = await req.json();
+    } = validationResult.data;
 
     console.log("Generating certificate PDF:", { certificateNumber, userName, courseTitle });
 
