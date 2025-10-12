@@ -182,12 +182,12 @@ const CourseDetail = () => {
         
         <div className="flex flex-wrap gap-3">
           {course.category && (
-            <Badge variant="secondary" className="text-lg font-semibold px-6 py-2 uppercase tracking-wide text-secondary-foreground">
+            <Badge variant="secondary" className="text-lg font-semibold px-6 py-2 uppercase tracking-wide">
               {course.category}
             </Badge>
           )}
           {course.level && (
-            <Badge variant="outline" className="text-lg font-semibold px-6 py-2 text-foreground">
+            <Badge variant="outline" className="text-lg font-semibold px-6 py-2">
               Level: {course.level}
             </Badge>
           )}
