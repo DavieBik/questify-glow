@@ -206,23 +206,14 @@ const Auth = () => {
         return;
       }
 
-      const resetUrl = (data?.data as { resetUrl?: string } | undefined)?.resetUrl;
-
       if (data?.requestId) {
-        console.info('Password reset request succeeded:', {
+        console.info('Password reset email requested successfully:', {
           requestId: data.requestId,
-          resetUrl,
+          provider: data?.data?.provider,
         });
       }
 
-      if (resetUrl && typeof window !== 'undefined') {
-        toast.success('Password reset link generated. Redirecting you now...');
-        setTimeout(() => {
-          window.location.href = resetUrl;
-        }, 600);
-      } else {
-        toast.success('Password reset link generated successfully.');
-      }
+      toast.success('Password reset email sent! Check your inbox.');
 
       setCurrentView('auth');
       setResetEmail('');
