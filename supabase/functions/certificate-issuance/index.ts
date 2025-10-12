@@ -179,8 +179,16 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("Error in certificate-issuance function:", error);
+    
+    // Return generic error message to client while logging details server-side
+    const errorId = crypto.randomUUID();
+    console.error(`Error ID ${errorId}:`, error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: "Failed to issue certificate. Please contact support.",
+        errorId 
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

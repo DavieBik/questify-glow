@@ -240,8 +240,16 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error('Error in generate-certificate-pdf function:', error);
+    
+    // Return generic error message to client while logging details server-side
+    const errorId = crypto.randomUUID();
+    console.error(`Error ID ${errorId}:`, error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: "Failed to generate certificate PDF. Please contact support.",
+        errorId 
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

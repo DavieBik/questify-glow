@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 
 interface Module {
   id: string;
@@ -232,7 +233,7 @@ const ModuleDetail = () => {
             <h3 className="text-lg font-semibold mb-4">Assessment Survey</h3>
             <div className="prose prose-sm max-w-none">
               {module.description && <p>{module.description}</p>}
-              <div dangerouslySetInnerHTML={{ __html: module.body || '' }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(module.body || '') }} />
             </div>
           </div>
           {completion?.status === 'in_progress' && (
@@ -262,7 +263,7 @@ const ModuleDetail = () => {
       return (
         <div className="space-y-6">
           <div className="prose prose-sm max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: processedContent }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedContent) }} />
           </div>
         </div>
       );
@@ -283,7 +284,7 @@ const ModuleDetail = () => {
           </Button>
         ) : (
           <div className="prose prose-sm max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: module.body || 'No content available.' }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(module.body || 'No content available.') }} />
           </div>
         )}
       </div>
