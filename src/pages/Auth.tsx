@@ -142,13 +142,13 @@ const Auth = () => {
         return;
       }
 
-      const options: { redirectTo?: string } = {};
+      const envRedirect = import.meta.env.VITE_SUPABASE_RESET_REDIRECT;
       const redirectUrl =
-        import.meta.env.VITE_SUPABASE_RESET_REDIRECT ?? `${window.location.origin}/auth/reset-password`;
+        envRedirect && envRedirect !== 'DISABLE'
+          ? envRedirect
+          : `${window.location.origin}/auth/reset-password`;
 
-      if (redirectUrl && redirectUrl !== 'DISABLE') {
-        options.redirectTo = redirectUrl;
-      }
+      const options: { redirectTo: string } = { redirectTo: redirectUrl };
 
       const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, options);
 
