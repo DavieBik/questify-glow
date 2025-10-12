@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
 import { Resend } from "https://esm.sh/resend@4.0.0";
-import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -29,27 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // SECURITY: Validate all input parameters to prevent injection attacks
-    const requestSchema = z.object({
-      completionId: z.string().uuid('Invalid completion ID format'),
-      userId: z.string().uuid('Invalid user ID format'),
-      courseId: z.string().uuid('Invalid course ID format'),
-      finalScore: z.number().min(0, 'Score cannot be negative').max(100, 'Score cannot exceed 100'),
-      completionTime: z.number().int('Completion time must be an integer').positive('Completion time must be positive')
-    });
-
-    const requestBody = await req.json();
-    const validationResult = requestSchema.safeParse(requestBody);
-    
-    if (!validationResult.success) {
-      console.error('Validation error:', validationResult.error);
-      return new Response(
-        JSON.stringify({ error: 'Invalid request parameters', details: validationResult.error.format() }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const { completionId, userId, courseId, finalScore, completionTime } = validationResult.data;
+    const { completionId, userId, courseId, finalScore, completionTime }: CertificateIssuanceRequest = await req.json();
 
     console.log("Processing certificate issuance for completion:", completionId);
 
@@ -179,16 +158,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("Error in certificate-issuance function:", error);
-    
-    // Return generic error message to client while logging details server-side
-    const errorId = crypto.randomUUID();
-    console.error(`Error ID ${errorId}:`, error);
-    
     return new Response(
-      JSON.stringify({ 
-        error: "Failed to issue certificate. Please contact support.",
-        errorId 
-      }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

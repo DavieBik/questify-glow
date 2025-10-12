@@ -108,18 +108,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     console.log('AuthContext: Fetching user data for user:', userToUse.id);
     try {
-      // Fetch user role from user_roles table (SECURITY: prevents privilege escalation)
-      const { data: userRoleData, error: userRoleError } = await supabase
-        .from('user_roles')
+      // Fetch user data (simplified for single-tenant)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
         .select('role')
-        .eq('user_id', userToUse.id)
+        .eq('id', userToUse.id)
         .maybeSingle();
 
-      console.log('AuthContext: User role query result:', { userRoleData, userRoleError });
+      console.log('AuthContext: User data query result:', { userData, userError });
 
-      if (!userRoleError && userRoleData) {
-        console.log('AuthContext: Setting user role to:', userRoleData.role);
-        setUserRole(userRoleData.role);
+      if (!userError && userData) {
+        console.log('AuthContext: Setting user role to:', userData.role);
+        setUserRole(userData.role);
         
         // Fetch org role from org_members
         const { data: orgMemberData } = await supabase
@@ -135,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setOrgRole(orgMemberData.role);
         }
       } else {
-        console.log('AuthContext: Error or no user role data:', userRoleError);
+        console.log('AuthContext: Error or no user data:', userError);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);

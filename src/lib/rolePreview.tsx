@@ -1,23 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-/**
- * ⚠️ SECURITY WARNING: UI PREVIEW ONLY - NOT FOR AUTHORIZATION
- * 
- * This role preview system is for UI testing and development ONLY.
- * NEVER use previewRole or effectiveRole for actual authorization decisions.
- * 
- * All security enforcement MUST happen server-side via:
- * - Row Level Security (RLS) policies in Supabase
- * - JWT token validation in edge functions
- * - Server-side role checks in database functions
- * 
- * @security This is a UI preview feature only
- * @warning Never use for authorization logic
- * @see AuthContext for actual user permissions
- * @see has_role() database function for server-side authorization
- */
-
 export type PreviewRole = 'worker' | 'manager' | 'admin' | null;
 
 interface PreviewRoleContextType {
@@ -39,9 +22,7 @@ export const usePreviewRole = () => {
   return context;
 };
 
-// ⚠️ SECURITY: This localStorage key is for UI preview ONLY
-// Never use localStorage for actual authorization decisions
-const STORAGE_KEY = 'preview.role.UI_ONLY';
+const STORAGE_KEY = 'preview.role';
 
 export const PreviewRoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { userRole } = useAuth();

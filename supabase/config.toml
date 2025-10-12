@@ -7,16 +7,16 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.certificate-issuance]
-verify_jwt = true
+verify_jwt = false
 
 [functions.refresher-scheduling]
-verify_jwt = true
+verify_jwt = false
 
 [functions.expiry-reminders]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-certificate-pdf]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-password-reset]
 verify_jwt = false
