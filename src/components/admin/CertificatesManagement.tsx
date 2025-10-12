@@ -12,8 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Award, RefreshCw, Search, Download, ExternalLink } from 'lucide-react';
+import { Award, RefreshCw, Search, Download, ExternalLink, Eye } from 'lucide-react';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Certificate {
   id: string;
@@ -146,8 +147,21 @@ export function CertificatesManagement() {
     cert.courses.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const getScoreVariant = (score: number) => {
+    if (score >= 90) return 'default'; // High score - green
+    if (score >= 70) return 'secondary'; // Medium score - blue
+    return 'destructive'; // Low score - red
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    if (score >= 70) return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+  };
+
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Certificates Management</h2>
@@ -158,15 +172,25 @@ export function CertificatesManagement() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>All Certificates</CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Award className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle>All Certificates</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {filteredCertificates.length} certificate{filteredCertificates.length !== 1 ? 's' : ''} found
+                </p>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <div className="relative w-72">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search certificates..."
+                  placeholder="Search by name, email, or course..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8"
+                  className="pl-9"
                 />
               </div>
             </div>
@@ -180,67 +204,107 @@ export function CertificatesManagement() {
               No certificates found
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="rounded-lg border border-border">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Learner</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Certificate #</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Issue Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="font-semibold">Learner</TableHead>
+                    <TableHead className="font-semibold">Course</TableHead>
+                    <TableHead className="font-semibold">Certificate #</TableHead>
+                    <TableHead className="font-semibold">Score</TableHead>
+                    <TableHead className="font-semibold">Issue Date</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="text-right font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredCertificates.map((cert) => (
-                    <TableRow key={cert.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {cert.users.first_name} {cert.users.last_name}
+                    <TableRow key={cert.id} className="hover:bg-muted/30">
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-semibold text-primary">
+                              {cert.users.first_name?.[0]}{cert.users.last_name?.[0]}
+                            </span>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {cert.users.email}
+                          <div>
+                            <div className="font-medium">
+                              {cert.users.first_name} {cert.users.last_name}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {cert.users.email}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{cert.courses.title}</TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {cert.certificate_number}
+                      <TableCell className="py-4">
+                        <div className="font-medium max-w-xs truncate">
+                          {cert.courses.title}
+                        </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
+                      <TableCell className="py-4">
+                        <code className="px-2 py-1 bg-muted rounded text-xs font-mono">
+                          {cert.certificate_number}
+                        </code>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <Badge className={getScoreColor(cert.final_score_percentage)}>
                           {cert.final_score_percentage}%
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {new Date(cert.issue_date).toLocaleDateString()}
+                      <TableCell className="py-4">
+                        <div className="text-sm">
+                          {new Date(cert.issue_date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={cert.is_valid ? "default" : "destructive"}>
+                      <TableCell className="py-4">
+                        <Badge 
+                          variant={cert.is_valid ? "default" : "destructive"}
+                          className="font-medium"
+                        >
                           {cert.is_valid ? 'Valid' : 'Expired'}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-4">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleView(cert)}
-                            disabled={!cert.pdf_storage_path}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleReissue(cert)}
-                            disabled={reissuingId === cert.id}
-                          >
-                            <RefreshCw className={`h-4 w-4 ${reissuingId === cert.id ? 'animate-spin' : ''}`} />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleView(cert)}
+                                disabled={!cert.pdf_storage_path}
+                                className="h-9"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View certificate PDF</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReissue(cert)}
+                                disabled={reissuingId === cert.id}
+                                className="h-9"
+                              >
+                                <RefreshCw className={`h-4 w-4 mr-1 ${reissuingId === cert.id ? 'animate-spin' : ''}`} />
+                                Re-issue
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Re-generate certificate</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -251,6 +315,7 @@ export function CertificatesManagement() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
