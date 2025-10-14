@@ -173,15 +173,26 @@ const Messages: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase
-        .from('users')
-        .select('id, first_name, last_name, email, role')
-        .neq('id', user?.id)
-        .order('first_name');
+        .rpc('message_allowed_recipient_list');
 
       if (error) throw error;
-      setUsers(data || []);
+
+      setUsers(
+        (data || []).map((row: any) => ({
+          id: row.user_id,
+          first_name: row.first_name,
+          last_name: row.last_name,
+          email: row.email,
+          role: row.role,
+        })),
+      );
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching allowed recipients:', error);
+      toast({
+        title: 'Error',
+        description: 'Unable to load your messaging contacts.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -246,11 +257,13 @@ const Messages: React.FC = () => {
       if (conversation) {
         setSelectedConversation(conversation);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting conversation:', error);
       toast({
         title: "Error",
-        description: "Failed to start conversation",
+        description: error?.message?.includes('not permitted')
+          ? "You're not permitted to message that user."
+          : "Failed to start conversation",
         variant: "destructive",
       });
     }
