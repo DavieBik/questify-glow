@@ -179,7 +179,7 @@ const Messages: React.FC = () => {
 
       setUsers(
         (data || []).map((row: any) => ({
-          id: row.user_id,
+          id: row.id,
           first_name: row.first_name,
           last_name: row.last_name,
           email: row.email,
