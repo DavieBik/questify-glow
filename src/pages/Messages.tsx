@@ -187,7 +187,7 @@ const Messages: React.FC = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        const query = supabase
           .from('conversations')
           .select(`
             id,
@@ -208,7 +208,7 @@ const Messages: React.FC = () => {
                 role
               )
             ),
-            messages(order=created_at.desc, limit=1) (
+            messages (
               id,
               content,
               created_at,
@@ -221,7 +221,11 @@ const Messages: React.FC = () => {
           `)
           .eq('conversation_participants.user_id', safeUserId)
           .is('conversation_participants.is_archived', false)
-          .order('updated_at', { ascending: false });
+          .order('updated_at', { ascending: false })
+          .order('created_at', { foreignTable: 'messages', ascending: false })
+          .limit(1, { foreignTable: 'messages' });
+
+        const { data, error } = await query;
 
         if (error) {
           throw error;
