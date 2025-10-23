@@ -655,10 +655,8 @@ const Messages: React.FC = () => {
       const { error } = await supabase
         .from('conversation_participants')
         .update({
-          is_archived: true,
-          archived_at: new Date().toISOString(),
-          archived_by: safeUserId,
-        })
+          last_read_at: new Date().toISOString(),
+        } as any)
         .eq('conversation_id', selectedConversation.id)
         .eq('user_id', safeUserId);
 

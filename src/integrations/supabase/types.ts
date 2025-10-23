@@ -588,22 +588,31 @@ export type Database = {
       }
       conversation_participants: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           conversation_id: string
           id: string
+          is_archived: boolean
           joined_at: string
           last_read_at: string | null
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           conversation_id: string
           id?: string
+          is_archived?: boolean
           joined_at?: string
           last_read_at?: string | null
           user_id: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           conversation_id?: string
           id?: string
+          is_archived?: boolean
           joined_at?: string
           last_read_at?: string | null
           user_id?: string
@@ -987,7 +996,7 @@ export type Database = {
           name: string
           organization_id: string
           parent_id: string | null
-          path: unknown | null
+          path: unknown
           updated_at: string | null
         }
         Insert: {
@@ -996,7 +1005,7 @@ export type Database = {
           name: string
           organization_id: string
           parent_id?: string | null
-          path?: unknown | null
+          path?: unknown
           updated_at?: string | null
         }
         Update: {
@@ -1005,7 +1014,7 @@ export type Database = {
           name?: string
           organization_id?: string
           parent_id?: string | null
-          path?: unknown | null
+          path?: unknown
           updated_at?: string | null
         }
         Relationships: [
@@ -2222,7 +2231,7 @@ export type Database = {
           score: number | null
           started_at: string | null
           status: string
-          total_time: unknown | null
+          total_time: unknown
           updated_at: string
           user_id: string
         }
@@ -2237,7 +2246,7 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: string
-          total_time?: unknown | null
+          total_time?: unknown
           updated_at?: string
           user_id: string
         }
@@ -2252,7 +2261,7 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: string
-          total_time?: unknown | null
+          total_time?: unknown
           updated_at?: string
           user_id?: string
         }
@@ -2913,14 +2922,6 @@ export type Database = {
       }
     }
     Functions: {
-      _ltree_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      _ltree_gist_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
       assign_curriculum_to_user: {
         Args: {
           p_assigned_by: string
@@ -2958,11 +2959,14 @@ export type Database = {
           subscription_plan: string | null
           updated_at: string | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "organizations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      enable_role_preview: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      enable_role_preview: { Args: never; Returns: boolean }
       get_announcement_stats: {
         Args: { announcement_id_param: string }
         Returns: {
@@ -2971,18 +2975,12 @@ export type Database = {
           total_readers: number
         }[]
       }
-      get_current_user_org: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_org: { Args: never; Returns: string }
       get_current_user_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
-      get_default_org_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_default_org_id: { Args: never; Returns: string }
       get_due_enrollments: {
         Args: { days_ahead?: number }
         Returns: {
@@ -3001,16 +2999,13 @@ export type Database = {
         Args: { other_user_id: string }
         Returns: string
       }
-      get_user_org_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      has_org_role: {
-        Args:
-          | { p_org: string; p_roles: string[]; p_user?: string }
-          | { required_role: string }
-        Returns: boolean
-      }
+      get_user_org_id: { Args: never; Returns: string }
+      has_org_role:
+        | { Args: { required_role: string }; Returns: boolean }
+        | {
+            Args: { p_org: string; p_roles: string[]; p_user?: string }
+            Returns: boolean
+          }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]
@@ -3018,14 +3013,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      hash_ltree: {
-        Args: { "": unknown }
-        Returns: number
-      }
-      is_admin: {
-        Args: { uid: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { uid: string }; Returns: boolean }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
@@ -3038,88 +3026,9 @@ export type Database = {
         Args: { p_org: string; p_user?: string }
         Returns: boolean
       }
-      is_org_admin_or_manager: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      lca: {
-        Args: { "": unknown[] }
-        Returns: unknown
-      }
-      lquery_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      lquery_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      lquery_recv: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      lquery_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      ltree_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_gist_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_gist_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
-      ltree_gist_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_recv: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltree_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      ltree2text: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      ltxtq_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltxtq_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltxtq_recv: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ltxtq_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
+      is_org_admin_or_manager: { Args: never; Returns: boolean }
       message_allowed_recipient_list: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           first_name: string
@@ -3128,22 +3037,12 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
         }[]
       }
-      nlevel: {
-        Args: { "": unknown }
-        Returns: number
-      }
       process_approval: {
         Args: { p_approval_id: string; p_notes?: string; p_status: string }
         Returns: boolean
       }
-      refresh_all_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      refresh_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_all_analytics: { Args: never; Returns: undefined }
+      refresh_analytics: { Args: never; Returns: undefined }
       rpc_admin_team_user_progress: {
         Args: { date_from?: string; date_to?: string; manager_scope?: boolean }
         Returns: {
@@ -3160,23 +3059,34 @@ export type Database = {
           user_name: string
         }[]
       }
-      rpc_approvals_queue: {
-        Args: Record<PropertyKey, never> | { allow_preview?: boolean }
-        Returns: {
-          course_title: string
-          id: string
-          request_type: string
-          requested_at: string
-          reviewer_notes: string
-          status: string
-          user_email: string
-          user_name: string
-        }[]
-      }
-      rpc_bulk_assign: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      rpc_approvals_queue:
+        | {
+            Args: { allow_preview?: boolean }
+            Returns: {
+              course_title: string
+              id: string
+              request_type: string
+              requested_at: string
+              reviewer_notes: string
+              status: string
+              user_email: string
+              user_name: string
+            }[]
+          }
+        | {
+            Args: never
+            Returns: {
+              course_title: string
+              id: string
+              request_type: string
+              requested_at: string
+              reviewer_notes: string
+              status: string
+              user_email: string
+              user_name: string
+            }[]
+          }
+      rpc_bulk_assign: { Args: never; Returns: Json }
       rpc_course_metrics: {
         Args: { date_from?: string; date_to?: string }
         Returns: {
@@ -3203,17 +3113,29 @@ export type Database = {
           completions: number
         }[]
       }
-      rpc_manager_dashboard_metrics: {
-        Args:
-          | { allow_preview?: boolean; date_from?: string; date_to?: string }
-          | { date_from?: string; date_to?: string }
-        Returns: {
-          active_learners_7d: number
-          completion_rate_30d: number
-          due_soon_enrollments: number
-          overdue_enrollments: number
-        }[]
-      }
+      rpc_manager_dashboard_metrics:
+        | {
+            Args: {
+              allow_preview?: boolean
+              date_from?: string
+              date_to?: string
+            }
+            Returns: {
+              active_learners_7d: number
+              completion_rate_30d: number
+              due_soon_enrollments: number
+              overdue_enrollments: number
+            }[]
+          }
+        | {
+            Args: { date_from?: string; date_to?: string }
+            Returns: {
+              active_learners_7d: number
+              completion_rate_30d: number
+              due_soon_enrollments: number
+              overdue_enrollments: number
+            }[]
+          }
       rpc_module_metrics: {
         Args: {
           course_id_filter?: string
@@ -3237,7 +3159,7 @@ export type Database = {
         }[]
       }
       rpc_retention_metrics: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           cohort_week: string
           retained_30d: number
@@ -3260,33 +3182,49 @@ export type Database = {
           total_users: number
         }[]
       }
-      rpc_team_compliance: {
-        Args:
-          | {
+      rpc_team_compliance:
+        | {
+            Args: {
               allow_preview?: boolean
               date_from?: string
               date_to?: string
               department_filter?: string
             }
-          | { date_from?: string; date_to?: string; department_filter?: string }
-        Returns: {
-          assigned_courses: number
-          completed_courses: number
-          completion_percentage: number
-          department: string
-          email: string
-          last_activity: string
-          overdue_courses: number
-          required_courses: number
-          role: Database["public"]["Enums"]["user_role"]
-          user_id: string
-          user_name: string
-        }[]
-      }
-      text2ltree: {
-        Args: { "": string }
-        Returns: unknown
-      }
+            Returns: {
+              assigned_courses: number
+              completed_courses: number
+              completion_percentage: number
+              department: string
+              email: string
+              last_activity: string
+              overdue_courses: number
+              required_courses: number
+              role: Database["public"]["Enums"]["user_role"]
+              user_id: string
+              user_name: string
+            }[]
+          }
+        | {
+            Args: {
+              date_from?: string
+              date_to?: string
+              department_filter?: string
+            }
+            Returns: {
+              assigned_courses: number
+              completed_courses: number
+              completion_percentage: number
+              department: string
+              email: string
+              last_activity: string
+              overdue_courses: number
+              required_courses: number
+              role: Database["public"]["Enums"]["user_role"]
+              user_id: string
+              user_name: string
+            }[]
+          }
+      text2ltree: { Args: { "": string }; Returns: unknown }
     }
     Enums: {
       course_level: "Beginner" | "Intermediate" | "Advanced"

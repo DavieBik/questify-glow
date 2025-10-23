@@ -54,6 +54,37 @@ const CourseDetail = () => {
     }
   }, [id, user]);
 
+  // Auto-enroll for "Getting Started with Skillbridge" course
+  useEffect(() => {
+    const autoEnroll = async () => {
+      if (!user || !course || enrollment) return;
+      
+      // Check if this is the Getting Started course
+      if (course.id === '00000000-0000-0000-0000-000000000001') {
+        try {
+          const { error } = await supabase
+            .from('user_course_enrollments')
+            .insert({
+              user_id: user.id,
+              course_id: course.id,
+              status: 'enrolled',
+            });
+
+          if (error && error.code !== '23505') { // Ignore duplicate enrollment errors
+            console.error('Auto-enrollment error:', error);
+          } else if (!error) {
+            // Refresh enrollment status
+            fetchCourseDetails();
+          }
+        } catch (error) {
+          console.error('Auto-enrollment failed:', error);
+        }
+      }
+    };
+
+    autoEnroll();
+  }, [user, course, enrollment]);
+
   const fetchCourseDetails = async () => {
     try {
       // Fetch course details
