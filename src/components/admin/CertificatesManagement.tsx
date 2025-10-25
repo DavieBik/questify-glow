@@ -154,7 +154,7 @@ export function CertificatesManagement() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary';
+    if (score >= 90) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
     if (score >= 70) return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
     return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
   };

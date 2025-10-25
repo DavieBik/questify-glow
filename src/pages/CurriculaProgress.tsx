@@ -149,7 +149,7 @@ const CurriculaProgress = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
+        return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">Completed</Badge>;
       case 'in_progress':
         return <Badge className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
       case 'overdue':
@@ -164,7 +164,7 @@ const CurriculaProgress = () => {
   const getEnrollmentStatusIcon = (status?: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-primary" />;
+        return <CheckCircle className="h-5 w-5 text-emerald-600" />;
       case 'in_progress':
         return <Circle className="h-5 w-5 text-blue-600 fill-current" />;
       default:
@@ -252,7 +252,7 @@ const CurriculaProgress = () => {
                           <div className="flex items-center gap-2">
                             <h5 className="font-medium">{item.course.title}</h5>
                             {item.enrollment?.status === 'completed' && (
-                              <Badge variant="outline" className="text-xs bg-primary/10 text-primary">
+                              <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">
                                 Completed
                               </Badge>
                             )}

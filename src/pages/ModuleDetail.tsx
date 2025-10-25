@@ -394,8 +394,8 @@ const ModuleDetail = () => {
               {isCompleted && (
                 <div className="space-y-4">
                   <div className="text-center">
-                    <CheckCircle className="h-8 w-8 mx-auto text-primary mb-2" />
-                    <p className="text-sm font-medium text-primary">Module Completed!</p>
+                    <CheckCircle className="h-8 w-8 mx-auto text-green-600 mb-2" />
+                    <p className="text-sm font-medium text-green-600">Module Completed!</p>
                   </div>
                   
                   {nextModuleId ? (
@@ -481,7 +481,7 @@ const ModuleDetail = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  {isCompleted && isPassed && <CheckCircle className="h-5 w-5 text-primary" />}
+                  {isCompleted && isPassed && <CheckCircle className="h-5 w-5 text-green-600" />}
                   Your Progress
                 </CardTitle>
               </CardHeader>
@@ -507,7 +507,7 @@ const ModuleDetail = () => {
                       </div>
                       <Progress 
                         value={completion.score_percentage} 
-                        className={completion.score_percentage >= module.pass_threshold_percentage ? 'text-primary' : 'text-red-600'}
+                        className={completion.score_percentage >= module.pass_threshold_percentage ? 'text-green-600' : 'text-red-600'}
                       />
                     </>
                   )}

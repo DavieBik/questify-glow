@@ -182,7 +182,7 @@ export default function AdminManagement() {
         value: Math.round(avgCompletionDays),
         change: -8, // Mock percentage change
         icon: Clock,
-        color: 'text-primary'
+        color: 'text-green-600'
       },
       {
         title: 'Overdue Items',
@@ -307,7 +307,7 @@ export default function AdminManagement() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-primary/10 text-primary';
+      case 'completed': return 'bg-green-100 text-green-800';
       case 'in_progress': return 'bg-blue-100 text-blue-800';
       case 'enrolled': return 'bg-gray-100 text-gray-800';
       case 'overdue': return 'bg-red-100 text-red-800';
@@ -351,7 +351,7 @@ export default function AdminManagement() {
                 {metric.title === 'Avg Completion Time' ? `${metric.value} days` : metric.value}
               </div>
               <p className="text-xs text-muted-foreground">
-                <span className={metric.change >= 0 ? 'text-primary' : 'text-red-600'}>
+                <span className={metric.change >= 0 ? 'text-green-600' : 'text-red-600'}>
                   {metric.change >= 0 ? '+' : ''}{metric.change}%
                 </span>
                 {' '}from last week

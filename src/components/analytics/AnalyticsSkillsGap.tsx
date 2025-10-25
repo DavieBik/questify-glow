@@ -509,8 +509,8 @@ export function AnalyticsSkillsGap() {
             <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {skillsGap.length > 0 ?
+            <div className="text-2xl font-bold text-green-600">
+              {skillsGap.length > 0 ? 
                 Math.round((skillsGap.filter(item => item.status === 'ok').length / skillsGap.length) * 100) 
                 : 100}%
             </div>

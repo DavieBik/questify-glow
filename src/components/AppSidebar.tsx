@@ -84,7 +84,7 @@ export function AppSidebar() {
   };
 
   const navButtonClasses =
-    'text-white/80 hover:bg-white/10 hover:text-white data-[active=true]:bg-white/20 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:border-l-4 data-[active=true]:border-primary data-[active=true]:ring-1 data-[active=true]:ring-ring/30';
+    'text-white/80 hover:bg-white/10 hover:text-white data-[active=true]:bg-white/20 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:shadow-[inset_3px_0_0_rgba(16,185,129,0.85)] data-[active=true]:ring-1 data-[active=true]:ring-emerald-300/60';
 
   return (
     <Sidebar
