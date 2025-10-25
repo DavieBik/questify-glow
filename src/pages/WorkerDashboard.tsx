@@ -72,10 +72,10 @@ export default function WorkerDashboard() {
       description: 'Courses finished',
       value: stats.completedCourses,
       icon: Target,
-      cardClass: 'from-emerald-50 via-white to-emerald-100 border-emerald-100 text-brand-navy',
-      iconClass: 'bg-emerald-100 text-emerald-600',
-      valueClass: 'text-emerald-600',
-      accentClass: 'bg-emerald-400/60',
+      cardClass: 'from-primary/5 via-white to-primary/10 border-primary/10 text-brand-navy',
+      iconClass: 'bg-primary/10 text-primary',
+      valueClass: 'text-primary',
+      accentClass: 'bg-primary/60',
     },
     {
       id: 'certificates',
@@ -376,7 +376,7 @@ export default function WorkerDashboard() {
                       className={cn(
                         'relative overflow-hidden border border-muted/60 bg-white shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg',
                         isCompleted
-                          ? 'bg-gradient-to-br from-emerald-50 via-white to-emerald-100 border-emerald-100'
+                          ? 'bg-gradient-to-br from-primary/5 via-white to-primary/10 border-primary/10'
                           : 'bg-gradient-to-br from-white via-white to-sky-100 border-blue-100'
                       )}
                     >
@@ -384,7 +384,7 @@ export default function WorkerDashboard() {
                         aria-hidden="true"
                         className={cn(
                           'absolute inset-x-0 top-0 h-1',
-                          isCompleted ? 'bg-emerald-400/70' : 'bg-blue-400/70'
+                          isCompleted ? 'bg-primary/70' : 'bg-blue-400/70'
                         )}
                       />
                       <CardContent className="space-y-4 pt-6">
@@ -402,7 +402,7 @@ export default function WorkerDashboard() {
                                       {enrollment.course.difficulty}
                                     </Badge>
                                     {isCompleted && (
-                                      <Badge className="border-emerald-200 bg-emerald-100 text-emerald-700">
+                                      <Badge className="border-primary/20 bg-primary/10 text-primary">
                                         <CheckCircle className="mr-1 h-3 w-3" />
                                         Completed
                                       </Badge>

@@ -84,10 +84,10 @@ export default function CourseCatalog() {
   };
 
   const difficultyBadgeStyles: Record<string, string> = {
-    beginner: 'bg-emerald-100 text-emerald-700 border-emerald-200 shadow-[0_1px_0_rgba(16,185,129,0.25)]',
-    intermediate: 'bg-sky-100 text-sky-700 border-sky-200 shadow-[0_1px_0_rgba(14,116,144,0.25)]',
-    advanced: 'bg-rose-100 text-rose-700 border-rose-200 shadow-[0_1px_0_rgba(225,29,72,0.25)]',
-    default: 'bg-slate-100 text-slate-700 border-slate-200 shadow-[0_1px_0_rgba(148,163,184,0.25)]',
+    beginner: 'bg-primary/10 text-primary border-primary/20',
+    intermediate: 'bg-sky-100 text-sky-700 border-sky-200',
+    advanced: 'bg-rose-100 text-rose-700 border-rose-200',
+    default: 'bg-slate-100 text-slate-700 border-slate-200',
   };
 
   const badgeText = (value?: string | null) =>
@@ -150,9 +150,9 @@ export default function CourseCatalog() {
                           onClick={() => toggleCategory(category)}
                           className={cn(
                             'w-full rounded-xl border px-3 py-2 text-left text-sm font-medium transition-all',
-                            'flex items-center justify-between gap-3 shadow-[0_1px_0_rgba(15,23,42,0.04)]',
+                            'flex items-center justify-between gap-3',
                             isSelected
-                              ? 'border-emerald-400 bg-emerald-50 text-emerald-700 shadow-[0_4px_12px_rgba(16,185,129,0.15)]'
+                              ? 'border-primary bg-primary/10 text-primary'
                               : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                           )}
                         >
@@ -160,7 +160,7 @@ export default function CourseCatalog() {
                           <span
                             className={cn(
                               'h-2 w-2 rounded-full transition',
-                              isSelected ? 'bg-emerald-500' : 'bg-slate-300'
+                              isSelected ? 'bg-primary' : 'bg-slate-300'
                             )}
                           />
                         </button>
@@ -178,7 +178,7 @@ export default function CourseCatalog() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedCategories([])}
-                  className="w-full rounded-full border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                  className="w-full rounded-full border-primary/20 text-primary hover:bg-primary/10"
                 >
                   Clear Filters
                 </Button>
@@ -245,8 +245,8 @@ export default function CourseCatalog() {
                           }}
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-200/50 via-brand-sky/20 to-white">
-                          <BookOpen className="h-16 w-16 text-emerald-600/50" />
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-primary">
+                          <BookOpen className="h-16 w-16 text-primary-foreground/50" />
                         </div>
                       )}
                       
@@ -331,7 +331,7 @@ export default function CourseCatalog() {
                       {/* View Course Button */}
                       <Button
                         asChild
-                        className="w-full rounded-full bg-emerald-500 text-white shadow-[0_6px_18px_rgba(16,185,129,0.3)] transition hover:bg-emerald-600 focus-visible:ring-emerald-200"
+                        className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring"
                       >
                         <Link to={`/courses/${course.id}`}>
                           View Course

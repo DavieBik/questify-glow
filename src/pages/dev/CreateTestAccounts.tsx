@@ -53,7 +53,7 @@ const CreateTestAccounts = () => {
                 <div 
                   key={index} 
                   className={`p-3 rounded-md ${
-                    result.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    result.success ? 'bg-primary/10 text-primary' : 'bg-red-100 text-red-800'
                   }`}
                 >
                   <div className="font-medium">{result.email}</div>

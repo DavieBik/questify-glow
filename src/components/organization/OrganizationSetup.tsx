@@ -202,12 +202,12 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-6">
       <div className="w-full max-w-2xl">
         <Card className="border-0 shadow-xl">
           <CardHeader className="text-center pb-2">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Building2 className="w-8 h-8 text-emerald-600" />
+            <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-8 h-8 text-primary" />
             </div>
             <CardTitle className="text-2xl font-semibold">Set Up Your Organization</CardTitle>
             <CardDescription className="text-base">
@@ -248,13 +248,13 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
             {mode === 'create' && (
               <div className="flex items-center justify-center mb-8">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                  step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-slate-200 text-slate-600'
                 }`}>
                   1
                 </div>
-                <div className={`w-12 h-1 mx-2 ${step >= 2 ? 'bg-emerald-600' : 'bg-slate-200'}`} />
+                <div className={`w-12 h-1 mx-2 ${step >= 2 ? 'bg-primary' : 'bg-slate-200'}`} />
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                  step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-slate-200 text-slate-600'
                 }`}>
                   2
                 </div>
@@ -355,7 +355,7 @@ export function OrganizationSetup({ onComplete }: OrganizationSetupProps) {
 
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <Users className="w-5 h-5 text-emerald-600" />
+                    <Users className="w-5 h-5 text-primary" />
                     <h4 className="font-medium">Plan Summary</h4>
                   </div>
                   <p className="text-sm text-muted-foreground">

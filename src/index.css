@@ -4,21 +4,21 @@
 
 @layer base {
   :root {
-    /* Canvas Brand Colors */
+    /* Clean Blue Theme */
     --brand-navy: 210 100% 15%;
     --brand-gold: 42 100% 38%;
     --brand-sky: 212 88% 24%;
     
-    /* Core Canvas Design System */
+    /* Core Design System */
     --background: 0 0% 100%;
     --foreground: 210 100% 15%;
     
-    /* Primary - Canvas Navy */
-    --primary: 210 100% 15%;
+    /* Primary - Clean Blue #2563EB */
+    --primary: 223 90% 58%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 100% 20%;
+    --primary-glow: 223 90% 63%;
     
-    /* Secondary - Light Navy */
+    /* Secondary - Light Blue */
     --secondary: 210 25% 95%;
     --secondary-foreground: 210 100% 15%;
     
@@ -32,18 +32,18 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 100% 15%;
     
-    /* Muted Colors - Subtle Navy Greys */
+    /* Muted Colors - Subtle Greys */
     --muted: 210 25% 96%;
     --muted-foreground: 210 15% 45%;
     
-    /* Destructive */
-    --destructive: 0 84% 60%;
+    /* Destructive - Red #DC2626 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders & Inputs - Navy-tinted */
+    /* Borders & Inputs - Blue-tinted */
     --border: 210 25% 88%;
     --input: 210 25% 88%;
-    --ring: 210 100% 15%;
+    --ring: 223 90% 58%;
     
     /* Canvas Sidebar */
     --sidebar-background: 210 100% 15%;
@@ -66,14 +66,14 @@
   }
 
   .dark {
-    /* Canvas Dark Mode */
+    /* Dark Mode - Clean Blue */
     --background: 210 100% 8%;
     --foreground: 0 0% 95%;
     
-    /* Dark Mode Primary */
-    --primary: 210 100% 25%;
+    /* Dark Mode Primary - Blue */
+    --primary: 223 90% 63%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 100% 30%;
+    --primary-glow: 223 90% 68%;
     
     /* Dark Mode Secondary */
     --secondary: 210 50% 15%;
@@ -94,13 +94,13 @@
     --accent-foreground: 210 100% 8%;
     
     /* Dark Mode Destructive */
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
     
     /* Dark Mode Borders */
     --border: 210 50% 18%;
     --input: 210 50% 18%;
-    --ring: 210 100% 25%;
+    --ring: 223 90% 63%;
     
     /* Dark Canvas Sidebar */
     --sidebar-background: 210 100% 6%;
