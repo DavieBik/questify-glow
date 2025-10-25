@@ -465,7 +465,7 @@ export default function AdminImportUsersEnrollments() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-primary" />
+                <CheckCircle className="h-5 w-5 text-green-600" />
                 Import Complete
               </CardTitle>
               <CardDescription>

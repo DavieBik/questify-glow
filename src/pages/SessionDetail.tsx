@@ -333,7 +333,7 @@ const SessionDetail: React.FC = () => {
             <CardContent className="space-y-4">
               {rsvpData?.status ? (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-primary">
+                  <div className="flex items-center gap-2 text-green-600">
                     <UserCheck className="h-4 w-4" />
                     <span className="font-medium">You're registered!</span>
                   </div>

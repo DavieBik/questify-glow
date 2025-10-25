@@ -27,10 +27,10 @@ interface CourseCardProps {
 
 export function CourseCard({ course, enrollment, showProgress = false }: CourseCardProps) {
   const difficultyBadgeStyles: Record<string, string> = {
-    beginner: 'bg-primary/10 text-primary border-primary/20',
-    intermediate: 'bg-sky-100 text-sky-700 border-sky-200',
-    advanced: 'bg-rose-100 text-rose-700 border-rose-200',
-    default: 'bg-slate-100 text-slate-700 border-slate-200',
+    beginner: 'bg-emerald-100/80 text-emerald-700 border-emerald-200 shadow-[0_1px_0_rgba(16,185,129,0.25)]',
+    intermediate: 'bg-sky-100 text-sky-700 border-sky-200 shadow-[0_1px_0_rgba(14,116,144,0.25)]',
+    advanced: 'bg-rose-100 text-rose-700 border-rose-200 shadow-[0_1px_0_rgba(225,29,72,0.25)]',
+    default: 'bg-slate-100 text-slate-700 border-slate-200 shadow-[0_1px_0_rgba(148,163,184,0.25)]',
   };
 
   const badgeText = (value?: string) => value?.toUpperCase() ?? '';
@@ -48,7 +48,7 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
+        return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 shadow-[0_1px_0_rgba(16,185,129,0.25)]">Completed</Badge>;
       case 'in_progress':
         return <Badge className="bg-blue-100 text-blue-700 border-blue-200 shadow-[0_1px_0_rgba(59,130,246,0.25)]">In Progress</Badge>;
       case 'enrolled':
@@ -138,7 +138,12 @@ export function CourseCard({ course, enrollment, showProgress = false }: CourseC
           <Button
             asChild
             size="sm"
-            className="ml-auto rounded-full bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring"
+            className={cn(
+              'ml-auto rounded-full px-5 py-2 text-sm font-semibold shadow-[0_6px_18px_rgba(16,185,129,0.3)] transition-all focus-visible:ring-2 focus-visible:ring-offset-2',
+              enrollment
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-200'
+                : 'bg-emerald-500 text-white hover:bg-emerald-600 focus-visible:ring-emerald-200'
+            )}
           >
             <Link to={`/courses/${course.id}`}>
               {enrollment ? 'Continue' : 'Start Course'}

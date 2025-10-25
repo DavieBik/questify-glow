@@ -206,7 +206,7 @@ export function LeaderboardCard() {
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <Target className="h-4 w-4 text-primary" />
+                  <Target className="h-4 w-4 text-green-500" />
                   <span className="text-sm font-medium">Streak</span>
                 </div>
                 <p className="text-2xl font-bold">{userStats.current_streak}</p>

@@ -102,11 +102,11 @@ const PasswordReset = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/10 p-4">
         <Card className="w-full max-w-md shadow-xl border-0 bg-card/95 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
-              <CheckCircle className="h-8 w-8 text-primary dark:text-primary" />
+            <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-primary dark:text-primary">
+              <CardTitle className="text-2xl font-bold text-green-600 dark:text-green-400">
                 Password Updated!
               </CardTitle>
               <CardDescription className="text-muted-foreground mt-2">
@@ -116,7 +116,7 @@ const PasswordReset = () => {
           </CardHeader>
           <CardContent className="text-center">
             <div className="space-y-4">
-              <Badge variant="outline" className="text-primary border-primary">
+              <Badge variant="outline" className="text-green-600 border-green-600">
                 Secure & Protected
               </Badge>
               <p className="text-sm text-muted-foreground">

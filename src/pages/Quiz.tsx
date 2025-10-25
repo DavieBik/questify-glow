@@ -263,7 +263,7 @@ const Quiz = () => {
           <CardHeader className="text-center">
             <div className="mx-auto mb-4">
               {isPassed ? (
-                <CheckCircle className="h-16 w-16 text-primary" />
+                <CheckCircle className="h-16 w-16 text-green-600" />
               ) : (
                 <XCircle className="h-16 w-16 text-red-600" />
               )}
